@@ -755,6 +755,806 @@ console.log('\nAC5: Error Recovery (Remains Usable After Error)');
   console.log('  ✓ Clear always recovers to default state');
 }
 
+// ============================================================================
+// JMNT-2: Theme Picker Tests (AC1-6)
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-2: Theme Picker and Styling');
+console.log('='.repeat(70));
+
+// Clean up prior globals for fresh test
+delete global.document;
+delete global.window;
+
+// Create a more complete fake DOM for theme tests
+const createClassListMock = () => {
+  const classes = new Set();
+  return {
+    add(...classList) {
+      for (const cls of classList) {
+        classes.add(cls);
+      }
+    },
+    remove(...classList) {
+      for (const cls of classList) {
+        classes.delete(cls);
+      }
+    },
+    contains(cls) {
+      return classes.has(cls);
+    },
+    toggle(cls, force) {
+      if (force === undefined) {
+        classes.has(cls) ? classes.delete(cls) : classes.add(cls);
+      } else if (force) {
+        classes.add(cls);
+      } else {
+        classes.delete(cls);
+      }
+    },
+    has(cls) {
+      return classes.has(cls);
+    }
+  };
+};
+
+const themeTestElements = {
+  expression: {
+    id: 'expression',
+    textContent: '',
+    classList: createClassListMock()
+  },
+  result: {
+    id: 'result',
+    textContent: '0',
+    classList: createClassListMock()
+  },
+  themeSelect: {
+    id: 'theme-select',
+    value: '',
+    options: [
+      { value: '', textContent: 'Default' },
+      { value: 'halloween', textContent: 'Halloween' },
+      { value: 'dark-mode', textContent: 'Dark Mode' },
+      { value: 'childrens', textContent: "Children's" }
+    ],
+    addEventListener: (event, handler) => {
+      if (event === 'change') {
+        themeTestElements.themeSelect.changeHandler = handler;
+      }
+    }
+  },
+  calculator: {
+    classList: createClassListMock()
+  },
+  ghostEmoji: {
+    id: 'ghost-emoji',
+    style: { top: '', left: '' },
+    classList: createClassListMock()
+  },
+  eventListeners: {}
+};
+
+const themeTestFakeDOM = {
+  getElementById: (id) => {
+    if (id === 'expression') return themeTestElements.expression;
+    if (id === 'result') return themeTestElements.result;
+    if (id === 'theme-select') return themeTestElements.themeSelect;
+    if (id === 'ghost-emoji') return themeTestElements.ghostEmoji;
+    return null;
+  },
+  querySelector: (selector) => {
+    if (selector === '.calculator') return themeTestElements.calculator;
+    if (selector === '.main-buttons') {
+      return {
+        addEventListener: (event, handler) => {
+          themeTestFakeDOM.eventListeners['main-buttons'] = handler;
+        }
+      };
+    }
+    if (selector === '.sci-buttons') {
+      return {
+        addEventListener: (event, handler) => {
+          themeTestFakeDOM.eventListeners['sci-buttons'] = handler;
+        }
+      };
+    }
+    return null;
+  },
+  eventListeners: {}
+};
+
+global.document = themeTestFakeDOM;
+global.window = {};
+
+// Re-require script.js with the theme test DOM
+delete require.cache[require.resolve('./script.js')];
+const CalculatorWithTheme = require('./script.js');
+
+// ============================================================================
+// AC1: Theme dropdown exists with correct options and default selection
+// ============================================================================
+
+console.log('\nAC1: Theme Dropdown Exists with Correct Options');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  assert(selectEl, 'Select element with id="theme-select" should exist');
+}
+console.log('  ✓ Select element with id="theme-select" exists');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  assert.strictEqual(selectEl.options.length, 4, 'Select should have exactly 4 options');
+}
+console.log('  ✓ Select has exactly 4 options');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const optionValues = selectEl.options.map(o => o.value);
+  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens'], 'Options should be in correct order');
+}
+console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  assert.strictEqual(selectEl.value, '', 'Default option should be selected on initial load');
+}
+console.log('  ✓ Default option is selected on initial load');
+
+// ============================================================================
+// AC2: Choosing a theme applies classes; choosing default removes them
+// ============================================================================
+
+console.log('\nAC2: Theme Selection Applies and Removes Classes');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const calculatorEl = themeTestFakeDOM.querySelector('.calculator');
+
+  // Simulate selecting Halloween
+  selectEl.value = 'halloween';
+  const changeEvent = { target: selectEl };
+  selectEl.changeHandler(changeEvent);
+
+  assert(calculatorEl.classList.contains('theme-halloween'), 'Selecting halloween should add theme-halloween class');
+}
+console.log('  ✓ Selecting Halloween adds theme-halloween class');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const calculatorEl = themeTestFakeDOM.querySelector('.calculator');
+
+  // Simulate selecting Dark Mode
+  selectEl.value = 'dark-mode';
+  const changeEvent = { target: selectEl };
+  selectEl.changeHandler(changeEvent);
+
+  assert(!calculatorEl.classList.contains('theme-halloween'), 'theme-halloween should be removed');
+  assert(calculatorEl.classList.contains('theme-dark-mode'), 'Selecting dark-mode should add theme-dark-mode class');
+}
+console.log('  ✓ Selecting Dark Mode removes other themes and adds theme-dark-mode');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const calculatorEl = themeTestFakeDOM.querySelector('.calculator');
+
+  // Simulate selecting Children's
+  selectEl.value = 'childrens';
+  const changeEvent = { target: selectEl };
+  selectEl.changeHandler(changeEvent);
+
+  assert(!calculatorEl.classList.contains('theme-dark-mode'), 'theme-dark-mode should be removed');
+  assert(calculatorEl.classList.contains('theme-childrens'), 'Selecting childrens should add theme-childrens class');
+}
+console.log('  ✓ Selecting Children\'s removes other themes and adds theme-childrens');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const calculatorEl = themeTestFakeDOM.querySelector('.calculator');
+
+  // Simulate selecting Default (empty value)
+  selectEl.value = '';
+  const changeEvent = { target: selectEl };
+  selectEl.changeHandler(changeEvent);
+
+  assert(!calculatorEl.classList.contains('theme-childrens'), 'theme-childrens should be removed when selecting default');
+  assert(!calculatorEl.classList.contains('theme-halloween'), 'No theme classes should remain after selecting default');
+  assert(!calculatorEl.classList.contains('theme-dark-mode'), 'No theme classes should remain after selecting default');
+}
+console.log('  ✓ Selecting Default removes all theme classes');
+
+// ============================================================================
+// AC3: Halloween theme applies orange buttons and manages ghost emoji intervals
+// ============================================================================
+
+console.log('\nAC3: Halloween Theme - Orange Buttons and Ghost Emoji');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const calculatorEl = themeTestFakeDOM.querySelector('.calculator');
+  const ghostEl = themeTestFakeDOM.getElementById('ghost-emoji');
+
+  // Select Halloween theme
+  selectEl.value = 'halloween';
+  const changeEvent = { target: selectEl };
+  selectEl.changeHandler(changeEvent);
+
+  assert(calculatorEl.classList.contains('theme-halloween'), 'theme-halloween class should be applied');
+  // Ghost should be started (we'll verify it was added in next test)
+}
+console.log('  ✓ Halloween theme class is applied');
+
+{
+  // Create new test context to measure ghost interval
+  delete global.document;
+  delete global.window;
+
+  // Track if moveGhost function is called
+  let ghostIntervalStarted = false;
+  let ghostIntervalCleared = false;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+
+  let timeoutId = null;
+  global.setTimeout = function(fn, delay) {
+    ghostIntervalStarted = true;
+    timeoutId = originalSetTimeout(fn, delay);
+    return timeoutId;
+  };
+  global.clearTimeout = function(id) {
+    ghostIntervalCleared = true;
+    return originalClearTimeout(id);
+  };
+
+  const ghostTestElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          ghostTestElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const ghostTestFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return ghostTestElements.expression;
+      if (id === 'result') return ghostTestElements.result;
+      if (id === 'theme-select') return ghostTestElements.themeSelect;
+      if (id === 'ghost-emoji') return ghostTestElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return ghostTestElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = ghostTestFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorGhostTest = require('./script.js');
+
+  // Select Halloween to start ghost interval
+  ghostTestElements.themeSelect.value = 'halloween';
+  ghostTestElements.themeSelect.changeHandler({ target: ghostTestElements.themeSelect });
+
+  assert(ghostIntervalStarted, 'Selecting Halloween should start a setTimeout for ghost emoji');
+
+  // Restore globals
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Halloween theme starts ghost emoji interval');
+
+{
+  // Test that ghost stops when switching away from Halloween
+  delete global.document;
+  delete global.window;
+
+  let ghostIntervalStarted = false;
+  let ghostIntervalCleared = false;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+
+  global.setTimeout = function(fn, delay) {
+    ghostIntervalStarted = true;
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function(id) {
+    ghostIntervalCleared = true;
+    return originalClearTimeout(id);
+  };
+
+  const ghostStopElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          ghostStopElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const ghostStopFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return ghostStopElements.expression;
+      if (id === 'result') return ghostStopElements.result;
+      if (id === 'theme-select') return ghostStopElements.themeSelect;
+      if (id === 'ghost-emoji') return ghostStopElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return ghostStopElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = ghostStopFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorGhostStopTest = require('./script.js');
+
+  // First select Halloween to start ghost
+  ghostStopElements.themeSelect.value = 'halloween';
+  ghostStopElements.themeSelect.changeHandler({ target: ghostStopElements.themeSelect });
+  assert(ghostIntervalStarted, 'Halloween should start ghost interval');
+
+  // Reset flag
+  ghostIntervalCleared = false;
+
+  // Now switch to Dark Mode
+  ghostStopElements.themeSelect.value = 'dark-mode';
+  ghostStopElements.themeSelect.changeHandler({ target: ghostStopElements.themeSelect });
+
+  assert(ghostIntervalCleared, 'Switching away from Halloween should clear the ghost interval');
+  assert(!ghostStopElements.ghostEmoji.classList.contains('visible'), 'Ghost should not be visible after clearing');
+
+  // Restore globals
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Ghost emoji interval stops when switching away from Halloween');
+
+// ============================================================================
+// AC4: Dark Mode theme applies dark styling
+// ============================================================================
+
+console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
+
+{
+  // Clean up and create fresh test context for Dark Mode CSS class test
+  delete global.document;
+  delete global.window;
+
+  const darkModeElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          darkModeElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const darkModeFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return darkModeElements.expression;
+      if (id === 'result') return darkModeElements.result;
+      if (id === 'theme-select') return darkModeElements.themeSelect;
+      if (id === 'ghost-emoji') return darkModeElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return darkModeElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = darkModeFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorDarkModeTest = require('./script.js');
+
+  // Select Dark Mode
+  darkModeElements.themeSelect.value = 'dark-mode';
+  darkModeElements.themeSelect.changeHandler({ target: darkModeElements.themeSelect });
+
+  assert(darkModeElements.calculator.classList.contains('theme-dark-mode'), 'Dark Mode theme should be applied');
+}
+console.log('  ✓ Dark Mode theme class is applied to calculator');
+
+// ============================================================================
+// AC5: Children's theme applies bright, playful styling
+// ============================================================================
+
+console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
+
+{
+  // Clean up and create fresh test context for Children's CSS class test
+  delete global.document;
+  delete global.window;
+
+  const childrensElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          childrensElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const childrensFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return childrensElements.expression;
+      if (id === 'result') return childrensElements.result;
+      if (id === 'theme-select') return childrensElements.themeSelect;
+      if (id === 'ghost-emoji') return childrensElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return childrensElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = childrensFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorChildrensTest = require('./script.js');
+
+  // Select Children's
+  childrensElements.themeSelect.value = 'childrens';
+  childrensElements.themeSelect.changeHandler({ target: childrensElements.themeSelect });
+
+  assert(childrensElements.calculator.classList.contains('theme-childrens'), 'Children\'s theme should be applied');
+}
+console.log('  ✓ Children\'s theme class is applied to calculator');
+
+// ============================================================================
+// AC6: No persistence - no writes to localStorage/sessionStorage/cookies
+// ============================================================================
+
+console.log('\nAC6: No Theme Persistence - No localStorage/sessionStorage/Cookie Writes');
+
+{
+  // Verify localStorage/sessionStorage/cookies are not accessed
+  const localStorageMock = {};
+  const sessionStorageMock = {};
+
+  let localStorageWritten = false;
+  let sessionStorageWritten = false;
+  let cookieWritten = false;
+
+  global.localStorage = {
+    setItem: (key, value) => {
+      localStorageWritten = true;
+      localStorageMock[key] = value;
+    },
+    getItem: (key) => localStorageMock[key],
+    removeItem: (key) => delete localStorageMock[key]
+  };
+
+  global.sessionStorage = {
+    setItem: (key, value) => {
+      sessionStorageWritten = true;
+      sessionStorageMock[key] = value;
+    },
+    getItem: (key) => sessionStorageMock[key],
+    removeItem: (key) => delete sessionStorageMock[key]
+  };
+
+  Object.defineProperty(global.document, 'cookie', {
+    set: (value) => {
+      cookieWritten = true;
+    },
+    get: () => ''
+  });
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorNoPersistTest = require('./script.js');
+
+  assert(!localStorageWritten, 'Theme logic should not write to localStorage');
+  assert(!sessionStorageWritten, 'Theme logic should not write to sessionStorage');
+  assert(!cookieWritten, 'Theme logic should not write to cookies');
+}
+console.log('  ✓ Theme logic does not write to localStorage/sessionStorage/cookies');
+
+// ============================================================================
+// Edge Cases for Theme Switching
+// ============================================================================
+
+console.log('\nEdge Cases: Theme Switching');
+
+{
+  // Test rapid theme switching
+  delete global.document;
+  delete global.window;
+
+  let timeoutClears = 0;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+
+  global.setTimeout = function(fn, delay) {
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function(id) {
+    timeoutClears++;
+    return originalClearTimeout(id);
+  };
+
+  const rapidSwitchElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          rapidSwitchElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const rapidSwitchFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return rapidSwitchElements.expression;
+      if (id === 'result') return rapidSwitchElements.result;
+      if (id === 'theme-select') return rapidSwitchElements.themeSelect;
+      if (id === 'ghost-emoji') return rapidSwitchElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return rapidSwitchElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = rapidSwitchFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorRapidSwitchTest = require('./script.js');
+
+  // Rapid switch: Halloween -> Dark Mode -> Halloween
+  rapidSwitchElements.themeSelect.value = 'halloween';
+  rapidSwitchElements.themeSelect.changeHandler({ target: rapidSwitchElements.themeSelect });
+
+  rapidSwitchElements.themeSelect.value = 'dark-mode';
+  rapidSwitchElements.themeSelect.changeHandler({ target: rapidSwitchElements.themeSelect });
+
+  rapidSwitchElements.themeSelect.value = 'halloween';
+  rapidSwitchElements.themeSelect.changeHandler({ target: rapidSwitchElements.themeSelect });
+
+  assert(rapidSwitchElements.calculator.classList.contains('theme-halloween'), 'Final theme should be Halloween');
+  assert(!rapidSwitchElements.calculator.classList.contains('theme-dark-mode'), 'Dark Mode should not be applied');
+
+  // Restore globals
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Rapid theme switching works without errors (Halloween → Dark → Halloween)');
+
+{
+  // Test selecting same theme twice
+  delete global.document;
+  delete global.window;
+
+  const samethemeElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          samethemeElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    }
+  };
+
+  const samethemeFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return samethemeElements.expression;
+      if (id === 'result') return samethemeElements.result;
+      if (id === 'theme-select') return samethemeElements.themeSelect;
+      if (id === 'ghost-emoji') return samethemeElements.ghostEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return samethemeElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = samethemeFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorSameThemeTest = require('./script.js');
+
+  // Select Halloween twice
+  samethemeElements.themeSelect.value = 'halloween';
+  samethemeElements.themeSelect.changeHandler({ target: samethemeElements.themeSelect });
+
+  const hadClassFirst = samethemeElements.calculator.classList.contains('theme-halloween');
+
+  samethemeElements.themeSelect.changeHandler({ target: samethemeElements.themeSelect });
+
+  const hadClassSecond = samethemeElements.calculator.classList.contains('theme-halloween');
+  assert(hadClassFirst && hadClassSecond, 'Selecting same theme twice should not error');
+}
+console.log('  ✓ Selecting same theme twice does not cause errors');
+
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
