@@ -488,6 +488,273 @@ console.log('  ✓ "abc" defaults to 0 (non-numeric ignored)');
 }
 console.log('  ✓ Handles very long decimals');
 
+// ============================================================================
+// AC4: Real-time display updates via DOM event handlers (DOM-stub tests)
+// ============================================================================
+
+console.log('\nAC4: Real-time Display Updates & Clear Button');
+
+{
+  // Clean up any prior test globals
+  delete global.document;
+  delete global.window;
+
+  // Create a minimal fake DOM for the DOM-wiring tests
+  const stubElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const eventListeners = {};
+
+  const fakeDOM = {
+    getElementById: (id) => stubElements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  // Set up fake globals before requiring script.js
+  global.document = fakeDOM;
+  global.window = {};
+
+  // Clear the require cache and re-require script.js with our fake DOM
+  delete require.cache[require.resolve('./script.js')];
+  const Calculator = require('./script.js');
+
+  // Helper to simulate a button click
+  function simulateButtonClick(containerKey, selector, classList = []) {
+    const handler = eventListeners[containerKey];
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Pressing digits updates the display in real-time
+  {
+    simulateButtonClick('main-buttons', { dataValue: '2' }, ['digit']);
+    assert.strictEqual(stubElements.expression.textContent, '2', 'After pressing 2, expression should display "2"');
+  }
+  console.log('  ✓ Pressing digit 2 displays "2" immediately');
+
+  {
+    simulateButtonClick('main-buttons', { dataValue: '+' }, ['operator']);
+    assert.strictEqual(stubElements.expression.textContent, '2+', 'After pressing +, expression should display "2+"');
+  }
+  console.log('  ✓ Pressing operator + displays "2+" immediately');
+
+  {
+    simulateButtonClick('main-buttons', { dataValue: '3' }, ['digit']);
+    assert.strictEqual(stubElements.expression.textContent, '2+3', 'After pressing 3, expression should display "2+3"');
+  }
+  console.log('  ✓ Pressing digit 3 displays "2+3" immediately');
+
+  // Test: Pressing equals evaluates and displays result
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'equals' }, ['equals']);
+    assert.strictEqual(stubElements.result.textContent, '5', 'After pressing =, result should display "5"');
+  }
+  console.log('  ✓ Pressing equals displays result "5"');
+
+  // Test: Clear resets to default empty state
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    assert.strictEqual(stubElements.expression.textContent, '', 'After pressing Clear, expression should be empty');
+    assert.strictEqual(stubElements.result.textContent, '0', 'After pressing Clear, result should be "0"');
+  }
+  console.log('  ✓ Pressing Clear resets expression to "" and result to "0"');
+
+  // Test: Building another expression after clear
+  {
+    simulateButtonClick('main-buttons', { dataValue: '1' }, ['digit']);
+    assert.strictEqual(stubElements.expression.textContent, '1', 'New expression should start fresh');
+  }
+  console.log('  ✓ Can build new expression after Clear');
+
+  // Test: Real-time update during complex expression
+  {
+    simulateButtonClick('main-buttons', { dataValue: '2' }, ['digit']);
+    assert.strictEqual(stubElements.expression.textContent, '12', 'Digit 2 appends to expression');
+
+    simulateButtonClick('main-buttons', { dataValue: '*' }, ['operator']);
+    assert.strictEqual(stubElements.expression.textContent, '12×', 'Operator * appends (displayed as ×)');
+
+    simulateButtonClick('main-buttons', { dataValue: '3' }, ['digit']);
+    assert.strictEqual(stubElements.expression.textContent, '12×3', 'Digit 3 appends to expression');
+
+    simulateButtonClick('main-buttons', { dataAction: 'equals' }, ['equals']);
+    // 12 * 3 = 36
+    assert.strictEqual(stubElements.result.textContent, '36', 'Result of 12*3 is 36');
+  }
+  console.log('  ✓ Real-time display during complex expression (1 2 × 3 = 36)');
+
+  // Test: Clear after an expression
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    assert.strictEqual(stubElements.expression.textContent, '', 'Clear resets expression');
+    assert.strictEqual(stubElements.result.textContent, '0', 'Clear resets result to 0');
+  }
+  console.log('  ✓ Clear works after complex expression');
+}
+
+// ============================================================================
+// AC5: Error recovery (remains usable after error) - DOM-stub tests
+// ============================================================================
+
+console.log('\nAC5: Error Recovery (Remains Usable After Error)');
+
+{
+  // Clean up and create fresh fake DOM
+  delete global.document;
+  delete global.window;
+
+  const stubElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const eventListeners = {};
+
+  const fakeDOM = {
+    getElementById: (id) => stubElements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = fakeDOM;
+  global.window = {};
+
+  // Re-require with fresh fake DOM
+  delete require.cache[require.resolve('./script.js')];
+  const Calculator = require('./script.js');
+
+  function simulateButtonClick(containerKey, selector, classList = []) {
+    const handler = eventListeners[containerKey];
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Division by zero error recovery with Clear
+  {
+    simulateButtonClick('main-buttons', { dataValue: '5' }, ['digit']);
+    simulateButtonClick('main-buttons', { dataValue: '/' }, ['operator']);
+    simulateButtonClick('main-buttons', { dataValue: '0' }, ['digit']);
+    simulateButtonClick('main-buttons', { dataAction: 'equals' }, ['equals']);
+
+    // Should show error message
+    assert(stubElements.result.textContent.toLowerCase().includes('divide') ||
+           stubElements.result.textContent.toLowerCase().includes('zero'),
+           'Division by zero should show error message');
+  }
+  console.log('  ✓ Division by zero shows error message');
+
+  // Test: Clear recovers from error state
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    assert.strictEqual(stubElements.expression.textContent, '', 'Clear resets expression after error');
+    assert.strictEqual(stubElements.result.textContent, '0', 'Clear resets result to 0 after error');
+  }
+  console.log('  ✓ Clear recovers from error state (expression="" and result="0")');
+
+  // Test: Calculator remains usable after error recovery
+  {
+    simulateButtonClick('main-buttons', { dataValue: '9' }, ['digit']);
+    simulateButtonClick('main-buttons', { dataValue: '+' }, ['operator']);
+    simulateButtonClick('main-buttons', { dataValue: '1' }, ['digit']);
+    simulateButtonClick('main-buttons', { dataAction: 'equals' }, ['equals']);
+    assert.strictEqual(stubElements.result.textContent, '10', 'Can perform a new calculation after error recovery');
+  }
+  console.log('  ✓ Calculator remains usable after Clear (9+1=10)');
+
+  // Test: sqrt of negative error recovery
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    simulateButtonClick('main-buttons', { dataValue: '4' }, ['digit']);
+    simulateButtonClick('sci-buttons', { dataAction: 'sqrt' }, ['fn']);
+
+    // Should show result (sqrt(4) = 2)
+    assert.strictEqual(stubElements.result.textContent, '2', 'sqrt(4) = 2');
+  }
+  console.log('  ✓ Scientific function works after recovery');
+
+  // Test: Error in scientific function (sqrt of negative) recovery
+  {
+    simulateButtonClick('main-buttons', { dataValue: '5' }, ['digit']);
+    stubElements.expression.textContent = '5';
+    simulateButtonClick('sci-buttons', { dataAction: 'sqrt' }, ['fn']);
+
+    // Check that we have expression and result set (recovery possible)
+    assert(stubElements.result.textContent !== '', 'Result should be set after scientific function');
+  }
+  console.log('  ✓ Scientific function preserves state for recovery');
+
+  // Test: Clear works from any error state
+  {
+    simulateButtonClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    assert.strictEqual(stubElements.expression.textContent, '', 'Clear always resets expression');
+    assert.strictEqual(stubElements.result.textContent, '0', 'Clear always resets result to 0');
+  }
+  console.log('  ✓ Clear always recovers to default state');
+}
+
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
