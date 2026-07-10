@@ -982,7 +982,10 @@ console.log('\nAC3: Halloween Theme - Orange Buttons and Ghost Emoji');
   selectEl.changeHandler(changeEvent);
 
   assert(calculatorEl.classList.contains('theme-halloween'), 'theme-halloween class should be applied');
-  // Ghost should be started (we'll verify it was added in next test)
+
+  // Switch back to default to clean up setTimeout
+  selectEl.value = '';
+  selectEl.changeHandler({ target: selectEl });
 }
 console.log('  ✓ Halloween theme class is applied');
 
@@ -1071,6 +1074,10 @@ console.log('  ✓ Halloween theme class is applied');
   ghostTestElements.themeSelect.changeHandler({ target: ghostTestElements.themeSelect });
 
   assert(ghostIntervalStarted, 'Selecting Halloween should start a setTimeout for ghost emoji');
+
+  // Switch back to default to clean up setTimeout before restoring globals
+  ghostTestElements.themeSelect.value = '';
+  ghostTestElements.themeSelect.changeHandler({ target: ghostTestElements.themeSelect });
 
   // Restore globals
   global.setTimeout = originalSetTimeout;
@@ -1473,6 +1480,10 @@ console.log('\nEdge Cases: Theme Switching');
   assert(rapidSwitchElements.calculator.classList.contains('theme-halloween'), 'Final theme should be Halloween');
   assert(!rapidSwitchElements.calculator.classList.contains('theme-dark-mode'), 'Dark Mode should not be applied');
 
+  // Switch back to default to clean up setTimeout before restoring globals
+  rapidSwitchElements.themeSelect.value = '';
+  rapidSwitchElements.themeSelect.changeHandler({ target: rapidSwitchElements.themeSelect });
+
   // Restore globals
   global.setTimeout = originalSetTimeout;
   global.clearTimeout = originalClearTimeout;
@@ -1552,6 +1563,10 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
 
   const hadClassSecond = samethemeElements.calculator.classList.contains('theme-halloween');
   assert(hadClassFirst && hadClassSecond, 'Selecting same theme twice should not error');
+
+  // Switch back to default to clean up setTimeout
+  samethemeElements.themeSelect.value = '';
+  samethemeElements.themeSelect.changeHandler({ target: samethemeElements.themeSelect });
 }
 console.log('  ✓ Selecting same theme twice does not cause errors');
 
