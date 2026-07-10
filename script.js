@@ -265,6 +265,48 @@ if (typeof document !== 'undefined') {
       handleSciFunction(btn.dataset.action);
     });
 
+    /* ---------- Theme picker + ghost emoji (Halloween only) ---------- */
+
+    const calculatorEl = document.querySelector('.calculator');
+    const themeSelect = document.getElementById('theme-select');
+    const ghostEl = document.getElementById('ghost-emoji');
+
+    if (calculatorEl && themeSelect && ghostEl) {
+      let ghostTimeoutId = null;
+
+      const stopGhost = () => {
+        if (ghostTimeoutId !== null) {
+          clearTimeout(ghostTimeoutId);
+          ghostTimeoutId = null;
+        }
+        ghostEl.classList.remove('visible');
+      };
+
+      const moveGhost = () => {
+        const maxTop = Math.max(window.innerHeight - 60, 0);
+        const maxLeft = Math.max(window.innerWidth - 60, 0);
+        ghostEl.style.top = `${Math.random() * maxTop}px`;
+        ghostEl.style.left = `${Math.random() * maxLeft}px`;
+        ghostEl.classList.add('visible');
+        ghostTimeoutId = setTimeout(moveGhost, 700 + Math.random() * 1800);
+      };
+
+      const applyTheme = (theme) => {
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens');
+        stopGhost();
+        if (theme) {
+          calculatorEl.classList.add(`theme-${theme}`);
+        }
+        if (theme === 'halloween') {
+          moveGhost();
+        }
+      };
+
+      themeSelect.addEventListener('change', (e) => {
+        applyTheme(e.target.value);
+      });
+    }
+
     render();
   })();
 }

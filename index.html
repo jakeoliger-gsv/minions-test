@@ -8,6 +8,17 @@
 </head>
 <body>
 <div class="calculator">
+  <div class="theme-picker">
+    <label for="theme-select" class="theme-picker-label">Theme</label>
+    <select id="theme-select">
+      <option value="">Default</option>
+      <option value="halloween">Halloween</option>
+      <option value="dark-mode">Dark Mode</option>
+      <option value="childrens">Children's</option>
+    </select>
+  </div>
+  <div class="ghost-emoji" id="ghost-emoji" aria-hidden="true">&#x1F47B;</div>
+
   <div class="display">
     <div class="expression" id="expression"></div>
     <div class="result" id="result">0</div>
