@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="result" id="result">0</div>
+  </div>
+
+  <div class="buttons sci-buttons">
+    <button class="btn fn" data-action="sqrt">&#x221A;</button>
+    <button class="btn fn" data-action="log">log</button>
+    <button class="btn fn" data-action="sin">sin</button>
+    <button class="btn fn" data-action="cos">cos</button>
+    <button class="btn fn" data-action="tan">tan</button>
+  </div>
+
+  <div class="buttons main-buttons">
+    <button class="btn util" data-action="clear">Clear</button>
+    <button class="btn operator" data-value="/">&#xF7;</button>
+    <button class="btn operator" data-value="*">&#xD7;</button>
+    <button class="btn operator" data-value="-">&minus;</button>
+
+    <button class="btn digit" data-value="7">7</button>
+    <button class="btn digit" data-value="8">8</button>
+    <button class="btn digit" data-value="9">9</button>
+    <button class="btn operator" data-value="+">+</button>
+
+    <button class="btn digit" data-value="4">4</button>
+    <button class="btn digit" data-value="5">5</button>
+    <button class="btn digit" data-value="6">6</button>
+    <button class="btn equals" data-action="equals">=</button>
+
+    <button class="btn digit" data-value="1">1</button>
+    <button class="btn digit" data-value="2">2</button>
+    <button class="btn digit" data-value="3">3</button>
+
+    <button class="btn digit zero" data-value="0">0</button>
+    <button class="btn digit dot" data-value=".">.</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
