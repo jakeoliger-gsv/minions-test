@@ -355,3 +355,82 @@ body {
   background: linear-gradient(160deg, #ff9fe5 0%, #ff6fb5 100%);
   color: #ffffff;
 }
+
+/* ---------- Monolith emoji (2001: A Space Odyssey theme only) ---------- */
+
+.monolith-emoji {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 46px;
+  height: 160px;
+  background: linear-gradient(160deg, #030303 0%, #1c1a16 100%);
+  box-shadow:
+    0 0 30px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px rgba(230, 216, 186, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.4s ease;
+}
+
+.monolith-emoji.visible {
+  opacity: 1;
+}
+
+/* ---------- 2001: A Space Odyssey (Dawn of Man) theme ---------- */
+
+.calculator.theme-monolith {
+  background: linear-gradient(160deg, #4a3c28 0%, #241d14 55%, #000000 100%);
+  border: 3px solid #000000;
+  border-radius: 4px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.calculator.theme-monolith .display {
+  background: #0b0906;
+  border: 2px solid #5c4a32;
+  border-radius: 2px;
+}
+
+.calculator.theme-monolith .expression {
+  color: #8a7a5c;
+  letter-spacing: 1px;
+}
+
+.calculator.theme-monolith .result {
+  color: #e8dcc0;
+  letter-spacing: 2px;
+}
+
+.calculator.theme-monolith .btn {
+  background: #4a3c28;
+  color: #e8dcc0;
+  border: 1px solid #000000;
+  border-radius: 2px;
+}
+
+.calculator.theme-monolith .btn:hover {
+  background: #5c4a32;
+}
+
+.calculator.theme-monolith .sci-buttons .btn {
+  background: #2b2318;
+  color: #c9b896;
+}
+
+.calculator.theme-monolith .btn.operator {
+  background: #000000;
+  color: #e8dcc0;
+}
+
+.calculator.theme-monolith .btn.util {
+  background: #6b4423;
+  color: #1a1712;
+}
+
+.calculator.theme-monolith .btn.equals {
+  background: linear-gradient(160deg, #000000 0%, #4a3c28 100%);
+  color: #e8dcc0;
+  font-weight: 700;
+}
