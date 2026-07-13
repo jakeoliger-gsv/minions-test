@@ -84,6 +84,10 @@ function applyTan(value) {
   return { value: Math.tan((value * Math.PI) / 180) };
 }
 
+function applyJakify(value) {
+  return { value: 2 * value + 3 };
+}
+
 function applyUnary(name, value) {
   switch (name) {
     case 'sqrt': return applySqrt(value);
@@ -91,6 +95,7 @@ function applyUnary(name, value) {
     case 'sin': return applySin(value);
     case 'cos': return applyCos(value);
     case 'tan': return applyTan(value);
+    case 'jakify': return applyJakify(value);
     default: return { error: 'Unknown function' };
   }
 }
@@ -116,6 +121,7 @@ const CalculatorMath = {
   applySin,
   applyCos,
   applyTan,
+  applyJakify,
   applyUnary,
   formatNumber,
 };
