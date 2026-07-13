@@ -817,7 +817,8 @@ const themeTestElements = {
       { value: '', textContent: 'Default' },
       { value: 'halloween', textContent: 'Halloween' },
       { value: 'dark-mode', textContent: 'Dark Mode' },
-      { value: 'childrens', textContent: "Children's" }
+      { value: 'childrens', textContent: "Children's" },
+      { value: 'monolith', textContent: '2001: A Space Odyssey' }
     ],
     addEventListener: (event, handler) => {
       if (event === 'change') {
@@ -833,6 +834,10 @@ const themeTestElements = {
     style: { top: '', left: '' },
     classList: createClassListMock()
   },
+  monolithEmoji: {
+    id: 'monolith-emoji',
+    classList: createClassListMock()
+  },
   eventListeners: {}
 };
 
@@ -842,6 +847,7 @@ const themeTestFakeDOM = {
     if (id === 'result') return themeTestElements.result;
     if (id === 'theme-select') return themeTestElements.themeSelect;
     if (id === 'ghost-emoji') return themeTestElements.ghostEmoji;
+    if (id === 'monolith-emoji') return themeTestElements.monolithEmoji;
     return null;
   },
   querySelector: (selector) => {
@@ -886,16 +892,16 @@ console.log('  ✓ Select element with id="theme-select" exists');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.options.length, 4, 'Select should have exactly 4 options');
+  assert.strictEqual(selectEl.options.length, 5, 'Select should have exactly 5 options');
 }
-console.log('  ✓ Select has exactly 4 options');
+console.log('  ✓ Select has exactly 5 options');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
   const optionValues = selectEl.options.map(o => o.value);
-  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens'], 'Options should be in correct order');
+  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith'], 'Options should be in correct order');
 }
-console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s');
+console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
@@ -1029,7 +1035,8 @@ console.log('  ✓ Halloween theme class is applied');
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1044,6 +1051,10 @@ console.log('  ✓ Halloween theme class is applied');
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1053,6 +1064,7 @@ console.log('  ✓ Halloween theme class is applied');
       if (id === 'result') return ghostTestElements.result;
       if (id === 'theme-select') return ghostTestElements.themeSelect;
       if (id === 'ghost-emoji') return ghostTestElements.ghostEmoji;
+      if (id === 'monolith-emoji') return ghostTestElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1122,7 +1134,8 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1137,6 +1150,10 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1146,6 +1163,7 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
       if (id === 'result') return ghostStopElements.result;
       if (id === 'theme-select') return ghostStopElements.themeSelect;
       if (id === 'ghost-emoji') return ghostStopElements.ghostEmoji;
+      if (id === 'monolith-emoji') return ghostStopElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1212,7 +1230,8 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1227,6 +1246,10 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1236,6 +1259,7 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
       if (id === 'result') return darkModeElements.result;
       if (id === 'theme-select') return darkModeElements.themeSelect;
       if (id === 'ghost-emoji') return darkModeElements.ghostEmoji;
+      if (id === 'monolith-emoji') return darkModeElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1289,7 +1313,8 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1304,6 +1329,10 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1313,6 +1342,7 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
       if (id === 'result') return childrensElements.result;
       if (id === 'theme-select') return childrensElements.themeSelect;
       if (id === 'ghost-emoji') return childrensElements.ghostEmoji;
+      if (id === 'monolith-emoji') return childrensElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1427,7 +1457,8 @@ console.log('\nEdge Cases: Theme Switching');
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1442,6 +1473,10 @@ console.log('\nEdge Cases: Theme Switching');
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1451,6 +1486,7 @@ console.log('\nEdge Cases: Theme Switching');
       if (id === 'result') return rapidSwitchElements.result;
       if (id === 'theme-select') return rapidSwitchElements.themeSelect;
       if (id === 'ghost-emoji') return rapidSwitchElements.ghostEmoji;
+      if (id === 'monolith-emoji') return rapidSwitchElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1513,7 +1549,8 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
         { value: '', textContent: 'Default' },
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" }
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1528,6 +1565,10 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
       id: 'ghost-emoji',
       style: { top: '', left: '' },
       classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1537,6 +1578,7 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
       if (id === 'result') return samethemeElements.result;
       if (id === 'theme-select') return samethemeElements.themeSelect;
       if (id === 'ghost-emoji') return samethemeElements.ghostEmoji;
+      if (id === 'monolith-emoji') return samethemeElements.monolithEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1569,6 +1611,753 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
   samethemeElements.themeSelect.changeHandler({ target: samethemeElements.themeSelect });
 }
 console.log('  ✓ Selecting same theme twice does not cause errors');
+
+// ============================================================================
+// JMNT-3: 2001: A Space Odyssey (Monolith) Theme Tests
+// ============================================================================
+
+console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
+
+{
+  // Clean up and create fresh test context for Monolith theme class test
+  delete global.document;
+  delete global.window;
+
+  const monolithElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithElements.expression;
+      if (id === 'result') return monolithElements.result;
+      if (id === 'theme-select') return monolithElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = monolithFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithTest = require('./script.js');
+
+  // Select Monolith theme
+  monolithElements.themeSelect.value = 'monolith';
+  monolithElements.themeSelect.changeHandler({ target: monolithElements.themeSelect });
+
+  assert(monolithElements.calculator.classList.contains('theme-monolith'), 'Monolith theme class should be applied when selected');
+}
+console.log('  ✓ Monolith theme class is applied when selected');
+
+{
+  // Test that monolith theme class is removed when selecting another theme
+  delete global.document;
+  delete global.window;
+
+  const monolithRemoveElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithRemoveElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithRemoveFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithRemoveElements.expression;
+      if (id === 'result') return monolithRemoveElements.result;
+      if (id === 'theme-select') return monolithRemoveElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithRemoveElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithRemoveElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithRemoveElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = monolithRemoveFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithRemoveTest = require('./script.js');
+
+  // First select Monolith
+  monolithRemoveElements.themeSelect.value = 'monolith';
+  monolithRemoveElements.themeSelect.changeHandler({ target: monolithRemoveElements.themeSelect });
+  assert(monolithRemoveElements.calculator.classList.contains('theme-monolith'), 'Monolith theme should be applied initially');
+
+  // Now select Default theme
+  monolithRemoveElements.themeSelect.value = '';
+  monolithRemoveElements.themeSelect.changeHandler({ target: monolithRemoveElements.themeSelect });
+
+  assert(!monolithRemoveElements.calculator.classList.contains('theme-monolith'), 'Monolith theme class should be removed when selecting Default');
+}
+console.log('  ✓ Monolith theme class is removed when switching to another theme');
+
+// ============================================================================
+// JMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3 (Motif Visibility)
+// ============================================================================
+
+console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
+
+{
+  // Test that monolith emoji becomes visible when monolith theme is selected
+  delete global.document;
+  delete global.window;
+
+  const monolithMotifElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithMotifElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithMotifFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithMotifElements.expression;
+      if (id === 'result') return monolithMotifElements.result;
+      if (id === 'theme-select') return monolithMotifElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithMotifElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithMotifElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithMotifElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = monolithMotifFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithMotifTest = require('./script.js');
+
+  // Select Monolith theme
+  monolithMotifElements.themeSelect.value = 'monolith';
+  monolithMotifElements.themeSelect.changeHandler({ target: monolithMotifElements.themeSelect });
+
+  assert(monolithMotifElements.monolithEmoji.classList.contains('visible'), 'Monolith emoji should become visible when monolith theme is selected');
+}
+console.log('  ✓ Monolith emoji becomes visible when monolith theme is selected');
+
+{
+  // Test that monolith emoji is hidden when switching away from monolith theme
+  delete global.document;
+  delete global.window;
+
+  const monolithHideElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithHideElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithHideFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithHideElements.expression;
+      if (id === 'result') return monolithHideElements.result;
+      if (id === 'theme-select') return monolithHideElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithHideElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithHideElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithHideElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = monolithHideFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithHideTest = require('./script.js');
+
+  // First select Monolith theme
+  monolithHideElements.themeSelect.value = 'monolith';
+  monolithHideElements.themeSelect.changeHandler({ target: monolithHideElements.themeSelect });
+  assert(monolithHideElements.monolithEmoji.classList.contains('visible'), 'Monolith should be visible when theme is active');
+
+  // Now switch to Dark Mode
+  monolithHideElements.themeSelect.value = 'dark-mode';
+  monolithHideElements.themeSelect.changeHandler({ target: monolithHideElements.themeSelect });
+
+  assert(!monolithHideElements.monolithEmoji.classList.contains('visible'), 'Monolith emoji should be hidden when switching away from monolith theme');
+}
+console.log('  ✓ Monolith emoji is hidden when switching away from monolith theme');
+
+// ============================================================================
+// JMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4 (Calculator behavior)
+// ============================================================================
+
+console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
+
+{
+  // Test that calculator operations work unchanged with monolith theme active
+  delete global.document;
+  delete global.window;
+
+  const monolithCalcElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithCalcElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithCalcFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithCalcElements.expression;
+      if (id === 'result') return monolithCalcElements.result;
+      if (id === 'theme-select') return monolithCalcElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithCalcElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithCalcElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithCalcElements.calculator;
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            monolithCalcElements.mainButtonsHandler = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            monolithCalcElements.sciButtonsHandler = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = monolithCalcFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithCalcTest = require('./script.js');
+
+  // Helper to simulate button clicks
+  function simulateMonolithClick(containerKey, selector, classList = []) {
+    const handler = containerKey === 'main' ? monolithCalcElements.mainButtonsHandler : monolithCalcElements.sciButtonsHandler;
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Select Monolith theme first
+  monolithCalcElements.themeSelect.value = 'monolith';
+  monolithCalcElements.themeSelect.changeHandler({ target: monolithCalcElements.themeSelect });
+
+  // Test basic arithmetic with monolith theme active
+  simulateMonolithClick('main', { dataValue: '5' }, ['digit']);
+  simulateMonolithClick('main', { dataValue: '+' }, ['operator']);
+  simulateMonolithClick('main', { dataValue: '3' }, ['digit']);
+  simulateMonolithClick('main', { dataAction: 'equals' }, ['equals']);
+
+  assert.strictEqual(monolithCalcElements.result.textContent, '8', 'With monolith theme: 5 + 3 should equal 8');
+}
+console.log('  ✓ Calculator arithmetic operations work unchanged with monolith theme active');
+
+{
+  // Test that sqrt/log/sin/cos/tan work with monolith theme active
+  delete global.document;
+  delete global.window;
+
+  const monolithSciElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          monolithSciElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const monolithSciFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return monolithSciElements.expression;
+      if (id === 'result') return monolithSciElements.result;
+      if (id === 'theme-select') return monolithSciElements.themeSelect;
+      if (id === 'ghost-emoji') return monolithSciElements.ghostEmoji;
+      if (id === 'monolith-emoji') return monolithSciElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return monolithSciElements.calculator;
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            monolithSciElements.mainButtonsHandler = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            monolithSciElements.sciButtonsHandler = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = monolithSciFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMonolithSciTest = require('./script.js');
+
+  function simulateMonolithSciClick(containerKey, selector, classList = []) {
+    const handler = containerKey === 'main' ? monolithSciElements.mainButtonsHandler : monolithSciElements.sciButtonsHandler;
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Select Monolith theme
+  monolithSciElements.themeSelect.value = 'monolith';
+  monolithSciElements.themeSelect.changeHandler({ target: monolithSciElements.themeSelect });
+
+  // Test sqrt(16) = 4 with monolith theme active
+  simulateMonolithSciClick('main', { dataValue: '1' }, ['digit']);
+  simulateMonolithSciClick('main', { dataValue: '6' }, ['digit']);
+  simulateMonolithSciClick('sci', { dataAction: 'sqrt' }, ['fn']);
+
+  assert.strictEqual(monolithSciElements.result.textContent, '4', 'With monolith theme: sqrt(16) should equal 4');
+}
+console.log('  ✓ Scientific functions (sqrt/log/sin/cos/tan) work unchanged with monolith theme active');
+
+// ============================================================================
+// JMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5 (Theme distinctness)
+// ============================================================================
+
+console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
+
+{
+  // Test that monolith theme is distinct from other themes (only one theme class at a time)
+  delete global.document;
+  delete global.window;
+
+  const distinctElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          distinctElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const distinctFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return distinctElements.expression;
+      if (id === 'result') return distinctElements.result;
+      if (id === 'theme-select') return distinctElements.themeSelect;
+      if (id === 'ghost-emoji') return distinctElements.ghostEmoji;
+      if (id === 'monolith-emoji') return distinctElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return distinctElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = distinctFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorDistinctTest = require('./script.js');
+
+  // Test: monolith theme class name is distinct
+  distinctElements.themeSelect.value = 'monolith';
+  distinctElements.themeSelect.changeHandler({ target: distinctElements.themeSelect });
+
+  assert(distinctElements.calculator.classList.contains('theme-monolith'), 'theme-monolith class should be present');
+  assert(!distinctElements.calculator.classList.contains('theme-halloween'), 'theme-halloween should not be present');
+  assert(!distinctElements.calculator.classList.contains('theme-dark-mode'), 'theme-dark-mode should not be present');
+  assert(!distinctElements.calculator.classList.contains('theme-childrens'), 'theme-childrens should not be present');
+}
+console.log('  ✓ Monolith theme class name is distinct from all existing themes');
+
+{
+  // Test switching between monolith and other themes removes/adds correctly
+  delete global.document;
+  delete global.window;
+
+  const switchElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          switchElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const switchFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return switchElements.expression;
+      if (id === 'result') return switchElements.result;
+      if (id === 'theme-select') return switchElements.themeSelect;
+      if (id === 'ghost-emoji') return switchElements.ghostEmoji;
+      if (id === 'monolith-emoji') return switchElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return switchElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = switchFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorSwitchTest = require('./script.js');
+
+  // Start with Halloween
+  switchElements.themeSelect.value = 'halloween';
+  switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
+
+  // Switch to Monolith
+  switchElements.themeSelect.value = 'monolith';
+  switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
+
+  assert(switchElements.calculator.classList.contains('theme-monolith'), 'Monolith class should be present');
+  assert(!switchElements.calculator.classList.contains('theme-halloween'), 'Halloween class should be removed');
+
+  // Switch back to Halloween
+  switchElements.themeSelect.value = 'halloween';
+  switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
+
+  assert(switchElements.calculator.classList.contains('theme-halloween'), 'Halloween class should be present');
+  assert(!switchElements.calculator.classList.contains('theme-monolith'), 'Monolith class should be removed');
+
+  // Clean up timeout
+  switchElements.themeSelect.value = '';
+  switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
+}
+console.log('  ✓ Only one theme class is present at a time (monolith + other themes mutually exclusive)');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');

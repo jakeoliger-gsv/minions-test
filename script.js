@@ -270,8 +270,9 @@ if (typeof document !== 'undefined') {
     const calculatorEl = document.querySelector('.calculator');
     const themeSelect = document.getElementById('theme-select');
     const ghostEl = document.getElementById('ghost-emoji');
+    const monolithEl = document.getElementById('monolith-emoji');
 
-    if (calculatorEl && themeSelect && ghostEl) {
+    if (calculatorEl && themeSelect && ghostEl && monolithEl) {
       let ghostTimeoutId = null;
 
       const stopGhost = () => {
@@ -291,14 +292,25 @@ if (typeof document !== 'undefined') {
         ghostTimeoutId = setTimeout(moveGhost, 700 + Math.random() * 1800);
       };
 
+      const stopMonolith = () => {
+        monolithEl.classList.remove('visible');
+      };
+
+      const showMonolith = () => {
+        monolithEl.classList.add('visible');
+      };
+
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith');
         stopGhost();
+        stopMonolith();
         if (theme) {
           calculatorEl.classList.add(`theme-${theme}`);
         }
         if (theme === 'halloween') {
           moveGhost();
+        } else if (theme === 'monolith') {
+          showMonolith();
         }
       };
 
