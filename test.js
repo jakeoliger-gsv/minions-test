@@ -818,7 +818,9 @@ const themeTestElements = {
       { value: 'halloween', textContent: 'Halloween' },
       { value: 'dark-mode', textContent: 'Dark Mode' },
       { value: 'childrens', textContent: "Children's" },
-      { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      { value: 'monolith', textContent: '2001: A Space Odyssey' },
+      { value: 'minions', textContent: 'Minions' },
+      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
     ],
     addEventListener: (event, handler) => {
       if (event === 'change') {
@@ -892,16 +894,16 @@ console.log('  ✓ Select element with id="theme-select" exists');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.options.length, 5, 'Select should have exactly 5 options');
+  assert.strictEqual(selectEl.options.length, 7, 'Select should have exactly 7 options');
 }
-console.log('  ✓ Select has exactly 5 options');
+console.log('  ✓ Select has exactly 7 options');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
   const optionValues = selectEl.options.map(o => o.value);
-  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith'], 'Options should be in correct order');
+  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman'], 'Options should be in correct order');
 }
-console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey');
+console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey, Minions, Marvel/Iron Man');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
@@ -1036,7 +1038,9 @@ console.log('  ✓ Halloween theme class is applied');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1135,7 +1139,9 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1231,7 +1237,9 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1314,7 +1322,9 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1458,7 +1468,9 @@ console.log('\nEdge Cases: Theme Switching');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1550,7 +1562,9 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1642,7 +1656,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1719,7 +1735,9 @@ console.log('  ✓ Monolith theme class is applied when selected');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1807,7 +1825,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1884,7 +1904,9 @@ console.log('  ✓ Monolith emoji becomes visible when monolith theme is selecte
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1972,7 +1994,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2089,7 +2113,9 @@ console.log('  ✓ Calculator arithmetic operations work unchanged with monolith
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2210,7 +2236,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2290,7 +2318,9 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2358,6 +2388,563 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
   switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
 }
 console.log('  ✓ Only one theme class is present at a time (monolith + other themes mutually exclusive)');
+
+// ============================================================================
+// JMNT-4: Minions Theme Tests
+// ============================================================================
+
+console.log('\nJMNT-4: Minions Theme - AC1 (Options in dropdown)');
+
+{
+  // Verify "Minions" option exists in the dropdown
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const minionsOption = selectEl.options.find(o => o.value === 'minions');
+  assert(minionsOption, 'Minions option should exist in theme dropdown');
+  assert.strictEqual(minionsOption.textContent, 'Minions', 'Minions option should have correct label');
+}
+console.log('  ✓ Minions option exists in theme dropdown with correct label');
+
+console.log('\nJMNT-4: Minions Theme - AC2 (Theme class applied)');
+
+{
+  // Clean up and create fresh test context for Minions theme
+  delete global.document;
+  delete global.window;
+
+  const minionsElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          minionsElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const minionsFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return minionsElements.expression;
+      if (id === 'result') return minionsElements.result;
+      if (id === 'theme-select') return minionsElements.themeSelect;
+      if (id === 'ghost-emoji') return minionsElements.ghostEmoji;
+      if (id === 'monolith-emoji') return minionsElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return minionsElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = minionsFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMinionsTest = require('./script.js');
+
+  // Select Minions theme
+  minionsElements.themeSelect.value = 'minions';
+  minionsElements.themeSelect.changeHandler({ target: minionsElements.themeSelect });
+
+  assert(minionsElements.calculator.classList.contains('theme-minions'), 'Selecting minions should add theme-minions class');
+  assert(!minionsElements.calculator.classList.contains('theme-halloween'), 'Other theme classes should be removed');
+  assert(!minionsElements.calculator.classList.contains('theme-dark-mode'), 'Other theme classes should be removed');
+  assert(!minionsElements.calculator.classList.contains('theme-childrens'), 'Other theme classes should be removed');
+  assert(!minionsElements.calculator.classList.contains('theme-monolith'), 'Other theme classes should be removed');
+}
+console.log('  ✓ Selecting Minions theme adds theme-minions class and removes other theme classes');
+
+// ============================================================================
+// JMNT-4: Marvel/Iron Man Theme Tests
+// ============================================================================
+
+console.log('\nJMNT-4: Marvel/Iron Man Theme - AC1 (Options in dropdown)');
+
+{
+  // Verify "Marvel/Iron Man" option exists in the dropdown
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const marvelOption = selectEl.options.find(o => o.value === 'marvel-ironman');
+  assert(marvelOption, 'Marvel/Iron Man option should exist in theme dropdown');
+  assert.strictEqual(marvelOption.textContent, 'Marvel/Iron Man', 'Marvel/Iron Man option should have correct label');
+}
+console.log('  ✓ Marvel/Iron Man option exists in theme dropdown with correct label');
+
+console.log('\nJMNT-4: Marvel/Iron Man Theme - AC3 (Theme class applied)');
+
+{
+  // Clean up and create fresh test context for Marvel/Iron Man theme
+  delete global.document;
+  delete global.window;
+
+  const marvelElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          marvelElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const marvelFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return marvelElements.expression;
+      if (id === 'result') return marvelElements.result;
+      if (id === 'theme-select') return marvelElements.themeSelect;
+      if (id === 'ghost-emoji') return marvelElements.ghostEmoji;
+      if (id === 'monolith-emoji') return marvelElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return marvelElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = marvelFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMarvelTest = require('./script.js');
+
+  // Select Marvel/Iron Man theme
+  marvelElements.themeSelect.value = 'marvel-ironman';
+  marvelElements.themeSelect.changeHandler({ target: marvelElements.themeSelect });
+
+  assert(marvelElements.calculator.classList.contains('theme-marvel-ironman'), 'Selecting marvel-ironman should add theme-marvel-ironman class');
+  assert(!marvelElements.calculator.classList.contains('theme-halloween'), 'Other theme classes should be removed');
+  assert(!marvelElements.calculator.classList.contains('theme-dark-mode'), 'Other theme classes should be removed');
+  assert(!marvelElements.calculator.classList.contains('theme-childrens'), 'Other theme classes should be removed');
+  assert(!marvelElements.calculator.classList.contains('theme-monolith'), 'Other theme classes should be removed');
+  assert(!marvelElements.calculator.classList.contains('theme-minions'), 'Other theme classes should be removed');
+}
+console.log('  ✓ Selecting Marvel/Iron Man theme adds theme-marvel-ironman class and removes other theme classes');
+
+// ============================================================================
+// JMNT-4: Calculator Functionality with Minions Theme - AC4
+// ============================================================================
+
+console.log('\nJMNT-4: Calculator Functionality - AC4 (With Minions theme)');
+
+{
+  // Clean up and create fresh test context for calculator with minions theme
+  delete global.document;
+  delete global.window;
+
+  const minionsCalcElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          minionsCalcElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const minionsCalcFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return minionsCalcElements.expression;
+      if (id === 'result') return minionsCalcElements.result;
+      if (id === 'theme-select') return minionsCalcElements.themeSelect;
+      if (id === 'ghost-emoji') return minionsCalcElements.ghostEmoji;
+      if (id === 'monolith-emoji') return minionsCalcElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return minionsCalcElements.calculator;
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            minionsCalcElements.mainButtonsHandler = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            minionsCalcElements.sciButtonsHandler = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = minionsCalcFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMinionsCalcTest = require('./script.js');
+
+  // Helper to simulate button clicks
+  function simulateMinionsClick(containerKey, selector, classList = []) {
+    const handler = containerKey === 'main' ? minionsCalcElements.mainButtonsHandler : minionsCalcElements.sciButtonsHandler;
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Select Minions theme first
+  minionsCalcElements.themeSelect.value = 'minions';
+  minionsCalcElements.themeSelect.changeHandler({ target: minionsCalcElements.themeSelect });
+
+  // Test basic arithmetic with minions theme active: 5 + 3 = 8
+  simulateMinionsClick('main', { dataValue: '5' }, ['digit']);
+  simulateMinionsClick('main', { dataValue: '+' }, ['operator']);
+  simulateMinionsClick('main', { dataValue: '3' }, ['digit']);
+  simulateMinionsClick('main', { dataAction: 'equals' }, ['equals']);
+
+  assert.strictEqual(minionsCalcElements.result.textContent, '8', 'With minions theme: 5 + 3 should equal 8');
+}
+console.log('  ✓ Calculator arithmetic operations work unchanged with minions theme active');
+
+// ============================================================================
+// JMNT-4: Calculator Functionality with Marvel/Iron Man Theme - AC4
+// ============================================================================
+
+console.log('\nJMNT-4: Calculator Functionality - AC4 (With Marvel/Iron Man theme)');
+
+{
+  // Clean up and create fresh test context for calculator with marvel theme
+  delete global.document;
+  delete global.window;
+
+  const marvelCalcElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          marvelCalcElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const marvelCalcFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return marvelCalcElements.expression;
+      if (id === 'result') return marvelCalcElements.result;
+      if (id === 'theme-select') return marvelCalcElements.themeSelect;
+      if (id === 'ghost-emoji') return marvelCalcElements.ghostEmoji;
+      if (id === 'monolith-emoji') return marvelCalcElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return marvelCalcElements.calculator;
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            marvelCalcElements.mainButtonsHandler = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            marvelCalcElements.sciButtonsHandler = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = marvelCalcFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorMarvelCalcTest = require('./script.js');
+
+  // Helper to simulate button clicks
+  function simulateMarvelClick(containerKey, selector, classList = []) {
+    const handler = containerKey === 'main' ? marvelCalcElements.mainButtonsHandler : marvelCalcElements.sciButtonsHandler;
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Select Marvel/Iron Man theme first
+  marvelCalcElements.themeSelect.value = 'marvel-ironman';
+  marvelCalcElements.themeSelect.changeHandler({ target: marvelCalcElements.themeSelect });
+
+  // Test basic arithmetic with marvel theme active: 5 + 3 = 8
+  simulateMarvelClick('main', { dataValue: '5' }, ['digit']);
+  simulateMarvelClick('main', { dataValue: '+' }, ['operator']);
+  simulateMarvelClick('main', { dataValue: '3' }, ['digit']);
+  simulateMarvelClick('main', { dataAction: 'equals' }, ['equals']);
+
+  assert.strictEqual(marvelCalcElements.result.textContent, '8', 'With marvel theme: 5 + 3 should equal 8');
+}
+console.log('  ✓ Calculator arithmetic operations work unchanged with marvel/iron man theme active');
+
+// ============================================================================
+// JMNT-4: Theme Switching with New Themes - AC5
+// ============================================================================
+
+console.log('\nJMNT-4: Theme Switching - AC5 (Minions, Marvel/Iron Man, and Existing Themes)');
+
+{
+  // Test sequential theme switching including minions and marvel themes
+  delete global.document;
+  delete global.window;
+
+  const switchNewElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          switchNewElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const switchNewFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return switchNewElements.expression;
+      if (id === 'result') return switchNewElements.result;
+      if (id === 'theme-select') return switchNewElements.themeSelect;
+      if (id === 'ghost-emoji') return switchNewElements.ghostEmoji;
+      if (id === 'monolith-emoji') return switchNewElements.monolithEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return switchNewElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = switchNewFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorSwitchNewTest = require('./script.js');
+
+  // Switch: Minions -> Marvel/Iron Man -> Halloween -> Default -> Minions
+  switchNewElements.themeSelect.value = 'minions';
+  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
+  assert(switchNewElements.calculator.classList.contains('theme-minions'), 'Step 1: Minions should be applied');
+  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 1: Marvel should not be present');
+
+  switchNewElements.themeSelect.value = 'marvel-ironman';
+  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
+  assert(switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 2: Marvel should be applied');
+  assert(!switchNewElements.calculator.classList.contains('theme-minions'), 'Step 2: Minions should be removed');
+
+  switchNewElements.themeSelect.value = 'halloween';
+  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
+  assert(switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 3: Halloween should be applied');
+  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 3: Marvel should be removed');
+
+  switchNewElements.themeSelect.value = '';
+  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
+  assert(!switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 4: Default should have no theme class');
+  assert(!switchNewElements.calculator.classList.contains('theme-minions'), 'Step 4: No theme classes should remain');
+  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 4: No theme classes should remain');
+
+  switchNewElements.themeSelect.value = 'minions';
+  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
+  assert(switchNewElements.calculator.classList.contains('theme-minions'), 'Step 5: Minions should be reapplied');
+  assert(!switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 5: Halloween should be removed');
+}
+console.log('  ✓ Theme switching between Minions, Marvel/Iron Man, and existing themes works correctly');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
