@@ -307,7 +307,7 @@ if (typeof document !== 'undefined') {
       };
 
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman');
         stopGhost();
         stopMonolith();
         if (theme) {

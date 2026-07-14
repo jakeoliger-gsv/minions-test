@@ -819,7 +819,9 @@ const themeTestElements = {
       { value: 'halloween', textContent: 'Halloween' },
       { value: 'dark-mode', textContent: 'Dark Mode' },
       { value: 'childrens', textContent: "Children's" },
-      { value: 'monolith', textContent: '2001: A Space Odyssey' }
+      { value: 'monolith', textContent: '2001: A Space Odyssey' },
+      { value: 'minions', textContent: 'Minions' },
+      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
     ],
     addEventListener: (event, handler) => {
       if (event === 'change') {
@@ -893,16 +895,16 @@ console.log('  ✓ Select element with id="theme-select" exists');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.options.length, 5, 'Select should have exactly 5 options');
+  assert.strictEqual(selectEl.options.length, 7, 'Select should have exactly 7 options');
 }
-console.log('  ✓ Select has exactly 5 options');
+console.log('  ✓ Select has exactly 7 options');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
   const optionValues = selectEl.options.map(o => o.value);
-  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith'], 'Options should be in correct order');
+  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman'], 'Options should be in correct order');
 }
-console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey');
+console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey, Minions, Marvel/Iron Man');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
@@ -1037,7 +1039,9 @@ console.log('  ✓ Halloween theme class is applied');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1136,7 +1140,9 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1232,7 +1238,9 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1315,7 +1323,9 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1459,7 +1469,9 @@ console.log('\nEdge Cases: Theme Switching');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1551,7 +1563,9 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1643,7 +1657,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1720,7 +1736,9 @@ console.log('  ✓ Monolith theme class is applied when selected');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1808,7 +1826,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1885,7 +1905,9 @@ console.log('  ✓ Monolith emoji becomes visible when monolith theme is selecte
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1973,7 +1995,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2090,7 +2114,9 @@ console.log('  ✓ Calculator arithmetic operations work unchanged with monolith
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2211,7 +2237,9 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2291,7 +2319,9 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
         { value: 'halloween', textContent: 'Halloween' },
         { value: 'dark-mode', textContent: 'Dark Mode' },
         { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' }
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
