@@ -11,6 +11,7 @@ const {
   applySin,
   applyCos,
   applyTan,
+  applyJakify,
   applyUnary,
   formatNumber
 } = CalculatorMath;
@@ -2358,6 +2359,328 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
   switchElements.themeSelect.changeHandler({ target: switchElements.themeSelect });
 }
 console.log('  ✓ Only one theme class is present at a time (monolith + other themes mutually exclusive)');
+
+// ============================================================================
+// JMNT-5: Jakify Operation - AC1-4
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-5: Jakify Operation');
+console.log('='.repeat(70));
+
+// AC1: Jakify button exists and is wired to sci-buttons listener
+console.log('\nAC1: Jakify Button Exists in Scientific Functions Row');
+
+{
+  // Test that Jakify button works via sci-buttons click handler
+  delete global.document;
+  delete global.window;
+
+  const ac1Elements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const ac1EventListeners = {};
+
+  const ac1FakeDOM = {
+    getElementById: (id) => ac1Elements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac1EventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac1EventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = ac1FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorAC1Test = require('./script.js');
+
+  // Test that clicking a button with data-action="jakify" in sci-buttons works
+  const ac1Handler = ac1EventListeners['sci-buttons'];
+  assert(ac1Handler, 'sci-buttons should have a click event listener registered');
+
+  // Create a fake button matching the jakify button from index.html
+  const jakifyButton = {
+    dataset: { action: 'jakify' },
+    classList: { contains: (c) => c === 'fn' },
+    closest: (s) => jakifyButton
+  };
+
+  // Simulate clicking the jakify button (no error should occur)
+  let clickHandled = false;
+  try {
+    ac1Handler({ target: jakifyButton });
+    clickHandled = true;
+  } catch (e) {
+    // If jakify is not implemented, this would throw
+  }
+
+  assert(clickHandled, 'Clicking jakify button should be handled without error');
+}
+console.log('  ✓ Jakify button with data-action="jakify" is wired to sci-buttons listener');
+
+// AC2/AC3: applyJakify function tests
+console.log('\nAC2/AC3: Jakify Function - f(x) = 2x + 3');
+
+{
+  const result = applyJakify(1);
+  assert(!result.error, 'applyJakify(1) should not produce an error');
+  assert.deepStrictEqual(result.value, 5, 'applyJakify(1) should equal 5');
+}
+console.log('  ✓ applyJakify(1) = 5');
+
+{
+  const result = applyJakify(2);
+  assert(!result.error, 'applyJakify(2) should not produce an error');
+  assert.deepStrictEqual(result.value, 7, 'applyJakify(2) should equal 7');
+}
+console.log('  ✓ applyJakify(2) = 7');
+
+{
+  const result = applyJakify(3);
+  assert(!result.error, 'applyJakify(3) should not produce an error');
+  assert.deepStrictEqual(result.value, 9, 'applyJakify(3) should equal 9');
+}
+console.log('  ✓ applyJakify(3) = 9');
+
+{
+  const result = applyJakify(5);
+  assert(!result.error, 'applyJakify(5) should not produce an error');
+  assert.deepStrictEqual(result.value, 13, 'applyJakify(5) should equal 13');
+}
+console.log('  ✓ applyJakify(5) = 13');
+
+{
+  const result = applyJakify(10);
+  assert(!result.error, 'applyJakify(10) should not produce an error');
+  assert.deepStrictEqual(result.value, 23, 'applyJakify(10) should equal 23');
+}
+console.log('  ✓ applyJakify(10) = 23');
+
+{
+  const result = applyJakify(-4);
+  assert(!result.error, 'applyJakify(-4) should not produce an error');
+  assert.deepStrictEqual(result.value, -5, 'applyJakify(-4) should equal -5');
+}
+console.log('  ✓ applyJakify(-4) = -5 (negative numbers)');
+
+{
+  const result = applyJakify(1.5);
+  assert(!result.error, 'applyJakify(1.5) should not produce an error');
+  assert.deepStrictEqual(result.value, 6, 'applyJakify(1.5) should equal 6');
+}
+console.log('  ✓ applyJakify(1.5) = 6 (decimals)');
+
+{
+  const result = applyJakify(0);
+  assert(!result.error, 'applyJakify(0) should not produce an error');
+  assert.deepStrictEqual(result.value, 3, 'applyJakify(0) should equal 3');
+}
+console.log('  ✓ applyJakify(0) = 3 (zero)');
+
+// AC2/AC3: Test applyJakify via applyUnary
+{
+  const result = applyUnary('jakify', 2);
+  assert(!result.error, 'applyUnary(jakify, 2) should not produce an error');
+  assert.deepStrictEqual(result.value, 7, 'applyUnary(jakify, 2) should equal 7');
+}
+console.log('  ✓ applyJakify is accessible via applyUnary("jakify", value)');
+
+// AC2/AC3: Integration test - simulate button click and check result display
+console.log('\nAC2/AC3: Jakify Button Integration - Result Display');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const ac23IntegrationElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const ac23EventListeners = {};
+
+  const ac23FakeDOM = {
+    getElementById: (id) => ac23IntegrationElements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac23EventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac23EventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = ac23FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorJakifyTest = require('./script.js');
+
+  function simulateJakifyClick(containerKey, selector, classList = []) {
+    const handler = ac23EventListeners[containerKey];
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Enter 5, click Jakify, should get 13
+  {
+    simulateJakifyClick('main-buttons', { dataValue: '5' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '13', 'After entering 5 and clicking Jakify, result should display 13');
+  }
+  console.log('  ✓ Enter 5, click Jakify → display shows 13');
+
+  // Clear and test with expression
+  {
+    simulateJakifyClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    simulateJakifyClick('main-buttons', { dataValue: '2' }, ['digit']);
+    simulateJakifyClick('main-buttons', { dataValue: '+' }, ['operator']);
+    simulateJakifyClick('main-buttons', { dataValue: '3' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    // Expression "2+3" evaluates to 5, Jakify: 2*5+3 = 13
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '13', 'After entering "2+3" and clicking Jakify, result should display 13 (evaluated to 5 first)');
+  }
+  console.log('  ✓ Enter expression "2+3", click Jakify → evaluates to 5, then Jakify(5) = 13');
+
+  // Test with negative number
+  {
+    simulateJakifyClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    simulateJakifyClick('main-buttons', { dataValue: '0' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '3', 'Jakify(0) should display 3');
+  }
+  console.log('  ✓ Jakify(0) = 3');
+}
+
+// AC4: Error handling when expression is invalid
+console.log('\nAC4: Jakify Error Handling - Invalid Expression');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const ac4Elements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const ac4EventListeners = {};
+
+  const ac4FakeDOM = {
+    getElementById: (id) => ac4Elements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac4EventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac4EventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = ac4FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorJakifyErrorTest = require('./script.js');
+
+  function simulateErrorClick(containerKey, selector, classList = []) {
+    const handler = ac4EventListeners[containerKey];
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Enter just a decimal point ".", click Jakify, should show error
+  {
+    simulateErrorClick('main-buttons', { dataValue: '.' }, ['digit', 'dot']);
+    simulateErrorClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert(ac4Elements.result.textContent.toLowerCase().includes('invalid'), 'Entering "." and clicking Jakify should show error message containing "Invalid"');
+  }
+  console.log('  ✓ Entering "." and clicking Jakify shows error message');
+
+  // Test: Calculator remains usable after error (digit press starts new expression)
+  {
+    simulateErrorClick('main-buttons', { dataValue: '5' }, ['digit']);
+    assert.strictEqual(ac4Elements.expression.textContent, '5', 'After pressing digit, new expression starts and is displayed');
+  }
+  console.log('  ✓ Calculator remains usable after error (digit starts new expression)');
+
+  // Test: Can perform calculation after error (expression and Jakify work)
+  {
+    simulateErrorClick('main-buttons', { dataValue: '2' }, ['digit']);
+    simulateErrorClick('main-buttons', { dataValue: '+' }, ['operator']);
+    simulateErrorClick('main-buttons', { dataValue: '1' }, ['digit']);
+    simulateErrorClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    // "52+1" = 53, Jakify: 2*53+3 = 109
+    assert.strictEqual(ac4Elements.result.textContent, '109', 'Jakify works after error recovery with new expression');
+  }
+  console.log('  ✓ Jakify works after error recovery: Jakify(52+1) = 109');
+}
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
