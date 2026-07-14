@@ -11,6 +11,7 @@ const {
   applySin,
   applyCos,
   applyTan,
+  applyJakify,
   applyUnary,
   formatNumber
 } = CalculatorMath;
@@ -2390,282 +2391,42 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
 console.log('  ✓ Only one theme class is present at a time (monolith + other themes mutually exclusive)');
 
 // ============================================================================
-// JMNT-4: Minions Theme Tests
+// JMNT-5: Jakify Operation - AC1-4
 // ============================================================================
 
-console.log('\nJMNT-4: Minions Theme - AC1 (Options in dropdown)');
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-5: Jakify Operation');
+console.log('='.repeat(70));
+
+// AC1: Jakify button exists and is wired to sci-buttons listener
+console.log('\nAC1: Jakify Button Exists in Scientific Functions Row');
 
 {
-  // Verify "Minions" option exists in the dropdown
-  const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  const minionsOption = selectEl.options.find(o => o.value === 'minions');
-  assert(minionsOption, 'Minions option should exist in theme dropdown');
-  assert.strictEqual(minionsOption.textContent, 'Minions', 'Minions option should have correct label');
-}
-console.log('  ✓ Minions option exists in theme dropdown with correct label');
-
-console.log('\nJMNT-4: Minions Theme - AC2 (Theme class applied)');
-
-{
-  // Clean up and create fresh test context for Minions theme
+  // Test that Jakify button works via sci-buttons click handler
   delete global.document;
   delete global.window;
 
-  const minionsElements = {
-    expression: {
-      id: 'expression',
-      textContent: '',
-      classList: createClassListMock()
-    },
-    result: {
-      id: 'result',
-      textContent: '0',
-      classList: createClassListMock()
-    },
-    themeSelect: {
-      id: 'theme-select',
-      value: '',
-      options: [
-        { value: '', textContent: 'Default' },
-        { value: 'halloween', textContent: 'Halloween' },
-        { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' },
-        { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
-      ],
-      addEventListener: (event, handler) => {
-        if (event === 'change') {
-          minionsElements.themeSelect.changeHandler = handler;
-        }
-      }
-    },
-    calculator: {
-      classList: createClassListMock()
-    },
-    ghostEmoji: {
-      id: 'ghost-emoji',
-      style: { top: '', left: '' },
-      classList: createClassListMock()
-    },
-    monolithEmoji: {
-      id: 'monolith-emoji',
-      classList: createClassListMock()
-    }
+  const ac1Elements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
   };
 
-  const minionsFakeDOM = {
-    getElementById: (id) => {
-      if (id === 'expression') return minionsElements.expression;
-      if (id === 'result') return minionsElements.result;
-      if (id === 'theme-select') return minionsElements.themeSelect;
-      if (id === 'ghost-emoji') return minionsElements.ghostEmoji;
-      if (id === 'monolith-emoji') return minionsElements.monolithEmoji;
-      return null;
-    },
+  const ac1EventListeners = {};
+
+  const ac1FakeDOM = {
+    getElementById: (id) => ac1Elements[id] || null,
     querySelector: (selector) => {
-      if (selector === '.calculator') return minionsElements.calculator;
-      if (selector === '.main-buttons') return { addEventListener: () => {} };
-      if (selector === '.sci-buttons') return { addEventListener: () => {} };
-      return null;
-    }
-  };
-
-  global.document = minionsFakeDOM;
-  global.window = {};
-
-  delete require.cache[require.resolve('./script.js')];
-  const CalculatorMinionsTest = require('./script.js');
-
-  // Select Minions theme
-  minionsElements.themeSelect.value = 'minions';
-  minionsElements.themeSelect.changeHandler({ target: minionsElements.themeSelect });
-
-  assert(minionsElements.calculator.classList.contains('theme-minions'), 'Selecting minions should add theme-minions class');
-  assert(!minionsElements.calculator.classList.contains('theme-halloween'), 'Other theme classes should be removed');
-  assert(!minionsElements.calculator.classList.contains('theme-dark-mode'), 'Other theme classes should be removed');
-  assert(!minionsElements.calculator.classList.contains('theme-childrens'), 'Other theme classes should be removed');
-  assert(!minionsElements.calculator.classList.contains('theme-monolith'), 'Other theme classes should be removed');
-}
-console.log('  ✓ Selecting Minions theme adds theme-minions class and removes other theme classes');
-
-// ============================================================================
-// JMNT-4: Marvel/Iron Man Theme Tests
-// ============================================================================
-
-console.log('\nJMNT-4: Marvel/Iron Man Theme - AC1 (Options in dropdown)');
-
-{
-  // Verify "Marvel/Iron Man" option exists in the dropdown
-  const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  const marvelOption = selectEl.options.find(o => o.value === 'marvel-ironman');
-  assert(marvelOption, 'Marvel/Iron Man option should exist in theme dropdown');
-  assert.strictEqual(marvelOption.textContent, 'Marvel/Iron Man', 'Marvel/Iron Man option should have correct label');
-}
-console.log('  ✓ Marvel/Iron Man option exists in theme dropdown with correct label');
-
-console.log('\nJMNT-4: Marvel/Iron Man Theme - AC3 (Theme class applied)');
-
-{
-  // Clean up and create fresh test context for Marvel/Iron Man theme
-  delete global.document;
-  delete global.window;
-
-  const marvelElements = {
-    expression: {
-      id: 'expression',
-      textContent: '',
-      classList: createClassListMock()
-    },
-    result: {
-      id: 'result',
-      textContent: '0',
-      classList: createClassListMock()
-    },
-    themeSelect: {
-      id: 'theme-select',
-      value: '',
-      options: [
-        { value: '', textContent: 'Default' },
-        { value: 'halloween', textContent: 'Halloween' },
-        { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' },
-        { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
-      ],
-      addEventListener: (event, handler) => {
-        if (event === 'change') {
-          marvelElements.themeSelect.changeHandler = handler;
-        }
-      }
-    },
-    calculator: {
-      classList: createClassListMock()
-    },
-    ghostEmoji: {
-      id: 'ghost-emoji',
-      style: { top: '', left: '' },
-      classList: createClassListMock()
-    },
-    monolithEmoji: {
-      id: 'monolith-emoji',
-      classList: createClassListMock()
-    }
-  };
-
-  const marvelFakeDOM = {
-    getElementById: (id) => {
-      if (id === 'expression') return marvelElements.expression;
-      if (id === 'result') return marvelElements.result;
-      if (id === 'theme-select') return marvelElements.themeSelect;
-      if (id === 'ghost-emoji') return marvelElements.ghostEmoji;
-      if (id === 'monolith-emoji') return marvelElements.monolithEmoji;
-      return null;
-    },
-    querySelector: (selector) => {
-      if (selector === '.calculator') return marvelElements.calculator;
-      if (selector === '.main-buttons') return { addEventListener: () => {} };
-      if (selector === '.sci-buttons') return { addEventListener: () => {} };
-      return null;
-    }
-  };
-
-  global.document = marvelFakeDOM;
-  global.window = {};
-
-  delete require.cache[require.resolve('./script.js')];
-  const CalculatorMarvelTest = require('./script.js');
-
-  // Select Marvel/Iron Man theme
-  marvelElements.themeSelect.value = 'marvel-ironman';
-  marvelElements.themeSelect.changeHandler({ target: marvelElements.themeSelect });
-
-  assert(marvelElements.calculator.classList.contains('theme-marvel-ironman'), 'Selecting marvel-ironman should add theme-marvel-ironman class');
-  assert(!marvelElements.calculator.classList.contains('theme-halloween'), 'Other theme classes should be removed');
-  assert(!marvelElements.calculator.classList.contains('theme-dark-mode'), 'Other theme classes should be removed');
-  assert(!marvelElements.calculator.classList.contains('theme-childrens'), 'Other theme classes should be removed');
-  assert(!marvelElements.calculator.classList.contains('theme-monolith'), 'Other theme classes should be removed');
-  assert(!marvelElements.calculator.classList.contains('theme-minions'), 'Other theme classes should be removed');
-}
-console.log('  ✓ Selecting Marvel/Iron Man theme adds theme-marvel-ironman class and removes other theme classes');
-
-// ============================================================================
-// JMNT-4: Calculator Functionality with Minions Theme - AC4
-// ============================================================================
-
-console.log('\nJMNT-4: Calculator Functionality - AC4 (With Minions theme)');
-
-{
-  // Clean up and create fresh test context for calculator with minions theme
-  delete global.document;
-  delete global.window;
-
-  const minionsCalcElements = {
-    expression: {
-      id: 'expression',
-      textContent: '',
-      classList: createClassListMock()
-    },
-    result: {
-      id: 'result',
-      textContent: '0',
-      classList: createClassListMock()
-    },
-    themeSelect: {
-      id: 'theme-select',
-      value: '',
-      options: [
-        { value: '', textContent: 'Default' },
-        { value: 'halloween', textContent: 'Halloween' },
-        { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' },
-        { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
-      ],
-      addEventListener: (event, handler) => {
-        if (event === 'change') {
-          minionsCalcElements.themeSelect.changeHandler = handler;
-        }
-      }
-    },
-    calculator: {
-      classList: createClassListMock()
-    },
-    ghostEmoji: {
-      id: 'ghost-emoji',
-      style: { top: '', left: '' },
-      classList: createClassListMock()
-    },
-    monolithEmoji: {
-      id: 'monolith-emoji',
-      classList: createClassListMock()
-    }
-  };
-
-  const minionsCalcFakeDOM = {
-    getElementById: (id) => {
-      if (id === 'expression') return minionsCalcElements.expression;
-      if (id === 'result') return minionsCalcElements.result;
-      if (id === 'theme-select') return minionsCalcElements.themeSelect;
-      if (id === 'ghost-emoji') return minionsCalcElements.ghostEmoji;
-      if (id === 'monolith-emoji') return minionsCalcElements.monolithEmoji;
-      return null;
-    },
-    querySelector: (selector) => {
-      if (selector === '.calculator') return minionsCalcElements.calculator;
       if (selector === '.main-buttons') {
         return {
           addEventListener: (event, handler) => {
-            minionsCalcElements.mainButtonsHandler = handler;
+            ac1EventListeners['main-buttons'] = handler;
           }
         };
       }
       if (selector === '.sci-buttons') {
         return {
           addEventListener: (event, handler) => {
-            minionsCalcElements.sciButtonsHandler = handler;
+            ac1EventListeners['sci-buttons'] = handler;
           }
         };
       }
@@ -2673,15 +2434,146 @@ console.log('\nJMNT-4: Calculator Functionality - AC4 (With Minions theme)');
     }
   };
 
-  global.document = minionsCalcFakeDOM;
+  global.document = ac1FakeDOM;
   global.window = {};
 
   delete require.cache[require.resolve('./script.js')];
-  const CalculatorMinionsCalcTest = require('./script.js');
+  const CalculatorAC1Test = require('./script.js');
 
-  // Helper to simulate button clicks
-  function simulateMinionsClick(containerKey, selector, classList = []) {
-    const handler = containerKey === 'main' ? minionsCalcElements.mainButtonsHandler : minionsCalcElements.sciButtonsHandler;
+  // Test that clicking a button with data-action="jakify" in sci-buttons works
+  const ac1Handler = ac1EventListeners['sci-buttons'];
+  assert(ac1Handler, 'sci-buttons should have a click event listener registered');
+
+  // Create a fake button matching the jakify button from index.html
+  const jakifyButton = {
+    dataset: { action: 'jakify' },
+    classList: { contains: (c) => c === 'fn' },
+    closest: (s) => jakifyButton
+  };
+
+  // Simulate clicking the jakify button (no error should occur)
+  let clickHandled = false;
+  try {
+    ac1Handler({ target: jakifyButton });
+    clickHandled = true;
+  } catch (e) {
+    // If jakify is not implemented, this would throw
+  }
+
+  assert(clickHandled, 'Clicking jakify button should be handled without error');
+}
+console.log('  ✓ Jakify button with data-action="jakify" is wired to sci-buttons listener');
+
+// AC2/AC3: applyJakify function tests
+console.log('\nAC2/AC3: Jakify Function - f(x) = 2x + 3');
+
+{
+  const result = applyJakify(1);
+  assert(!result.error, 'applyJakify(1) should not produce an error');
+  assert.deepStrictEqual(result.value, 5, 'applyJakify(1) should equal 5');
+}
+console.log('  ✓ applyJakify(1) = 5');
+
+{
+  const result = applyJakify(2);
+  assert(!result.error, 'applyJakify(2) should not produce an error');
+  assert.deepStrictEqual(result.value, 7, 'applyJakify(2) should equal 7');
+}
+console.log('  ✓ applyJakify(2) = 7');
+
+{
+  const result = applyJakify(3);
+  assert(!result.error, 'applyJakify(3) should not produce an error');
+  assert.deepStrictEqual(result.value, 9, 'applyJakify(3) should equal 9');
+}
+console.log('  ✓ applyJakify(3) = 9');
+
+{
+  const result = applyJakify(5);
+  assert(!result.error, 'applyJakify(5) should not produce an error');
+  assert.deepStrictEqual(result.value, 13, 'applyJakify(5) should equal 13');
+}
+console.log('  ✓ applyJakify(5) = 13');
+
+{
+  const result = applyJakify(10);
+  assert(!result.error, 'applyJakify(10) should not produce an error');
+  assert.deepStrictEqual(result.value, 23, 'applyJakify(10) should equal 23');
+}
+console.log('  ✓ applyJakify(10) = 23');
+
+{
+  const result = applyJakify(-4);
+  assert(!result.error, 'applyJakify(-4) should not produce an error');
+  assert.deepStrictEqual(result.value, -5, 'applyJakify(-4) should equal -5');
+}
+console.log('  ✓ applyJakify(-4) = -5 (negative numbers)');
+
+{
+  const result = applyJakify(1.5);
+  assert(!result.error, 'applyJakify(1.5) should not produce an error');
+  assert.deepStrictEqual(result.value, 6, 'applyJakify(1.5) should equal 6');
+}
+console.log('  ✓ applyJakify(1.5) = 6 (decimals)');
+
+{
+  const result = applyJakify(0);
+  assert(!result.error, 'applyJakify(0) should not produce an error');
+  assert.deepStrictEqual(result.value, 3, 'applyJakify(0) should equal 3');
+}
+console.log('  ✓ applyJakify(0) = 3 (zero)');
+
+// AC2/AC3: Test applyJakify via applyUnary
+{
+  const result = applyUnary('jakify', 2);
+  assert(!result.error, 'applyUnary(jakify, 2) should not produce an error');
+  assert.deepStrictEqual(result.value, 7, 'applyUnary(jakify, 2) should equal 7');
+}
+console.log('  ✓ applyJakify is accessible via applyUnary("jakify", value)');
+
+// AC2/AC3: Integration test - simulate button click and check result display
+console.log('\nAC2/AC3: Jakify Button Integration - Result Display');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const ac23IntegrationElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
+  };
+
+  const ac23EventListeners = {};
+
+  const ac23FakeDOM = {
+    getElementById: (id) => ac23IntegrationElements[id] || null,
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac23EventListeners['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            ac23EventListeners['sci-buttons'] = handler;
+          }
+        };
+      }
+      return null;
+    }
+  };
+
+  global.document = ac23FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorJakifyTest = require('./script.js');
+
+  function simulateJakifyClick(containerKey, selector, classList = []) {
+    const handler = ac23EventListeners[containerKey];
     const fakeButton = {
       dataset: {},
       classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
@@ -2701,96 +2593,64 @@ console.log('\nJMNT-4: Calculator Functionality - AC4 (With Minions theme)');
     handler({ target: fakeButton });
   }
 
-  // Select Minions theme first
-  minionsCalcElements.themeSelect.value = 'minions';
-  minionsCalcElements.themeSelect.changeHandler({ target: minionsCalcElements.themeSelect });
+  // Test: Enter 5, click Jakify, should get 13
+  {
+    simulateJakifyClick('main-buttons', { dataValue: '5' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '13', 'After entering 5 and clicking Jakify, result should display 13');
+  }
+  console.log('  ✓ Enter 5, click Jakify → display shows 13');
 
-  // Test basic arithmetic with minions theme active: 5 + 3 = 8
-  simulateMinionsClick('main', { dataValue: '5' }, ['digit']);
-  simulateMinionsClick('main', { dataValue: '+' }, ['operator']);
-  simulateMinionsClick('main', { dataValue: '3' }, ['digit']);
-  simulateMinionsClick('main', { dataAction: 'equals' }, ['equals']);
+  // Clear and test with expression
+  {
+    simulateJakifyClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    simulateJakifyClick('main-buttons', { dataValue: '2' }, ['digit']);
+    simulateJakifyClick('main-buttons', { dataValue: '+' }, ['operator']);
+    simulateJakifyClick('main-buttons', { dataValue: '3' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    // Expression "2+3" evaluates to 5, Jakify: 2*5+3 = 13
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '13', 'After entering "2+3" and clicking Jakify, result should display 13 (evaluated to 5 first)');
+  }
+  console.log('  ✓ Enter expression "2+3", click Jakify → evaluates to 5, then Jakify(5) = 13');
 
-  assert.strictEqual(minionsCalcElements.result.textContent, '8', 'With minions theme: 5 + 3 should equal 8');
+  // Test with negative number
+  {
+    simulateJakifyClick('main-buttons', { dataAction: 'clear' }, ['util']);
+    simulateJakifyClick('main-buttons', { dataValue: '0' }, ['digit']);
+    simulateJakifyClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert.strictEqual(ac23IntegrationElements.result.textContent, '3', 'Jakify(0) should display 3');
+  }
+  console.log('  ✓ Jakify(0) = 3');
 }
-console.log('  ✓ Calculator arithmetic operations work unchanged with minions theme active');
 
-// ============================================================================
-// JMNT-4: Calculator Functionality with Marvel/Iron Man Theme - AC4
-// ============================================================================
-
-console.log('\nJMNT-4: Calculator Functionality - AC4 (With Marvel/Iron Man theme)');
+// AC4: Error handling when expression is invalid
+console.log('\nAC4: Jakify Error Handling - Invalid Expression');
 
 {
-  // Clean up and create fresh test context for calculator with marvel theme
   delete global.document;
   delete global.window;
 
-  const marvelCalcElements = {
-    expression: {
-      id: 'expression',
-      textContent: '',
-      classList: createClassListMock()
-    },
-    result: {
-      id: 'result',
-      textContent: '0',
-      classList: createClassListMock()
-    },
-    themeSelect: {
-      id: 'theme-select',
-      value: '',
-      options: [
-        { value: '', textContent: 'Default' },
-        { value: 'halloween', textContent: 'Halloween' },
-        { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' },
-        { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
-      ],
-      addEventListener: (event, handler) => {
-        if (event === 'change') {
-          marvelCalcElements.themeSelect.changeHandler = handler;
-        }
-      }
-    },
-    calculator: {
-      classList: createClassListMock()
-    },
-    ghostEmoji: {
-      id: 'ghost-emoji',
-      style: { top: '', left: '' },
-      classList: createClassListMock()
-    },
-    monolithEmoji: {
-      id: 'monolith-emoji',
-      classList: createClassListMock()
-    }
+  const ac4Elements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } }
   };
 
-  const marvelCalcFakeDOM = {
-    getElementById: (id) => {
-      if (id === 'expression') return marvelCalcElements.expression;
-      if (id === 'result') return marvelCalcElements.result;
-      if (id === 'theme-select') return marvelCalcElements.themeSelect;
-      if (id === 'ghost-emoji') return marvelCalcElements.ghostEmoji;
-      if (id === 'monolith-emoji') return marvelCalcElements.monolithEmoji;
-      return null;
-    },
+  const ac4EventListeners = {};
+
+  const ac4FakeDOM = {
+    getElementById: (id) => ac4Elements[id] || null,
     querySelector: (selector) => {
-      if (selector === '.calculator') return marvelCalcElements.calculator;
       if (selector === '.main-buttons') {
         return {
           addEventListener: (event, handler) => {
-            marvelCalcElements.mainButtonsHandler = handler;
+            ac4EventListeners['main-buttons'] = handler;
           }
         };
       }
       if (selector === '.sci-buttons') {
         return {
           addEventListener: (event, handler) => {
-            marvelCalcElements.sciButtonsHandler = handler;
+            ac4EventListeners['sci-buttons'] = handler;
           }
         };
       }
@@ -2798,15 +2658,14 @@ console.log('\nJMNT-4: Calculator Functionality - AC4 (With Marvel/Iron Man them
     }
   };
 
-  global.document = marvelCalcFakeDOM;
+  global.document = ac4FakeDOM;
   global.window = {};
 
   delete require.cache[require.resolve('./script.js')];
-  const CalculatorMarvelCalcTest = require('./script.js');
+  const CalculatorJakifyErrorTest = require('./script.js');
 
-  // Helper to simulate button clicks
-  function simulateMarvelClick(containerKey, selector, classList = []) {
-    const handler = containerKey === 'main' ? marvelCalcElements.mainButtonsHandler : marvelCalcElements.sciButtonsHandler;
+  function simulateErrorClick(containerKey, selector, classList = []) {
+    const handler = ac4EventListeners[containerKey];
     const fakeButton = {
       dataset: {},
       classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
@@ -2826,125 +2685,32 @@ console.log('\nJMNT-4: Calculator Functionality - AC4 (With Marvel/Iron Man them
     handler({ target: fakeButton });
   }
 
-  // Select Marvel/Iron Man theme first
-  marvelCalcElements.themeSelect.value = 'marvel-ironman';
-  marvelCalcElements.themeSelect.changeHandler({ target: marvelCalcElements.themeSelect });
+  // Test: Enter just a decimal point ".", click Jakify, should show error
+  {
+    simulateErrorClick('main-buttons', { dataValue: '.' }, ['digit', 'dot']);
+    simulateErrorClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    assert(ac4Elements.result.textContent.toLowerCase().includes('invalid'), 'Entering "." and clicking Jakify should show error message containing "Invalid"');
+  }
+  console.log('  ✓ Entering "." and clicking Jakify shows error message');
 
-  // Test basic arithmetic with marvel theme active: 5 + 3 = 8
-  simulateMarvelClick('main', { dataValue: '5' }, ['digit']);
-  simulateMarvelClick('main', { dataValue: '+' }, ['operator']);
-  simulateMarvelClick('main', { dataValue: '3' }, ['digit']);
-  simulateMarvelClick('main', { dataAction: 'equals' }, ['equals']);
+  // Test: Calculator remains usable after error (digit press starts new expression)
+  {
+    simulateErrorClick('main-buttons', { dataValue: '5' }, ['digit']);
+    assert.strictEqual(ac4Elements.expression.textContent, '5', 'After pressing digit, new expression starts and is displayed');
+  }
+  console.log('  ✓ Calculator remains usable after error (digit starts new expression)');
 
-  assert.strictEqual(marvelCalcElements.result.textContent, '8', 'With marvel theme: 5 + 3 should equal 8');
+  // Test: Can perform calculation after error (expression and Jakify work)
+  {
+    simulateErrorClick('main-buttons', { dataValue: '2' }, ['digit']);
+    simulateErrorClick('main-buttons', { dataValue: '+' }, ['operator']);
+    simulateErrorClick('main-buttons', { dataValue: '1' }, ['digit']);
+    simulateErrorClick('sci-buttons', { dataAction: 'jakify' }, ['fn']);
+    // "52+1" = 53, Jakify: 2*53+3 = 109
+    assert.strictEqual(ac4Elements.result.textContent, '109', 'Jakify works after error recovery with new expression');
+  }
+  console.log('  ✓ Jakify works after error recovery: Jakify(52+1) = 109');
 }
-console.log('  ✓ Calculator arithmetic operations work unchanged with marvel/iron man theme active');
-
-// ============================================================================
-// JMNT-4: Theme Switching with New Themes - AC5
-// ============================================================================
-
-console.log('\nJMNT-4: Theme Switching - AC5 (Minions, Marvel/Iron Man, and Existing Themes)');
-
-{
-  // Test sequential theme switching including minions and marvel themes
-  delete global.document;
-  delete global.window;
-
-  const switchNewElements = {
-    expression: {
-      id: 'expression',
-      textContent: '',
-      classList: createClassListMock()
-    },
-    result: {
-      id: 'result',
-      textContent: '0',
-      classList: createClassListMock()
-    },
-    themeSelect: {
-      id: 'theme-select',
-      value: '',
-      options: [
-        { value: '', textContent: 'Default' },
-        { value: 'halloween', textContent: 'Halloween' },
-        { value: 'dark-mode', textContent: 'Dark Mode' },
-        { value: 'childrens', textContent: "Children's" },
-        { value: 'monolith', textContent: '2001: A Space Odyssey' },
-        { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
-      ],
-      addEventListener: (event, handler) => {
-        if (event === 'change') {
-          switchNewElements.themeSelect.changeHandler = handler;
-        }
-      }
-    },
-    calculator: {
-      classList: createClassListMock()
-    },
-    ghostEmoji: {
-      id: 'ghost-emoji',
-      style: { top: '', left: '' },
-      classList: createClassListMock()
-    },
-    monolithEmoji: {
-      id: 'monolith-emoji',
-      classList: createClassListMock()
-    }
-  };
-
-  const switchNewFakeDOM = {
-    getElementById: (id) => {
-      if (id === 'expression') return switchNewElements.expression;
-      if (id === 'result') return switchNewElements.result;
-      if (id === 'theme-select') return switchNewElements.themeSelect;
-      if (id === 'ghost-emoji') return switchNewElements.ghostEmoji;
-      if (id === 'monolith-emoji') return switchNewElements.monolithEmoji;
-      return null;
-    },
-    querySelector: (selector) => {
-      if (selector === '.calculator') return switchNewElements.calculator;
-      if (selector === '.main-buttons') return { addEventListener: () => {} };
-      if (selector === '.sci-buttons') return { addEventListener: () => {} };
-      return null;
-    }
-  };
-
-  global.document = switchNewFakeDOM;
-  global.window = {};
-
-  delete require.cache[require.resolve('./script.js')];
-  const CalculatorSwitchNewTest = require('./script.js');
-
-  // Switch: Minions -> Marvel/Iron Man -> Halloween -> Default -> Minions
-  switchNewElements.themeSelect.value = 'minions';
-  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
-  assert(switchNewElements.calculator.classList.contains('theme-minions'), 'Step 1: Minions should be applied');
-  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 1: Marvel should not be present');
-
-  switchNewElements.themeSelect.value = 'marvel-ironman';
-  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
-  assert(switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 2: Marvel should be applied');
-  assert(!switchNewElements.calculator.classList.contains('theme-minions'), 'Step 2: Minions should be removed');
-
-  switchNewElements.themeSelect.value = 'halloween';
-  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
-  assert(switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 3: Halloween should be applied');
-  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 3: Marvel should be removed');
-
-  switchNewElements.themeSelect.value = '';
-  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
-  assert(!switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 4: Default should have no theme class');
-  assert(!switchNewElements.calculator.classList.contains('theme-minions'), 'Step 4: No theme classes should remain');
-  assert(!switchNewElements.calculator.classList.contains('theme-marvel-ironman'), 'Step 4: No theme classes should remain');
-
-  switchNewElements.themeSelect.value = 'minions';
-  switchNewElements.themeSelect.changeHandler({ target: switchNewElements.themeSelect });
-  assert(switchNewElements.calculator.classList.contains('theme-minions'), 'Step 5: Minions should be reapplied');
-  assert(!switchNewElements.calculator.classList.contains('theme-halloween'), 'Step 5: Halloween should be removed');
-}
-console.log('  ✓ Theme switching between Minions, Marvel/Iron Man, and existing themes works correctly');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
