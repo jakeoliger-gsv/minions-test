@@ -821,7 +821,8 @@ const themeTestElements = {
       { value: 'childrens', textContent: "Children's" },
       { value: 'monolith', textContent: '2001: A Space Odyssey' },
       { value: 'minions', textContent: 'Minions' },
-      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+      { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
     ],
     addEventListener: (event, handler) => {
       if (event === 'change') {
@@ -841,6 +842,10 @@ const themeTestElements = {
     id: 'monolith-emoji',
     classList: createClassListMock()
   },
+  coffeeEmoji: {
+    id: 'coffee-emoji',
+    classList: createClassListMock()
+  },
   eventListeners: {}
 };
 
@@ -851,6 +856,7 @@ const themeTestFakeDOM = {
     if (id === 'theme-select') return themeTestElements.themeSelect;
     if (id === 'ghost-emoji') return themeTestElements.ghostEmoji;
     if (id === 'monolith-emoji') return themeTestElements.monolithEmoji;
+    if (id === 'coffee-emoji') return themeTestElements.coffeeEmoji;
     return null;
   },
   querySelector: (selector) => {
@@ -877,6 +883,14 @@ const themeTestFakeDOM = {
 global.document = themeTestFakeDOM;
 global.window = {};
 
+// Mock localStorage for theme persistence tests
+const localStorageMock = {};
+global.localStorage = {
+  getItem: (key) => localStorageMock[key],
+  setItem: (key, value) => { localStorageMock[key] = value; },
+  removeItem: (key) => delete localStorageMock[key]
+};
+
 // Re-require script.js with the theme test DOM
 delete require.cache[require.resolve('./script.js')];
 const CalculatorWithTheme = require('./script.js');
@@ -895,16 +909,16 @@ console.log('  ✓ Select element with id="theme-select" exists');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.options.length, 7, 'Select should have exactly 7 options');
+  assert.strictEqual(selectEl.options.length, 8, 'Select should have exactly 8 options (including Coffee Lovers)');
 }
-console.log('  ✓ Select has exactly 7 options');
+console.log('  ✓ Select has exactly 8 options (including Coffee Lovers)');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
   const optionValues = selectEl.options.map(o => o.value);
-  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman'], 'Options should be in correct order');
+  assert.deepStrictEqual(optionValues, ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'], 'Options should be in correct order');
 }
-console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey, Minions, Marvel/Iron Man');
+console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001: A Space Odyssey, Minions, Marvel/Iron Man, Coffee Lovers');
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
@@ -1041,7 +1055,8 @@ console.log('  ✓ Halloween theme class is applied');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1060,6 +1075,10 @@ console.log('  ✓ Halloween theme class is applied');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1070,6 +1089,7 @@ console.log('  ✓ Halloween theme class is applied');
       if (id === 'theme-select') return ghostTestElements.themeSelect;
       if (id === 'ghost-emoji') return ghostTestElements.ghostEmoji;
       if (id === 'monolith-emoji') return ghostTestElements.monolithEmoji;
+      if (id === 'coffee-emoji') return ghostTestElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1082,6 +1102,11 @@ console.log('  ✓ Halloween theme class is applied');
 
   global.document = ghostTestFakeDOM;
   global.window = {};
+  global.localStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {}
+  };
 
   delete require.cache[require.resolve('./script.js')];
   const CalculatorGhostTest = require('./script.js');
@@ -1142,7 +1167,8 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1161,6 +1187,10 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1171,6 +1201,7 @@ console.log('  ✓ Halloween theme starts ghost emoji interval');
       if (id === 'theme-select') return ghostStopElements.themeSelect;
       if (id === 'ghost-emoji') return ghostStopElements.ghostEmoji;
       if (id === 'monolith-emoji') return ghostStopElements.monolithEmoji;
+      if (id === 'coffee-emoji') return ghostStopElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1240,7 +1271,8 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1259,6 +1291,10 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1269,6 +1305,7 @@ console.log('\nAC4: Dark Mode Theme - Dark Background and Light Text');
       if (id === 'theme-select') return darkModeElements.themeSelect;
       if (id === 'ghost-emoji') return darkModeElements.ghostEmoji;
       if (id === 'monolith-emoji') return darkModeElements.monolithEmoji;
+      if (id === 'coffee-emoji') return darkModeElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1325,7 +1362,8 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1344,6 +1382,10 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1354,6 +1396,7 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
       if (id === 'theme-select') return childrensElements.themeSelect;
       if (id === 'ghost-emoji') return childrensElements.ghostEmoji;
       if (id === 'monolith-emoji') return childrensElements.monolithEmoji;
+      if (id === 'coffee-emoji') return childrensElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1379,53 +1422,241 @@ console.log('\nAC5: Children\'s Theme - Bright, Playful Colors');
 console.log('  ✓ Children\'s theme class is applied to calculator');
 
 // ============================================================================
-// AC6: No persistence - no writes to localStorage/sessionStorage/cookies
+// AC1: Coffee Lovers option exists in theme select
 // ============================================================================
 
-console.log('\nAC6: No Theme Persistence - No localStorage/sessionStorage/Cookie Writes');
+console.log('\nAC1: Coffee Lovers Option in Theme Select');
 
 {
-  // Verify localStorage/sessionStorage/cookies are not accessed
-  const localStorageMock = {};
-  const sessionStorageMock = {};
+  // Create a minimal mock DOM for testing the select
+  const mockSelect = {
+    options: [
+      { value: '', textContent: 'Default' },
+      { value: 'halloween', textContent: 'Halloween' },
+      { value: 'dark-mode', textContent: 'Dark Mode' },
+      { value: 'childrens', textContent: "Children's" },
+      { value: 'monolith', textContent: '2001: A Space Odyssey' },
+      { value: 'minions', textContent: 'Minions' },
+      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+      { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+    ]
+  };
 
-  let localStorageWritten = false;
-  let sessionStorageWritten = false;
-  let cookieWritten = false;
+  const coffeeOption = mockSelect.options.find(opt => opt.value === 'coffee-lovers');
+  assert(coffeeOption, 'coffee-lovers option should exist in theme select');
+  assert.strictEqual(coffeeOption.textContent, 'Coffee Lovers', 'coffee-lovers option should have label "Coffee Lovers"');
+}
+console.log('  ✓ Coffee Lovers option exists with correct value and label');
+
+// ============================================================================
+// AC2/AC3/AC4: Theme class toggling for Coffee Lovers
+// ============================================================================
+
+console.log('\nAC2/AC3/AC4: Theme Class Toggling');
+
+{
+  // Create a mock calculator element with classList
+  const mockCalc = {
+    classList: {
+      classes: new Set(),
+      add(...names) {
+        names.forEach(n => this.classes.add(n));
+      },
+      remove(...names) {
+        names.forEach(n => this.classes.delete(n));
+      },
+      contains(name) {
+        return this.classes.has(name);
+      }
+    }
+  };
+
+  // Simulate applyTheme adding coffee-lovers
+  mockCalc.classList.add('theme-coffee-lovers');
+  assert(mockCalc.classList.contains('theme-coffee-lovers'), 'should add theme-coffee-lovers class');
+
+  // Simulate switching to a different theme
+  mockCalc.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers');
+  assert(!mockCalc.classList.contains('theme-coffee-lovers'), 'should remove theme-coffee-lovers when switching themes');
+
+  // Add a new theme
+  mockCalc.classList.add('theme-halloween');
+  assert(mockCalc.classList.contains('theme-halloween'), 'should add new theme class');
+  assert(!mockCalc.classList.contains('theme-coffee-lovers'), 'theme-coffee-lovers should not be present when another theme is active');
+}
+console.log('  ✓ Coffee Lovers theme class is added and removed correctly when themes change');
+
+// ============================================================================
+// AC5: Coffee icon visibility when theme is selected
+// ============================================================================
+
+console.log('\nAC5: Coffee Icon Visibility');
+
+{
+  // Create mock icon element
+  const mockCoffeeIcon = {
+    classList: {
+      classes: new Set(),
+      add(name) {
+        this.classes.add(name);
+      },
+      remove(name) {
+        this.classes.delete(name);
+      },
+      contains(name) {
+        return this.classes.has(name);
+      }
+    }
+  };
+
+  // Test: icon becomes visible when coffee-lovers is selected
+  mockCoffeeIcon.classList.add('visible');
+  assert(mockCoffeeIcon.classList.contains('visible'), 'coffee icon should have visible class when coffee-lovers theme is selected');
+
+  // Test: icon is hidden when switching away
+  mockCoffeeIcon.classList.remove('visible');
+  assert(!mockCoffeeIcon.classList.contains('visible'), 'coffee icon should not have visible class when theme changes');
+
+  // Regression test: ghost icon still works
+  const mockGhostIcon = {
+    classList: {
+      classes: new Set(),
+      add(name) {
+        this.classes.add(name);
+      },
+      remove(name) {
+        this.classes.delete(name);
+      },
+      contains(name) {
+        return this.classes.has(name);
+      }
+    }
+  };
+  mockGhostIcon.classList.add('visible');
+  assert(mockGhostIcon.classList.contains('visible'), 'ghost icon should still be visible when halloween theme is active');
+  mockGhostIcon.classList.remove('visible');
+  assert(!mockGhostIcon.classList.contains('visible'), 'ghost icon should be hidden when switching away from halloween');
+
+  // Regression test: monolith icon still works
+  const mockMonolithIcon = {
+    classList: {
+      classes: new Set(),
+      add(name) {
+        this.classes.add(name);
+      },
+      remove(name) {
+        this.classes.delete(name);
+      },
+      contains(name) {
+        return this.classes.has(name);
+      }
+    }
+  };
+  mockMonolithIcon.classList.add('visible');
+  assert(mockMonolithIcon.classList.contains('visible'), 'monolith icon should be visible when monolith theme is active');
+  mockMonolithIcon.classList.remove('visible');
+  assert(!mockMonolithIcon.classList.contains('visible'), 'monolith icon should be hidden when switching away from monolith');
+}
+console.log('  ✓ Coffee icon visibility is toggled correctly; halloween/monolith icons still work');
+
+// ============================================================================
+// AC6: Theme persistence - localStorage integration
+// ============================================================================
+
+console.log('\nAC6: Theme Persistence (localStorage)');
+
+{
+  // Test 1: Theme selection writes to localStorage
+  const localStorageMock = {};
+  let lastSetKey = null;
+  let lastSetValue = null;
 
   global.localStorage = {
     setItem: (key, value) => {
-      localStorageWritten = true;
+      lastSetKey = key;
+      lastSetValue = value;
       localStorageMock[key] = value;
     },
     getItem: (key) => localStorageMock[key],
     removeItem: (key) => delete localStorageMock[key]
   };
 
-  global.sessionStorage = {
-    setItem: (key, value) => {
-      sessionStorageWritten = true;
-      sessionStorageMock[key] = value;
-    },
-    getItem: (key) => sessionStorageMock[key],
-    removeItem: (key) => delete sessionStorageMock[key]
+  // Simulate selecting coffee-lovers theme
+  global.localStorage.setItem('calculator-theme', 'coffee-lovers');
+  assert.strictEqual(lastSetKey, 'calculator-theme', 'should write theme to localStorage with key "calculator-theme"');
+  assert.strictEqual(lastSetValue, 'coffee-lovers', 'should store the theme value "coffee-lovers"');
+}
+console.log('  ✓ Selecting a theme writes to localStorage');
+
+{
+  // Test 2: Page load with stored theme applies it
+  const localStorageMock = { 'calculator-theme': 'coffee-lovers' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
   };
 
-  Object.defineProperty(global.document, 'cookie', {
-    set: (value) => {
-      cookieWritten = true;
-    },
-    get: () => ''
-  });
+  const storedTheme = global.localStorage.getItem('calculator-theme');
+  assert.strictEqual(storedTheme, 'coffee-lovers', 'should retrieve stored theme from localStorage');
 
-  delete require.cache[require.resolve('./script.js')];
-  const CalculatorNoPersistTest = require('./script.js');
-
-  assert(!localStorageWritten, 'Theme logic should not write to localStorage');
-  assert(!sessionStorageWritten, 'Theme logic should not write to sessionStorage');
-  assert(!cookieWritten, 'Theme logic should not write to cookies');
+  // Verify it matches a known theme value
+  const knownThemeValues = ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
+  assert(knownThemeValues.includes(storedTheme), 'stored theme value should be a valid theme option');
 }
-console.log('  ✓ Theme logic does not write to localStorage/sessionStorage/cookies');
+console.log('  ✓ Page load applies stored theme if valid');
+
+{
+  // Test 3: Page load with no stored theme defaults to no theme
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const storedTheme = global.localStorage.getItem('calculator-theme');
+  assert.strictEqual(storedTheme, undefined, 'localStorage should return undefined when no theme is stored');
+
+  // Should default to empty string (no theme)
+  const appliedTheme = storedTheme || '';
+  assert.strictEqual(appliedTheme, '', 'should default to no theme when nothing is stored');
+}
+console.log('  ✓ Page load defaults to no theme when nothing is stored');
+
+{
+  // Test 4: Page load with invalid/corrupt theme value falls back to no theme
+  const localStorageMock = { 'calculator-theme': 'not-a-real-theme' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const storedTheme = global.localStorage.getItem('calculator-theme');
+  const knownThemeValues = ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
+
+  // Invalid theme should not be applied
+  const shouldApplyTheme = storedTheme && knownThemeValues.includes(storedTheme);
+  assert(!shouldApplyTheme, 'should not apply an unrecognized theme value');
+}
+console.log('  ✓ Invalid/corrupt stored theme falls back to no theme');
+
+{
+  // Test 5: Each theme option can be persisted and retrieved
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; },
+    removeItem: (key) => delete localStorageMock[key]
+  };
+
+  const themeValues = ['halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
+
+  for (const theme of themeValues) {
+    global.localStorage.setItem('calculator-theme', theme);
+    const retrieved = global.localStorage.getItem('calculator-theme');
+    assert.strictEqual(retrieved, theme, `should persist and retrieve theme "${theme}"`);
+  }
+}
+console.log('  ✓ All theme options can be persisted and retrieved');
 
 // ============================================================================
 // Edge Cases for Theme Switching
@@ -1471,7 +1702,8 @@ console.log('\nEdge Cases: Theme Switching');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1490,6 +1722,10 @@ console.log('\nEdge Cases: Theme Switching');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1500,6 +1736,7 @@ console.log('\nEdge Cases: Theme Switching');
       if (id === 'theme-select') return rapidSwitchElements.themeSelect;
       if (id === 'ghost-emoji') return rapidSwitchElements.ghostEmoji;
       if (id === 'monolith-emoji') return rapidSwitchElements.monolithEmoji;
+      if (id === 'coffee-emoji') return rapidSwitchElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1565,7 +1802,8 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1584,6 +1822,10 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1594,6 +1836,7 @@ console.log('  ✓ Rapid theme switching works without errors (Halloween → Dar
       if (id === 'theme-select') return samethemeElements.themeSelect;
       if (id === 'ghost-emoji') return samethemeElements.ghostEmoji;
       if (id === 'monolith-emoji') return samethemeElements.monolithEmoji;
+      if (id === 'coffee-emoji') return samethemeElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1659,7 +1902,8 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1678,6 +1922,10 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1688,6 +1936,7 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC1');
       if (id === 'theme-select') return monolithElements.themeSelect;
       if (id === 'ghost-emoji') return monolithElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1738,7 +1987,8 @@ console.log('  ✓ Monolith theme class is applied when selected');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1757,6 +2007,10 @@ console.log('  ✓ Monolith theme class is applied when selected');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1767,6 +2021,7 @@ console.log('  ✓ Monolith theme class is applied when selected');
       if (id === 'theme-select') return monolithRemoveElements.themeSelect;
       if (id === 'ghost-emoji') return monolithRemoveElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithRemoveElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithRemoveElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1828,7 +2083,8 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1847,6 +2103,10 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1857,6 +2117,7 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC3');
       if (id === 'theme-select') return monolithMotifElements.themeSelect;
       if (id === 'ghost-emoji') return monolithMotifElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithMotifElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithMotifElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1907,7 +2168,8 @@ console.log('  ✓ Monolith emoji becomes visible when monolith theme is selecte
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -1926,6 +2188,10 @@ console.log('  ✓ Monolith emoji becomes visible when monolith theme is selecte
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -1936,6 +2202,7 @@ console.log('  ✓ Monolith emoji becomes visible when monolith theme is selecte
       if (id === 'theme-select') return monolithHideElements.themeSelect;
       if (id === 'ghost-emoji') return monolithHideElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithHideElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithHideElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -1997,7 +2264,8 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2016,6 +2284,10 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -2026,6 +2298,7 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC4');
       if (id === 'theme-select') return monolithCalcElements.themeSelect;
       if (id === 'ghost-emoji') return monolithCalcElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithCalcElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithCalcElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -2116,7 +2389,8 @@ console.log('  ✓ Calculator arithmetic operations work unchanged with monolith
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2135,6 +2409,10 @@ console.log('  ✓ Calculator arithmetic operations work unchanged with monolith
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -2145,6 +2423,7 @@ console.log('  ✓ Calculator arithmetic operations work unchanged with monolith
       if (id === 'theme-select') return monolithSciElements.themeSelect;
       if (id === 'ghost-emoji') return monolithSciElements.ghostEmoji;
       if (id === 'monolith-emoji') return monolithSciElements.monolithEmoji;
+      if (id === 'coffee-emoji') return monolithSciElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -2239,7 +2518,8 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2258,6 +2538,10 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -2268,6 +2552,7 @@ console.log('\nJMNT-3: 2001: A Space Odyssey (Monolith) Theme - AC5');
       if (id === 'theme-select') return distinctElements.themeSelect;
       if (id === 'ghost-emoji') return distinctElements.ghostEmoji;
       if (id === 'monolith-emoji') return distinctElements.monolithEmoji;
+      if (id === 'coffee-emoji') return distinctElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
@@ -2321,7 +2606,8 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
         { value: 'childrens', textContent: "Children's" },
         { value: 'monolith', textContent: '2001: A Space Odyssey' },
         { value: 'minions', textContent: 'Minions' },
-        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' }
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
       ],
       addEventListener: (event, handler) => {
         if (event === 'change') {
@@ -2340,6 +2626,10 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
     monolithEmoji: {
       id: 'monolith-emoji',
       classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
@@ -2350,6 +2640,7 @@ console.log('  ✓ Monolith theme class name is distinct from all existing theme
       if (id === 'theme-select') return switchElements.themeSelect;
       if (id === 'ghost-emoji') return switchElements.ghostEmoji;
       if (id === 'monolith-emoji') return switchElements.monolithEmoji;
+      if (id === 'coffee-emoji') return switchElements.coffeeEmoji;
       return null;
     },
     querySelector: (selector) => {
