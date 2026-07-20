@@ -1428,63 +1428,191 @@ console.log('  ✓ Children\'s theme class is applied to calculator');
 console.log('\nAC1: Coffee Lovers Option in Theme Select');
 
 {
-  // Create a minimal mock DOM for testing the select
-  const mockSelect = {
-    options: [
-      { value: '', textContent: 'Default' },
-      { value: 'halloween', textContent: 'Halloween' },
-      { value: 'dark-mode', textContent: 'Dark Mode' },
-      { value: 'childrens', textContent: "Children's" },
-      { value: 'monolith', textContent: '2001: A Space Odyssey' },
-      { value: 'minions', textContent: 'Minions' },
-      { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
-      { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
-    ]
+  // Test that coffee-lovers option exists in the select element
+  delete global.document;
+  delete global.window;
+
+  const coffeeTestElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          coffeeTestElements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
   };
 
-  const coffeeOption = mockSelect.options.find(opt => opt.value === 'coffee-lovers');
+  const coffeeTestFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return coffeeTestElements.expression;
+      if (id === 'result') return coffeeTestElements.result;
+      if (id === 'theme-select') return coffeeTestElements.themeSelect;
+      if (id === 'ghost-emoji') return coffeeTestElements.ghostEmoji;
+      if (id === 'monolith-emoji') return coffeeTestElements.monolithEmoji;
+      if (id === 'coffee-emoji') return coffeeTestElements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return coffeeTestElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = coffeeTestFakeDOM;
+  global.window = {};
+  global.localStorage = {
+    getItem: () => null,
+    setItem: () => {}
+  };
+
+  // Verify coffee-lovers option exists
+  const coffeeOption = coffeeTestElements.themeSelect.options.find(opt => opt.value === 'coffee-lovers');
   assert(coffeeOption, 'coffee-lovers option should exist in theme select');
   assert.strictEqual(coffeeOption.textContent, 'Coffee Lovers', 'coffee-lovers option should have label "Coffee Lovers"');
 }
 console.log('  ✓ Coffee Lovers option exists with correct value and label');
 
 // ============================================================================
-// AC2/AC3/AC4: Theme class toggling for Coffee Lovers
+// AC2/AC3/AC4: Coffee Lovers theme class toggling
 // ============================================================================
 
-console.log('\nAC2/AC3/AC4: Theme Class Toggling');
+console.log('\nAC2/AC3/AC4: Theme Class Toggling for Coffee Lovers');
 
 {
-  // Create a mock calculator element with classList
-  const mockCalc = {
-    classList: {
-      classes: new Set(),
-      add(...names) {
-        names.forEach(n => this.classes.add(n));
-      },
-      remove(...names) {
-        names.forEach(n => this.classes.delete(n));
-      },
-      contains(name) {
-        return this.classes.has(name);
+  // Test that selecting coffee-lovers adds theme-coffee-lovers class to calculator
+  delete global.document;
+  delete global.window;
+
+  const coffeeClassElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          coffeeClassElements.themeSelect.changeHandler = handler;
+        }
       }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
-  // Simulate applyTheme adding coffee-lovers
-  mockCalc.classList.add('theme-coffee-lovers');
-  assert(mockCalc.classList.contains('theme-coffee-lovers'), 'should add theme-coffee-lovers class');
+  const coffeeClassFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return coffeeClassElements.expression;
+      if (id === 'result') return coffeeClassElements.result;
+      if (id === 'theme-select') return coffeeClassElements.themeSelect;
+      if (id === 'ghost-emoji') return coffeeClassElements.ghostEmoji;
+      if (id === 'monolith-emoji') return coffeeClassElements.monolithEmoji;
+      if (id === 'coffee-emoji') return coffeeClassElements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return coffeeClassElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
 
-  // Simulate switching to a different theme
-  mockCalc.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers');
-  assert(!mockCalc.classList.contains('theme-coffee-lovers'), 'should remove theme-coffee-lovers when switching themes');
+  global.document = coffeeClassFakeDOM;
+  global.window = {};
+  global.localStorage = {
+    getItem: () => null,
+    setItem: () => {}
+  };
 
-  // Add a new theme
-  mockCalc.classList.add('theme-halloween');
-  assert(mockCalc.classList.contains('theme-halloween'), 'should add new theme class');
-  assert(!mockCalc.classList.contains('theme-coffee-lovers'), 'theme-coffee-lovers should not be present when another theme is active');
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorCoffeeClassTest = require('./script.js');
+
+  // Select Coffee Lovers theme
+  coffeeClassElements.themeSelect.value = 'coffee-lovers';
+  coffeeClassElements.themeSelect.changeHandler({ target: coffeeClassElements.themeSelect });
+
+  assert(coffeeClassElements.calculator.classList.contains('theme-coffee-lovers'), 'should add theme-coffee-lovers class when selected');
+
+  // Now switch to another theme - coffee-lovers should be removed
+  coffeeClassElements.themeSelect.value = 'halloween';
+  coffeeClassElements.themeSelect.changeHandler({ target: coffeeClassElements.themeSelect });
+
+  assert(!coffeeClassElements.calculator.classList.contains('theme-coffee-lovers'), 'should remove theme-coffee-lovers when switching to halloween');
+  assert(coffeeClassElements.calculator.classList.contains('theme-halloween'), 'should add theme-halloween when switching');
 }
-console.log('  ✓ Coffee Lovers theme class is added and removed correctly when themes change');
+console.log('  ✓ Coffee Lovers theme class is added and removed correctly');
 
 // ============================================================================
 // AC5: Coffee icon visibility when theme is selected
@@ -1493,71 +1621,106 @@ console.log('  ✓ Coffee Lovers theme class is added and removed correctly when
 console.log('\nAC5: Coffee Icon Visibility');
 
 {
-  // Create mock icon element
-  const mockCoffeeIcon = {
-    classList: {
-      classes: new Set(),
-      add(name) {
-        this.classes.add(name);
-      },
-      remove(name) {
-        this.classes.delete(name);
-      },
-      contains(name) {
-        return this.classes.has(name);
+  // Test that coffee icon becomes visible when coffee-lovers is selected
+  delete global.document;
+  delete global.window;
+
+  const coffeeIconElements = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          coffeeIconElements.themeSelect.changeHandler = handler;
+        }
       }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
     }
   };
 
-  // Test: icon becomes visible when coffee-lovers is selected
-  mockCoffeeIcon.classList.add('visible');
-  assert(mockCoffeeIcon.classList.contains('visible'), 'coffee icon should have visible class when coffee-lovers theme is selected');
-
-  // Test: icon is hidden when switching away
-  mockCoffeeIcon.classList.remove('visible');
-  assert(!mockCoffeeIcon.classList.contains('visible'), 'coffee icon should not have visible class when theme changes');
-
-  // Regression test: ghost icon still works
-  const mockGhostIcon = {
-    classList: {
-      classes: new Set(),
-      add(name) {
-        this.classes.add(name);
-      },
-      remove(name) {
-        this.classes.delete(name);
-      },
-      contains(name) {
-        return this.classes.has(name);
-      }
+  const coffeeIconFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return coffeeIconElements.expression;
+      if (id === 'result') return coffeeIconElements.result;
+      if (id === 'theme-select') return coffeeIconElements.themeSelect;
+      if (id === 'ghost-emoji') return coffeeIconElements.ghostEmoji;
+      if (id === 'monolith-emoji') return coffeeIconElements.monolithEmoji;
+      if (id === 'coffee-emoji') return coffeeIconElements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return coffeeIconElements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
     }
   };
-  mockGhostIcon.classList.add('visible');
-  assert(mockGhostIcon.classList.contains('visible'), 'ghost icon should still be visible when halloween theme is active');
-  mockGhostIcon.classList.remove('visible');
-  assert(!mockGhostIcon.classList.contains('visible'), 'ghost icon should be hidden when switching away from halloween');
 
-  // Regression test: monolith icon still works
-  const mockMonolithIcon = {
-    classList: {
-      classes: new Set(),
-      add(name) {
-        this.classes.add(name);
-      },
-      remove(name) {
-        this.classes.delete(name);
-      },
-      contains(name) {
-        return this.classes.has(name);
-      }
-    }
+  global.document = coffeeIconFakeDOM;
+  global.window = {};
+  global.localStorage = {
+    getItem: () => null,
+    setItem: () => {}
   };
-  mockMonolithIcon.classList.add('visible');
-  assert(mockMonolithIcon.classList.contains('visible'), 'monolith icon should be visible when monolith theme is active');
-  mockMonolithIcon.classList.remove('visible');
-  assert(!mockMonolithIcon.classList.contains('visible'), 'monolith icon should be hidden when switching away from monolith');
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorCoffeeIconTest = require('./script.js');
+
+  // Select coffee-lovers theme
+  coffeeIconElements.themeSelect.value = 'coffee-lovers';
+  coffeeIconElements.themeSelect.changeHandler({ target: coffeeIconElements.themeSelect });
+
+  assert(coffeeIconElements.coffeeEmoji.classList.contains('visible'), 'coffee icon should be visible when coffee-lovers theme is selected');
+
+  // Switch away from coffee-lovers - icon should hide
+  coffeeIconElements.themeSelect.value = '';
+  coffeeIconElements.themeSelect.changeHandler({ target: coffeeIconElements.themeSelect });
+
+  assert(!coffeeIconElements.coffeeEmoji.classList.contains('visible'), 'coffee icon should be hidden when switching away from coffee-lovers');
+
+  // Regression test: monolith icon visibility still works
+  coffeeIconElements.themeSelect.value = 'monolith';
+  coffeeIconElements.themeSelect.changeHandler({ target: coffeeIconElements.themeSelect });
+
+  assert(coffeeIconElements.monolithEmoji.classList.contains('visible'), 'monolith icon should be visible when monolith theme is selected');
+  assert(!coffeeIconElements.coffeeEmoji.classList.contains('visible'), 'coffee icon should remain hidden when monolith is selected');
 }
-console.log('  ✓ Coffee icon visibility is toggled correctly; halloween/monolith icons still work');
+console.log('  ✓ Coffee icon visibility is toggled correctly; monolith icon regression check passes');
 
 // ============================================================================
 // AC6: Theme persistence - localStorage integration
@@ -1566,97 +1729,464 @@ console.log('  ✓ Coffee icon visibility is toggled correctly; halloween/monoli
 console.log('\nAC6: Theme Persistence (localStorage)');
 
 {
-  // Test 1: Theme selection writes to localStorage
-  const localStorageMock = {};
-  let lastSetKey = null;
-  let lastSetValue = null;
+  // Test 1: Selecting coffee-lovers writes to localStorage
+  delete global.document;
+  delete global.window;
 
+  const localStorageMock = {};
   global.localStorage = {
     setItem: (key, value) => {
-      lastSetKey = key;
-      lastSetValue = value;
       localStorageMock[key] = value;
     },
-    getItem: (key) => localStorageMock[key],
-    removeItem: (key) => delete localStorageMock[key]
+    getItem: (key) => localStorageMock[key]
   };
 
-  // Simulate selecting coffee-lovers theme
-  global.localStorage.setItem('calculator-theme', 'coffee-lovers');
-  assert.strictEqual(lastSetKey, 'calculator-theme', 'should write theme to localStorage with key "calculator-theme"');
-  assert.strictEqual(lastSetValue, 'coffee-lovers', 'should store the theme value "coffee-lovers"');
+  const persistenceElements1 = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          persistenceElements1.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const persistence1FakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return persistenceElements1.expression;
+      if (id === 'result') return persistenceElements1.result;
+      if (id === 'theme-select') return persistenceElements1.themeSelect;
+      if (id === 'ghost-emoji') return persistenceElements1.ghostEmoji;
+      if (id === 'monolith-emoji') return persistenceElements1.monolithEmoji;
+      if (id === 'coffee-emoji') return persistenceElements1.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return persistenceElements1.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = persistence1FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorPersistence1Test = require('./script.js');
+
+  // Select coffee-lovers - should write to localStorage
+  persistenceElements1.themeSelect.value = 'coffee-lovers';
+  persistenceElements1.themeSelect.changeHandler({ target: persistenceElements1.themeSelect });
+
+  assert.strictEqual(localStorageMock['calculator-theme'], 'coffee-lovers', 'should write coffee-lovers to localStorage with key "calculator-theme"');
 }
 console.log('  ✓ Selecting a theme writes to localStorage');
 
 {
-  // Test 2: Page load with stored theme applies it
+  // Test 2: Page load with stored theme restores it and applies it
+  delete global.document;
+  delete global.window;
+
   const localStorageMock = { 'calculator-theme': 'coffee-lovers' };
   global.localStorage = {
-    getItem: (key) => localStorageMock[key],
-    setItem: (key, value) => { localStorageMock[key] = value; }
+    setItem: (key, value) => {
+      localStorageMock[key] = value;
+    },
+    getItem: (key) => localStorageMock[key]
   };
 
-  const storedTheme = global.localStorage.getItem('calculator-theme');
-  assert.strictEqual(storedTheme, 'coffee-lovers', 'should retrieve stored theme from localStorage');
+  const persistenceElements2 = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          persistenceElements2.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
+  };
 
-  // Verify it matches a known theme value
-  const knownThemeValues = ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
-  assert(knownThemeValues.includes(storedTheme), 'stored theme value should be a valid theme option');
+  const persistence2FakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return persistenceElements2.expression;
+      if (id === 'result') return persistenceElements2.result;
+      if (id === 'theme-select') return persistenceElements2.themeSelect;
+      if (id === 'ghost-emoji') return persistenceElements2.ghostEmoji;
+      if (id === 'monolith-emoji') return persistenceElements2.monolithEmoji;
+      if (id === 'coffee-emoji') return persistenceElements2.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return persistenceElements2.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = persistence2FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorPersistence2Test = require('./script.js');
+
+  // After script loads, it should have restored the theme from localStorage
+  assert.strictEqual(persistenceElements2.themeSelect.value, 'coffee-lovers', 'themeSelect.value should be set to stored theme on load');
+  assert(persistenceElements2.calculator.classList.contains('theme-coffee-lovers'), 'coffee-lovers theme class should be applied on load');
+  assert(persistenceElements2.coffeeEmoji.classList.contains('visible'), 'coffee icon should be visible after restoring coffee-lovers theme');
 }
-console.log('  ✓ Page load applies stored theme if valid');
+console.log('  ✓ Page load restores and applies stored theme');
 
 {
-  // Test 3: Page load with no stored theme defaults to no theme
+  // Test 3: Page load with no stored theme uses defaults
+  delete global.document;
+  delete global.window;
+
   const localStorageMock = {};
   global.localStorage = {
-    getItem: (key) => localStorageMock[key],
-    setItem: (key, value) => { localStorageMock[key] = value; }
+    setItem: (key, value) => {
+      localStorageMock[key] = value;
+    },
+    getItem: (key) => localStorageMock[key]
   };
 
-  const storedTheme = global.localStorage.getItem('calculator-theme');
-  assert.strictEqual(storedTheme, undefined, 'localStorage should return undefined when no theme is stored');
+  const persistenceElements3 = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          persistenceElements3.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
+  };
 
-  // Should default to empty string (no theme)
-  const appliedTheme = storedTheme || '';
-  assert.strictEqual(appliedTheme, '', 'should default to no theme when nothing is stored');
+  const persistence3FakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return persistenceElements3.expression;
+      if (id === 'result') return persistenceElements3.result;
+      if (id === 'theme-select') return persistenceElements3.themeSelect;
+      if (id === 'ghost-emoji') return persistenceElements3.ghostEmoji;
+      if (id === 'monolith-emoji') return persistenceElements3.monolithEmoji;
+      if (id === 'coffee-emoji') return persistenceElements3.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return persistenceElements3.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = persistence3FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorPersistence3Test = require('./script.js');
+
+  // With no stored theme, calculator should have no theme class
+  assert.strictEqual(persistenceElements3.themeSelect.value, '', 'themeSelect.value should remain empty with no stored theme');
+  assert(!persistenceElements3.calculator.classList.contains('theme-coffee-lovers'), 'no coffee-lovers class should be applied with no stored theme');
+  assert(!persistenceElements3.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with no stored theme');
 }
 console.log('  ✓ Page load defaults to no theme when nothing is stored');
 
 {
-  // Test 4: Page load with invalid/corrupt theme value falls back to no theme
+  // Test 4: Page load with invalid stored theme falls back to no theme
+  delete global.document;
+  delete global.window;
+
   const localStorageMock = { 'calculator-theme': 'not-a-real-theme' };
   global.localStorage = {
-    getItem: (key) => localStorageMock[key],
-    setItem: (key, value) => { localStorageMock[key] = value; }
+    setItem: (key, value) => {
+      localStorageMock[key] = value;
+    },
+    getItem: (key) => localStorageMock[key]
   };
 
-  const storedTheme = global.localStorage.getItem('calculator-theme');
-  const knownThemeValues = ['', 'halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
+  const persistenceElements4 = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          persistenceElements4.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
+  };
+
+  const persistence4FakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return persistenceElements4.expression;
+      if (id === 'result') return persistenceElements4.result;
+      if (id === 'theme-select') return persistenceElements4.themeSelect;
+      if (id === 'ghost-emoji') return persistenceElements4.ghostEmoji;
+      if (id === 'monolith-emoji') return persistenceElements4.monolithEmoji;
+      if (id === 'coffee-emoji') return persistenceElements4.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return persistenceElements4.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = persistence4FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorPersistence4Test = require('./script.js');
 
   // Invalid theme should not be applied
-  const shouldApplyTheme = storedTheme && knownThemeValues.includes(storedTheme);
-  assert(!shouldApplyTheme, 'should not apply an unrecognized theme value');
+  assert.strictEqual(persistenceElements4.themeSelect.value, '', 'themeSelect.value should remain empty with invalid stored theme');
+  assert(!persistenceElements4.calculator.classList.contains('theme-coffee-lovers'), 'invalid theme should not be applied');
+  assert(!persistenceElements4.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with invalid stored theme');
 }
-console.log('  ✓ Invalid/corrupt stored theme falls back to no theme');
+console.log('  ✓ Invalid stored theme falls back to no theme');
 
 {
-  // Test 5: Each theme option can be persisted and retrieved
-  const localStorageMock = {};
+  // Test 5: Other valid themes persist correctly
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'halloween' };
   global.localStorage = {
-    getItem: (key) => localStorageMock[key],
-    setItem: (key, value) => { localStorageMock[key] = value; },
-    removeItem: (key) => delete localStorageMock[key]
+    setItem: (key, value) => {
+      localStorageMock[key] = value;
+    },
+    getItem: (key) => localStorageMock[key]
   };
 
-  const themeValues = ['halloween', 'dark-mode', 'childrens', 'monolith', 'minions', 'marvel-ironman', 'coffee-lovers'];
+  const persistenceElements5 = {
+    expression: {
+      id: 'expression',
+      textContent: '',
+      classList: createClassListMock()
+    },
+    result: {
+      id: 'result',
+      textContent: '0',
+      classList: createClassListMock()
+    },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          persistenceElements5.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: {
+      classList: createClassListMock()
+    },
+    ghostEmoji: {
+      id: 'ghost-emoji',
+      style: { top: '', left: '' },
+      classList: createClassListMock()
+    },
+    monolithEmoji: {
+      id: 'monolith-emoji',
+      classList: createClassListMock()
+    },
+    coffeeEmoji: {
+      id: 'coffee-emoji',
+      classList: createClassListMock()
+    }
+  };
 
-  for (const theme of themeValues) {
-    global.localStorage.setItem('calculator-theme', theme);
-    const retrieved = global.localStorage.getItem('calculator-theme');
-    assert.strictEqual(retrieved, theme, `should persist and retrieve theme "${theme}"`);
-  }
+  const persistence5FakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return persistenceElements5.expression;
+      if (id === 'result') return persistenceElements5.result;
+      if (id === 'theme-select') return persistenceElements5.themeSelect;
+      if (id === 'ghost-emoji') return persistenceElements5.ghostEmoji;
+      if (id === 'monolith-emoji') return persistenceElements5.monolithEmoji;
+      if (id === 'coffee-emoji') return persistenceElements5.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return persistenceElements5.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  global.document = persistence5FakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorPersistence5Test = require('./script.js');
+
+  // Halloween theme should be restored
+  assert.strictEqual(persistenceElements5.themeSelect.value, 'halloween', 'halloween theme should be restored from storage');
+  assert(persistenceElements5.calculator.classList.contains('theme-halloween'), 'halloween theme class should be applied on load');
 }
-console.log('  ✓ All theme options can be persisted and retrieved');
+console.log('  ✓ Other theme options persist and restore correctly');
 
 // ============================================================================
 // Edge Cases for Theme Switching
