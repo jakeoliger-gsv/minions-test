@@ -277,8 +277,10 @@ if (typeof document !== 'undefined') {
     const themeSelect = document.getElementById('theme-select');
     const ghostEl = document.getElementById('ghost-emoji');
     const monolithEl = document.getElementById('monolith-emoji');
+    const coffeeEl = document.getElementById('coffee-emoji');
+    const THEME_STORAGE_KEY = 'calculator-theme';
 
-    if (calculatorEl && themeSelect && ghostEl && monolithEl) {
+    if (calculatorEl && themeSelect && ghostEl && monolithEl && coffeeEl) {
       let ghostTimeoutId = null;
 
       const stopGhost = () => {
@@ -306,10 +308,19 @@ if (typeof document !== 'undefined') {
         monolithEl.classList.add('visible');
       };
 
+      const stopCoffee = () => {
+        coffeeEl.classList.remove('visible');
+      };
+
+      const showCoffee = () => {
+        coffeeEl.classList.add('visible');
+      };
+
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers');
         stopGhost();
         stopMonolith();
+        stopCoffee();
         if (theme) {
           calculatorEl.classList.add(`theme-${theme}`);
         }
@@ -317,12 +328,22 @@ if (typeof document !== 'undefined') {
           moveGhost();
         } else if (theme === 'monolith') {
           showMonolith();
+        } else if (theme === 'coffee-lovers') {
+          showCoffee();
         }
       };
 
       themeSelect.addEventListener('change', (e) => {
         applyTheme(e.target.value);
+        localStorage.setItem(THEME_STORAGE_KEY, e.target.value);
       });
+
+      const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      const knownThemeValues = Array.from(themeSelect.options).map((opt) => opt.value);
+      if (storedTheme && knownThemeValues.includes(storedTheme)) {
+        themeSelect.value = storedTheme;
+        applyTheme(storedTheme);
+      }
     }
 
     render();

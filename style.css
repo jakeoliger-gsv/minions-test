@@ -548,3 +548,77 @@ body {
   color: #2a0206;
   font-weight: 700;
 }
+
+/* ---------- Coffee cup emoji (Coffee Lovers theme only) ---------- */
+
+.coffee-emoji {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  font-size: 40px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.4s ease;
+}
+
+.coffee-emoji.visible {
+  opacity: 1;
+}
+
+/* ---------- Coffee Lovers theme ---------- */
+
+.calculator.theme-coffee-lovers {
+  background: linear-gradient(160deg, #6f4e37 0%, #3b2718 100%);
+  border: 4px solid #c8a27a;
+  border-radius: 12px;
+  font-family: "Bookman Old Style", "Georgia", "Times New Roman", serif;
+}
+
+.calculator.theme-coffee-lovers .display {
+  background: #2a1a10;
+  border: 2px solid #c8a27a;
+  border-radius: 8px;
+}
+
+.calculator.theme-coffee-lovers .expression {
+  color: #d8b98d;
+}
+
+.calculator.theme-coffee-lovers .result {
+  color: #f3e2c7;
+  font-weight: 700;
+}
+
+.calculator.theme-coffee-lovers .btn {
+  background: #8a5a3c;
+  color: #f3e2c7;
+  border: 2px solid #c8a27a;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.calculator.theme-coffee-lovers .btn:hover {
+  background: #9c6a48;
+}
+
+.calculator.theme-coffee-lovers .sci-buttons .btn {
+  background: #4a3222;
+  color: #d8b98d;
+}
+
+.calculator.theme-coffee-lovers .btn.operator {
+  background: #c8a27a;
+  color: #3b2718;
+}
+
+.calculator.theme-coffee-lovers .btn.util {
+  background: #3b2718;
+  color: #f3e2c7;
+}
+
+.calculator.theme-coffee-lovers .btn.equals {
+  background: linear-gradient(160deg, #c8a27a 0%, #8a5a3c 100%);
+  color: #2a1a10;
+  font-weight: 700;
+}
