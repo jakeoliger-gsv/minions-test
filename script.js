@@ -88,6 +88,29 @@ function applyJakify(value) {
   return { value: 2 * value + 3 };
 }
 
+// Classical subtractive-notation Roman numeral for 1-3999; "0" for zero;
+// falls back to the plain Arabic-numeral string for anything else (negatives,
+// non-integers, values >= 4000) rather than throwing.
+function toRomanNumeral(value) {
+  if (value === 0) return '0';
+  if (!Number.isInteger(value) || value < 1 || value > 3999) return String(value);
+
+  const numerals = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+    [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+    [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+  ];
+  let remaining = value;
+  let result = '';
+  for (const [num, symbol] of numerals) {
+    while (remaining >= num) {
+      result += symbol;
+      remaining -= num;
+    }
+  }
+  return result;
+}
+
 function applyUnary(name, value) {
   switch (name) {
     case 'sqrt': return applySqrt(value);
@@ -124,6 +147,7 @@ const CalculatorMath = {
   applyJakify,
   applyUnary,
   formatNumber,
+  toRomanNumeral,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -145,6 +169,7 @@ if (typeof document !== 'undefined') {
     let lastResultValue = 0;
     let justEvaluated = false;
     let hasError = false;
+    let isRomanTheme = false;
 
     function currentSegment(expr) {
       const match = expr.match(/[^+\-*/]*$/);
@@ -155,9 +180,27 @@ if (typeof document !== 'undefined') {
       return expr.replace(/\*/g, '×').replace(/\//g, '÷').replace(/-/g, '−');
     }
 
+    function toDisplayExpressionRoman(expr) {
+      return tokenize(expr)
+        .map((token) => {
+          if (token === '*') return '×';
+          if (token === '/') return '÷';
+          if (token === '-') return '−';
+          if (token === '+') return '+';
+          if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
+          return token;
+        })
+        .join('');
+    }
+
     function render() {
-      expressionEl.textContent = toDisplayExpression(expression);
-      resultEl.textContent = resultDisplay;
+      if (isRomanTheme) {
+        expressionEl.textContent = toDisplayExpressionRoman(expression);
+        resultEl.textContent = hasError ? resultDisplay : toRomanNumeral(Number(resultDisplay));
+      } else {
+        expressionEl.textContent = toDisplayExpression(expression);
+        resultEl.textContent = resultDisplay;
+      }
       resultEl.classList.toggle('error', hasError);
     }
 
@@ -279,6 +322,23 @@ if (typeof document !== 'undefined') {
     const monolithEl = document.getElementById('monolith-emoji');
     const coffeeEl = document.getElementById('coffee-emoji');
     const THEME_STORAGE_KEY = 'calculator-theme';
+    const clearBtn = document.querySelector('[data-action="clear"]');
+    const equalsBtn = document.querySelector('[data-action="equals"]');
+    const ROMAN_DIGITS = {
+      '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V',
+      '6': 'VI', '7': 'VII', '8': 'VIII', '9': 'IX',
+    };
+
+    function updateRomanLabels(active) {
+      document.querySelectorAll('.btn.digit').forEach((btn) => {
+        if (btn.classList.contains('zero')) return;
+        const romanValue = ROMAN_DIGITS[btn.dataset.value];
+        if (romanValue === undefined) return;
+        btn.textContent = active ? romanValue : btn.dataset.value;
+      });
+      if (clearBtn) clearBtn.textContent = active ? 'Dele' : 'Clear';
+      if (equalsBtn) equalsBtn.textContent = active ? 'Solve' : '=';
+    }
 
     if (calculatorEl && themeSelect && ghostEl && monolithEl && coffeeEl) {
       let ghostTimeoutId = null;
@@ -317,7 +377,7 @@ if (typeof document !== 'undefined') {
       };
 
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman');
         stopGhost();
         stopMonolith();
         stopCoffee();
@@ -331,6 +391,9 @@ if (typeof document !== 'undefined') {
         } else if (theme === 'coffee-lovers') {
           showCoffee();
         }
+        isRomanTheme = theme === 'roman';
+        updateRomanLabels(isRomanTheme);
+        render();
       };
 
       themeSelect.addEventListener('change', (e) => {
