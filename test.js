@@ -877,11 +877,15 @@ const themeTestElements = {
   },
   clearButton: {
     textContent: 'Clear',
-    dataset: { action: 'clear' }
+    dataset: { action: 'clear' },
+    classList: createClassListMock(),
+    closest: function(s) { return this; }
   },
   equalsButton: {
     textContent: '=',
-    dataset: { action: 'equals' }
+    dataset: { action: 'equals' },
+    classList: createClassListMock(),
+    closest: function(s) { return this; }
   },
   digitButtons: [
     { textContent: '1', dataset: { value: '1' }, classList: createClassListMock() },
@@ -3807,146 +3811,294 @@ console.log('  ✓ Clear button reads "Dele" and Equals button reads "Solve" in 
 console.log('  ✓ Clear and Equals buttons revert to "Clear" and "=" in other themes');
 
 // ============================================================================
-// AC2: toDisplayExpressionRoman tokenization tests
+// AC2: Expression tokenization with Roman numerals (via actual DOM render)
 // ============================================================================
 
 console.log('\nAC2: Expression tokenization with Roman numerals');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
 
-  // Test toDisplayExpressionRoman indirectly via tokenization
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
 
-  assert.strictEqual(toDisplayExpressionRoman('12+7'), 'XII+VII', 'Expression "12+7" should convert to "XII+VII"');
+  // Simulate clicking "1", "2", "+", "7" to build expression "12+7"
+  // Set up the digit buttons with proper classList
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  const digit1 = digitButtons[0]; // "1"
+  const digit2 = digitButtons[1]; // "2"
+  const digit7 = digitButtons[6]; // "7"
+
+  const opPlus = { dataset: { value: '+' }, classList: createClassListMock() };
+  opPlus.classList.add('operator');
+  opPlus.closest = (s) => opPlus;
+
+  mainButtonsHandler({ target: digit1 });
+  mainButtonsHandler({ target: digit2 });
+  mainButtonsHandler({ target: opPlus });
+  mainButtonsHandler({ target: digit7 });
+
+  assert.strictEqual(expressionEl.textContent, 'XII+VII', 'Expression "12+7" should display as "XII+VII" with Roman theme');
 }
-console.log('  ✓ Expression "12+7" converts to "XII+VII" (multi-number conversion)');
+console.log('  ✓ Expression "12+7" displays as "XII+VII" via actual render pipeline');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
 
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Clear and apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
 
-  assert.strictEqual(toDisplayExpressionRoman('3.14+2'), '3.14+II', 'Decimal tokens stay Arabic, integers convert');
+  // Ensure digit buttons have proper classList
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build expression with decimal: "3.14+2"
+  const digit3 = digitButtons[2]; // "3"
+  const dot = { dataset: { value: '.' }, classList: createClassListMock() };
+  dot.classList.add('digit', 'dot');
+  dot.closest = (s) => dot;
+  const digit1 = digitButtons[0]; // "1"
+  const digit4 = digitButtons[3]; // "4"
+  const opPlus = { dataset: { value: '+' }, classList: createClassListMock() };
+  opPlus.classList.add('operator');
+  opPlus.closest = (s) => opPlus;
+  const digit2 = digitButtons[1]; // "2"
+
+  mainButtonsHandler({ target: digit3 });
+  mainButtonsHandler({ target: dot });
+  mainButtonsHandler({ target: digit1 });
+  mainButtonsHandler({ target: digit4 });
+  mainButtonsHandler({ target: opPlus });
+  mainButtonsHandler({ target: digit2 });
+
+  assert.strictEqual(expressionEl.textContent, '3.14+II', 'Decimal token stays Arabic, integer token converts: "3.14+2" → "3.14+II"');
 }
 console.log('  ✓ Decimal tokens remain Arabic: "3.14+2" → "3.14+II"');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
 
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Clear and apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
 
-  assert.strictEqual(toDisplayExpressionRoman('5*4'), 'V×IV', 'Operator * converts to × symbol');
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build "5*4"
+  const digit5 = digitButtons[4]; // "5"
+  const digit4 = digitButtons[3]; // "4"
+  const opMult = { dataset: { value: '*' }, classList: createClassListMock() };
+  opMult.classList.add('operator');
+  opMult.closest = (s) => opMult;
+
+  mainButtonsHandler({ target: digit5 });
+  mainButtonsHandler({ target: opMult });
+  mainButtonsHandler({ target: digit4 });
+
+  assert.strictEqual(expressionEl.textContent, 'V×IV', 'Operator * converts to × symbol: "5*4" → "V×IV"');
 }
 console.log('  ✓ Operator conversion: "5*4" → "V×IV" (× symbol)');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
 
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Clear and apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
 
-  assert.strictEqual(toDisplayExpressionRoman('10/2'), 'X÷II', 'Operator / converts to ÷ symbol');
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build "10/2"
+  const digit1 = digitButtons[0]; // "1"
+  const digit0 = digitButtons[9]; // "0" (zero button)
+  const digit2 = digitButtons[1]; // "2"
+  const opDiv = { dataset: { value: '/' }, classList: createClassListMock() };
+  opDiv.classList.add('operator');
+  opDiv.closest = (s) => opDiv;
+
+  mainButtonsHandler({ target: digit1 });
+  mainButtonsHandler({ target: digit0 });
+  mainButtonsHandler({ target: opDiv });
+  mainButtonsHandler({ target: digit2 });
+
+  assert.strictEqual(expressionEl.textContent, 'X÷II', 'Operator / converts to ÷ symbol: "10/2" → "X÷II"');
 }
 console.log('  ✓ Operator conversion: "10/2" → "X÷II" (÷ symbol)');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
 
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Clear and apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
 
-  assert.strictEqual(toDisplayExpressionRoman('8-3'), 'VIII−III', 'Operator - converts to − symbol');
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build "8-3"
+  const digit8 = digitButtons[7]; // "8"
+  const digit3 = digitButtons[2]; // "3"
+  const opMinus = { dataset: { value: '-' }, classList: createClassListMock() };
+  opMinus.classList.add('operator');
+  opMinus.closest = (s) => opMinus;
+
+  mainButtonsHandler({ target: digit8 });
+  mainButtonsHandler({ target: opMinus });
+  mainButtonsHandler({ target: digit3 });
+
+  assert.strictEqual(expressionEl.textContent, 'VIII−III', 'Operator - converts to − symbol: "8-3" → "VIII−III"');
 }
 console.log('  ✓ Operator conversion: "8-3" → "VIII−III" (− symbol)');
 
 {
-  const { toRomanNumeral, tokenize } = CalculatorMath;
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const expressionEl = themeTestFakeDOM.getElementById('expression');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
 
-  function toDisplayExpressionRoman(expr) {
-    return tokenize(expr)
-      .map((token) => {
-        if (token === '*') return '×';
-        if (token === '/') return '÷';
-        if (token === '-') return '−';
-        if (token === '+') return '+';
-        if (/^[0-9]+$/.test(token)) return toRomanNumeral(parseInt(token, 10));
-        return token;
-      })
-      .join('');
-  }
+  // Clear and apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
 
-  assert.strictEqual(toDisplayExpressionRoman('6+'), 'VI+', 'Trailing operator is preserved in expression');
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build "6+" with trailing operator
+  const digit6 = digitButtons[5]; // "6"
+  const opPlus = { dataset: { value: '+' }, classList: createClassListMock() };
+  opPlus.classList.add('operator');
+  opPlus.closest = (s) => opPlus;
+
+  mainButtonsHandler({ target: digit6 });
+  mainButtonsHandler({ target: opPlus });
+
+  assert.strictEqual(expressionEl.textContent, 'VI+', 'Trailing operator is preserved in expression: "6+" → "VI+"');
 }
 console.log('  ✓ Trailing operator preserved: "6+" → "VI+"');
 
 // ============================================================================
-// AC2: Roman numeral result display
+// AC2: Roman numeral result display via actual render pipeline
 // ============================================================================
 
 console.log('\nAC2: Result display shows Roman numerals for in-range integers');
 
 {
-  const { evaluateExpression, formatNumber, toRomanNumeral } = CalculatorMath;
-  const result = evaluateExpression('7+2');
-  const formatted = formatNumber(result.value);
-  const roman = toRomanNumeral(Number(formatted));
-  assert.strictEqual(roman, 'IX', 'Result 9 should convert to IX');
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const resultEl = themeTestFakeDOM.getElementById('result');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
+  const equalsBtn = themeTestFakeDOM.querySelector('[data-action="equals"]');
+
+  // Apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
+
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // Build "7+2=" and check result displays as "IX"
+  const digit7 = digitButtons[6]; // "7"
+  const opPlus = { dataset: { value: '+' }, classList: createClassListMock() };
+  opPlus.classList.add('operator');
+  opPlus.closest = (s) => opPlus;
+  const digit2 = digitButtons[1]; // "2"
+
+  mainButtonsHandler({ target: digit7 });
+  mainButtonsHandler({ target: opPlus });
+  mainButtonsHandler({ target: digit2 });
+  mainButtonsHandler({ target: equalsBtn });
+
+  assert.strictEqual(resultEl.textContent, 'IX', 'Result of 7+2 should display as "IX" in Roman theme');
 }
-console.log('  ✓ Integer result (7+2=9) converts to IX');
+console.log('  ✓ Integer result (7+2=9) displays as "IX"');
+
+{
+  const selectEl = themeTestFakeDOM.getElementById('theme-select');
+  const resultEl = themeTestFakeDOM.getElementById('result');
+  const mainButtonsHandler = themeTestFakeDOM.eventListeners['main-buttons'];
+  const digitButtons = themeTestElements.digitButtons;
+  const clearBtn = themeTestFakeDOM.querySelector('[data-action="clear"]');
+  const equalsBtn = themeTestFakeDOM.querySelector('[data-action="equals"]');
+
+  // Apply Roman theme
+  selectEl.value = 'roman';
+  selectEl.changeHandler({ target: selectEl });
+  mainButtonsHandler({ target: clearBtn });
+
+  digitButtons.forEach(btn => {
+    btn.classList.add('digit');
+    btn.closest = (s) => btn;
+  });
+
+  // First operation: 7+2=9
+  const digit7 = digitButtons[6]; // "7"
+  const digit2 = digitButtons[1]; // "2"
+  const digit5 = digitButtons[4]; // "5"
+  const opPlus = { dataset: { value: '+' }, classList: createClassListMock() };
+  opPlus.classList.add('operator');
+  opPlus.closest = (s) => opPlus;
+
+  mainButtonsHandler({ target: digit7 });
+  mainButtonsHandler({ target: opPlus });
+  mainButtonsHandler({ target: digit2 });
+  mainButtonsHandler({ target: equalsBtn });
+  assert.strictEqual(resultEl.textContent, 'IX', 'First result should be 9 (IX)');
+
+  // Chained operation: result=9, press +, then 5, then = to get 14
+  mainButtonsHandler({ target: opPlus });
+  mainButtonsHandler({ target: digit5 });
+  mainButtonsHandler({ target: equalsBtn });
+
+  assert.strictEqual(resultEl.textContent, 'XIV', 'Chained operation 9+5 should display as "XIV"');
+}
+console.log('  ✓ Chained operations work correctly: 7+2=9 (IX), then +5= shows 14 (XIV)');
 
 {
   const { toRomanNumeral } = CalculatorMath;
