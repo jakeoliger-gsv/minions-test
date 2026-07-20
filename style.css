@@ -622,3 +622,94 @@ body {
   color: #2a1a10;
   font-weight: 700;
 }
+
+/* ---------- Roman theme ---------- */
+
+.calculator.theme-roman {
+  position: relative;
+  background: linear-gradient(160deg, #ded0ad 0%, #b9a374 100%);
+  border: 6px solid #8b7355;
+  border-radius: 6px;
+  font-family: "Trajan Pro", "Cinzel", "Copperplate", Georgia, "Times New Roman", serif;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 3px #5c5c52,
+    inset 0 0 0 8px #d8c9a3;
+  padding-left: 34px;
+  padding-right: 34px;
+}
+
+.calculator.theme-roman::before,
+.calculator.theme-roman::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  width: 14px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #d8c9a3 0px, #d8c9a3 6px,
+    #8b7355 6px, #8b7355 10px
+  );
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px #5c5c52;
+}
+
+.calculator.theme-roman::before {
+  left: 8px;
+}
+
+.calculator.theme-roman::after {
+  right: 8px;
+}
+
+.calculator.theme-roman .display {
+  background: #3f3b33;
+  border: 2px solid #8b7355;
+  border-radius: 4px;
+}
+
+.calculator.theme-roman .expression {
+  color: #cdbb92;
+  font-family: "Trajan Pro", "Cinzel", "Copperplate", Georgia, "Times New Roman", serif;
+}
+
+.calculator.theme-roman .result {
+  color: #f1e6cb;
+  font-weight: 700;
+  font-family: "Trajan Pro", "Cinzel", "Copperplate", Georgia, "Times New Roman", serif;
+}
+
+.calculator.theme-roman .btn {
+  background: #b9a374;
+  color: #3f3b33;
+  border: 2px solid #8b7355;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: "Trajan Pro", "Cinzel", "Copperplate", Georgia, "Times New Roman", serif;
+}
+
+.calculator.theme-roman .btn:hover {
+  background: #cdbb92;
+}
+
+.calculator.theme-roman .sci-buttons .btn {
+  background: #8b7355;
+  color: #ded0ad;
+}
+
+.calculator.theme-roman .btn.operator {
+  background: #5c5c52;
+  color: #ded0ad;
+}
+
+.calculator.theme-roman .btn.util {
+  background: #6e4b3a;
+  color: #f1e6cb;
+}
+
+.calculator.theme-roman .btn.equals {
+  background: linear-gradient(160deg, #8b7355 0%, #5c5c52 100%);
+  color: #f1e6cb;
+  font-weight: 700;
+}
