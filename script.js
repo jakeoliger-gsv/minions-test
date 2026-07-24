@@ -84,6 +84,20 @@ function applyTan(value) {
   return { value: Math.tan((value * Math.PI) / 180) };
 }
 
+function applyAsin(value) {
+  if (value < -1 || value > 1) return { error: "Can't take the arcsine of a value outside [-1, 1]" };
+  return { value: (Math.asin(value) * 180) / Math.PI };
+}
+
+function applyAcos(value) {
+  if (value < -1 || value > 1) return { error: "Can't take the arccosine of a value outside [-1, 1]" };
+  return { value: (Math.acos(value) * 180) / Math.PI };
+}
+
+function applyAtan(value) {
+  return { value: (Math.atan(value) * 180) / Math.PI };
+}
+
 function applyJakify(value) {
   return { value: 2 * value + 3 };
 }
@@ -118,6 +132,9 @@ function applyUnary(name, value) {
     case 'sin': return applySin(value);
     case 'cos': return applyCos(value);
     case 'tan': return applyTan(value);
+    case 'asin': return applyAsin(value);
+    case 'acos': return applyAcos(value);
+    case 'atan': return applyAtan(value);
     case 'jakify': return applyJakify(value);
     default: return { error: 'Unknown function' };
   }
@@ -144,6 +161,9 @@ const CalculatorMath = {
   applySin,
   applyCos,
   applyTan,
+  applyAsin,
+  applyAcos,
+  applyAtan,
   applyJakify,
   applyUnary,
   formatNumber,
@@ -170,6 +190,7 @@ if (typeof document !== 'undefined') {
     let justEvaluated = false;
     let hasError = false;
     let isRomanTheme = false;
+    let inverseMode = false;
 
     function currentSegment(expr) {
       const match = expr.match(/[^+\-*/]*$/);
@@ -294,6 +315,28 @@ if (typeof document !== 'undefined') {
       render();
     }
 
+    const invToggleBtn = document.getElementById('inv-toggle');
+    const sinBtn = document.querySelector('[data-action="sin"]');
+    const cosBtn = document.querySelector('[data-action="cos"]');
+    const tanBtn = document.querySelector('[data-action="tan"]');
+    const INVERSE_TRIG_LABELS = {
+      sin: { standard: 'sin', inverse: 'sin⁻¹' },
+      cos: { standard: 'cos', inverse: 'cos⁻¹' },
+      tan: { standard: 'tan', inverse: 'tan⁻¹' },
+    };
+
+    function updateInverseLabels(active) {
+      if (sinBtn) sinBtn.textContent = active ? INVERSE_TRIG_LABELS.sin.inverse : INVERSE_TRIG_LABELS.sin.standard;
+      if (cosBtn) cosBtn.textContent = active ? INVERSE_TRIG_LABELS.cos.inverse : INVERSE_TRIG_LABELS.cos.standard;
+      if (tanBtn) tanBtn.textContent = active ? INVERSE_TRIG_LABELS.tan.inverse : INVERSE_TRIG_LABELS.tan.standard;
+      if (invToggleBtn) invToggleBtn.classList.toggle('inv-active', active);
+    }
+
+    function handleToggleInverse() {
+      inverseMode = !inverseMode;
+      updateInverseLabels(inverseMode);
+    }
+
     document.querySelector('.main-buttons').addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -311,7 +354,13 @@ if (typeof document !== 'undefined') {
     document.querySelector('.sci-buttons').addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
-      handleSciFunction(btn.dataset.action);
+      if (btn.dataset.action === 'toggle-inverse') {
+        handleToggleInverse();
+        return;
+      }
+      const action = btn.dataset.action;
+      const isInvertibleTrig = action === 'sin' || action === 'cos' || action === 'tan';
+      handleSciFunction(inverseMode && isInvertibleTrig ? `a${action}` : action);
     });
 
     /* ---------- Theme picker + ghost emoji (Halloween only) ---------- */
