@@ -161,6 +161,241 @@ body {
   }
 }
 
+/* ---------- Tab shell ---------- */
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* ---------- Compound interest tab ---------- */
+
+.ci-panel {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  color: #eef0f6;
+}
+
+.ci-title {
+  margin: 0 0 18px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f5f6fa;
+}
+
+.ci-field {
+  margin-bottom: 14px;
+}
+
+.ci-field label {
+  display: block;
+  font-size: 0.8rem;
+  color: #b7bfe6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.ci-field input {
+  width: 100%;
+  background: #0d0e13;
+  color: #eef0f6;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+.ci-calculate {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.ci-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin-bottom: 10px;
+}
+
+.ci-summary {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ci-summary-item {
+  display: flex;
+  justify-content: space-between;
+  background: #0d0e13;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ci-summary-label {
+  font-size: 0.85rem;
+  color: #b7bfe6;
+}
+
+.ci-summary-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5f6fa;
+}
+
+.ci-view-label {
+  font-size: 0.85rem;
+  color: #7d8296;
+  margin-bottom: 10px;
+}
+
+#ci-table {
+  max-height: 480px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: #0d0e13;
+}
+
+#ci-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#ci-table th,
+#ci-table td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#ci-table th:first-child,
+#ci-table td:first-child {
+  text-align: left;
+}
+
+#ci-table thead th {
+  position: sticky;
+  top: 0;
+  background: #15171f;
+  color: #b7bfe6;
+  font-weight: 500;
+}
+
+/* ---------- Planetary weight tab ---------- */
+
+.pw-panel {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  color: #eef0f6;
+}
+
+.pw-title {
+  margin: 0 0 18px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f5f6fa;
+}
+
+.pw-field {
+  margin-bottom: 14px;
+}
+
+.pw-field label {
+  display: block;
+  font-size: 0.8rem;
+  color: #b7bfe6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.pw-field input {
+  width: 100%;
+  background: #0d0e13;
+  color: #eef0f6;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+.pw-calculate {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.pw-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin: 0 0 10px;
+}
+
+#pw-table-wrap {
+  max-height: 480px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: #0d0e13;
+}
+
+#pw-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#pw-table-wrap th,
+#pw-table-wrap td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#pw-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: #15171f;
+  color: #b7bfe6;
+  font-weight: 500;
+}
+
+#pw-table-wrap tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+#pw-table-wrap td.pw-weight {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+#pw-table-wrap th:last-child,
+#pw-table-wrap td:last-child {
+  min-width: 120px;
+}
+
+.pw-bar {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #0066cc, #00ccff);
+}
+
 /* ---------- Theme picker ---------- */
 
 .theme-picker {
@@ -717,5 +952,71 @@ body {
 .calculator.theme-roman .btn.equals {
   background: linear-gradient(160deg, #8b7355 0%, #5c5c52 100%);
   color: #f1e6cb;
+  font-weight: 700;
+}
+
+/* ---------- Space theme ---------- */
+
+.calculator.theme-space {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0) 1px),
+    radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.7) 0, rgba(255, 255, 255, 0) 1px),
+    radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.8) 0, rgba(255, 255, 255, 0) 1px),
+    radial-gradient(circle at 85% 80%, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0) 1px),
+    linear-gradient(160deg, #050718 0%, #0d1030 45%, #1a0b38 100%);
+  border: 1px solid #3a2c6b;
+  border-radius: 18px;
+  font-family: "Orbitron", "Eurostile", "Trebuchet MS", "Segoe UI", sans-serif;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(122, 162, 255, 0.15) inset,
+    0 0 28px rgba(90, 120, 255, 0.25);
+}
+
+.calculator.theme-space .display {
+  background: rgba(5, 8, 26, 0.85);
+  border: 1px solid #2f3b7a;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(0, 204, 255, 0.15) inset;
+}
+
+.calculator.theme-space .expression {
+  color: #8aa0d8;
+}
+
+.calculator.theme-space .result {
+  color: #6ff0ff;
+  text-shadow: 0 0 10px rgba(0, 204, 255, 0.6);
+}
+
+.calculator.theme-space .btn {
+  background: linear-gradient(160deg, #1a2255 0%, #12163a 100%);
+  color: #cdd8ff;
+  border: 1px solid #38468f;
+  border-radius: 10px;
+}
+
+.calculator.theme-space .btn:hover {
+  background: linear-gradient(160deg, #26317a 0%, #1a2255 100%);
+}
+
+.calculator.theme-space .sci-buttons .btn {
+  background: linear-gradient(160deg, #141a45 0%, #0d1030 100%);
+  color: #9fb2ff;
+}
+
+.calculator.theme-space .btn.operator {
+  background: linear-gradient(160deg, #3a2c6b 0%, #241a4a 100%);
+  color: #d8c8ff;
+}
+
+.calculator.theme-space .btn.util {
+  background: linear-gradient(160deg, #6b2c5a 0%, #431a3a 100%);
+  color: #ffd0ee;
+}
+
+.calculator.theme-space .btn.equals {
+  background: linear-gradient(160deg, #00ccff 0%, #0066cc 100%);
+  color: #041024;
   font-weight: 700;
 }

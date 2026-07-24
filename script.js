@@ -140,6 +140,91 @@ function applyUnary(name, value) {
   }
 }
 
+// Projects monthly-compounding growth of a lump sum plus recurring monthly
+// contributions. r = annualRate/100/12; each month: balance = balance*(1+r) + monthlyPayment.
+// Returns { finalBalance, totalContributed, totalInterest, monthlyBreakdown, annualSummary,
+// useAnnualView } or { error: 'Invalid input' } for negative/non-finite/non-integer input.
+function calculateCompoundInterest({ principal, annualRate, monthlyPayment, years }) {
+  if (
+    !Number.isFinite(principal) || principal < 0 ||
+    !Number.isFinite(annualRate) || annualRate < 0 ||
+    !Number.isFinite(monthlyPayment) || monthlyPayment < 0 ||
+    !Number.isInteger(years) || years <= 0
+  ) {
+    return { error: 'Invalid input' };
+  }
+
+  const monthlyRate = annualRate / 100 / 12;
+  const totalMonths = years * 12;
+  const monthlyBreakdown = [];
+  let balance = principal;
+
+  for (let month = 1; month <= totalMonths; month++) {
+    const interestEarned = balance * monthlyRate;
+    balance = balance + interestEarned + monthlyPayment;
+    monthlyBreakdown.push({ month, balance, interestEarned, contribution: monthlyPayment });
+  }
+
+  const annualSummary = [];
+  for (let year = 1; year <= years; year++) {
+    const yearMonths = monthlyBreakdown.slice((year - 1) * 12, year * 12);
+    const interestEarnedInYear = yearMonths.reduce((sum, m) => sum + m.interestEarned, 0);
+    const contributedInYear = yearMonths.reduce((sum, m) => sum + m.contribution, 0);
+    annualSummary.push({
+      year,
+      balance: yearMonths[yearMonths.length - 1].balance,
+      interestEarnedInYear,
+      contributedInYear,
+    });
+  }
+
+  const finalBalance = balance;
+  const totalContributed = principal + monthlyPayment * totalMonths;
+  const totalInterest = finalBalance - totalContributed;
+
+  return {
+    finalBalance,
+    totalContributed,
+    totalInterest,
+    monthlyBreakdown,
+    annualSummary,
+    useAnnualView: years > 10,
+  };
+}
+
+// Surface gravity of each solar-system body relative to Earth (Earth = 1),
+// used to convert an Earth weight into the equivalent weight elsewhere.
+const PLANETARY_GRAVITY = {
+  Mercury: 0.38,
+  Venus: 0.904,
+  Moon: 0.1655,
+  Mars: 0.3794,
+  Jupiter: 2.528,
+  Saturn: 1.065,
+  Uranus: 0.886,
+  Neptune: 1.137,
+  Pluto: 0.063,
+  Titan: 0.138,
+};
+
+// Converts an Earth weight in lbs into the equivalent weight on every body in
+// PLANETARY_GRAVITY. Returns an array of { body, weight } (weight = earthWeightLbs
+// times the body's gravity ratio, rounded to 2 decimals) sorted ascending by
+// weight, or { error: 'Weight must be a positive number' } for zero, negative,
+// or non-finite input.
+function calculatePlanetaryWeights(earthWeightLbs) {
+  if (!Number.isFinite(earthWeightLbs) || earthWeightLbs <= 0) {
+    return { error: 'Weight must be a positive number' };
+  }
+
+  return Object.keys(PLANETARY_GRAVITY)
+    .map((body) => ({
+      body,
+      weight: Math.round(earthWeightLbs * PLANETARY_GRAVITY[body] * 100) / 100,
+    }))
+    .sort((a, b) => a.weight - b.weight);
+}
+
 // Rounds away floating-point noise and keeps the display readable.
 function formatNumber(value) {
   if (!isFinite(value)) return 'Error';
@@ -168,6 +253,9 @@ const CalculatorMath = {
   applyUnary,
   formatNumber,
   toRomanNumeral,
+  calculateCompoundInterest,
+  PLANETARY_GRAVITY,
+  calculatePlanetaryWeights,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -180,6 +268,52 @@ if (typeof window !== 'undefined') {
 /* ---------- DOM wiring (browser only) ---------- */
 
 if (typeof document !== 'undefined') {
+  (function () {
+    const TAB_STORAGE_KEY = 'active-tab';
+    const KNOWN_TABS = ['calculator', 'compound-interest', 'planetary-weight'];
+
+    function activateTab(tabName) {
+      document.querySelectorAll('[data-tab]').forEach((btn) => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('active');
+        }
+      });
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.remove('active');
+      });
+      const targetPanel = document.getElementById(`panel-${tabName}`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    }
+
+    document.querySelectorAll('[data-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        activateTab(tabName);
+        if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem(TAB_STORAGE_KEY, tabName);
+          } catch (e) {
+            /* localStorage unavailable — tab still switches, just isn't persisted */
+          }
+        }
+      });
+    });
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const storedTab = localStorage.getItem(TAB_STORAGE_KEY);
+        if (storedTab && KNOWN_TABS.includes(storedTab)) {
+          activateTab(storedTab);
+        }
+      } catch (e) {
+        /* localStorage unavailable — default markup (calculator active) stands */
+      }
+    }
+  })();
+
   (function () {
     const expressionEl = document.getElementById('expression');
     const resultEl = document.getElementById('result');
@@ -426,7 +560,7 @@ if (typeof document !== 'undefined') {
       };
 
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman', 'theme-space');
         stopGhost();
         stopMonolith();
         stopCoffee();
@@ -459,5 +593,163 @@ if (typeof document !== 'undefined') {
     }
 
     render();
+  })();
+
+  (function () {
+    const principalInput = document.getElementById('ci-principal');
+    const rateInput = document.getElementById('ci-rate');
+    const monthlyInput = document.getElementById('ci-monthly');
+    const yearsInput = document.getElementById('ci-years');
+    const calculateBtn = document.getElementById('ci-calculate');
+    const errorEl = document.getElementById('ci-error');
+    const resultsEl = document.getElementById('ci-results');
+    const finalBalanceEl = document.getElementById('ci-final-balance');
+    const totalContributedEl = document.getElementById('ci-total-contributed');
+    const totalInterestEl = document.getElementById('ci-total-interest');
+    const viewLabelEl = document.getElementById('ci-view-label');
+    const tableBodyEl = document.getElementById('ci-table-body');
+
+    if (
+      !principalInput || !rateInput || !monthlyInput || !yearsInput || !calculateBtn ||
+      !errorEl || !resultsEl || !finalBalanceEl || !totalContributedEl || !totalInterestEl ||
+      !viewLabelEl || !tableBodyEl
+    ) {
+      return;
+    }
+
+    function formatCurrency(value) {
+      return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+
+    function showCiError(message) {
+      errorEl.textContent = message;
+      resultsEl.hidden = true;
+    }
+
+    function renderCiResults(result) {
+      finalBalanceEl.textContent = formatCurrency(result.finalBalance);
+      totalContributedEl.textContent = formatCurrency(result.totalContributed);
+      totalInterestEl.textContent = formatCurrency(result.totalInterest);
+
+      const rows = result.useAnnualView
+        ? result.annualSummary.map((row) => ({
+            period: `Year ${row.year}`,
+            balance: row.balance,
+            interest: row.interestEarnedInYear,
+            contribution: row.contributedInYear,
+          }))
+        : result.monthlyBreakdown.map((row) => ({
+            period: `Month ${row.month}`,
+            balance: row.balance,
+            interest: row.interestEarned,
+            contribution: row.contribution,
+          }));
+
+      tableBodyEl.innerHTML = '';
+      rows.forEach((row) => {
+        const tr = document.createElement('tr');
+        [row.period, formatCurrency(row.balance), formatCurrency(row.interest), formatCurrency(row.contribution)].forEach((text) => {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+        tableBodyEl.appendChild(tr);
+      });
+
+      viewLabelEl.textContent = result.useAnnualView
+        ? 'Showing annual summary (period exceeds 10 years)'
+        : 'Showing month-by-month breakdown';
+
+      resultsEl.hidden = false;
+    }
+
+    calculateBtn.addEventListener('click', () => {
+      errorEl.textContent = '';
+
+      const principal = parseFloat(principalInput.value);
+      const annualRate = parseFloat(rateInput.value);
+      const monthlyPayment = parseFloat(monthlyInput.value);
+      const years = parseFloat(yearsInput.value);
+
+      const result = calculateCompoundInterest({ principal, annualRate, monthlyPayment, years });
+      if (result.error) {
+        showCiError(result.error);
+        return;
+      }
+      renderCiResults(result);
+    });
+  })();
+
+  (function () {
+    const weightInput = document.getElementById('pw-earth-weight');
+    const calculateBtn = document.getElementById('pw-calculate');
+    const errorEl = document.getElementById('pw-error');
+    const resultsEl = document.getElementById('pw-results');
+    const tableEl = document.getElementById('pw-table');
+
+    if (!weightInput || !calculateBtn || !errorEl || !resultsEl || !tableEl) {
+      return;
+    }
+
+    // Astronomical/astrological symbol shown beside each body's name.
+    const BODY_EMOJI = {
+      Mercury: '☿',
+      Venus: '♀',
+      Moon: '🌙',
+      Mars: '♂',
+      Jupiter: '♃',
+      Saturn: '♄',
+      Uranus: '♅',
+      Neptune: '♆',
+      Pluto: '♇',
+      Titan: '🛰️',
+    };
+
+    function showPwError(message) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+      resultsEl.hidden = true;
+    }
+
+    function renderPwResults(results) {
+      const jupiter = results.find((row) => row.body === 'Jupiter');
+      const jupiterWeight = jupiter ? jupiter.weight : 0;
+
+      tableEl.innerHTML = '';
+      results.forEach((row) => {
+        const tr = document.createElement('tr');
+
+        const bodyCell = document.createElement('td');
+        bodyCell.textContent = `${BODY_EMOJI[row.body] || ''} ${row.body}`.trim();
+        tr.appendChild(bodyCell);
+
+        const weightCell = document.createElement('td');
+        weightCell.className = 'pw-weight';
+        weightCell.textContent = `${row.weight.toFixed(2)} lbs`;
+        tr.appendChild(weightCell);
+
+        const barCell = document.createElement('td');
+        const bar = document.createElement('div');
+        bar.className = 'pw-bar';
+        bar.style.width = `${((row.weight / jupiterWeight) * 100).toFixed(1)}%`;
+        barCell.appendChild(bar);
+        tr.appendChild(barCell);
+
+        tableEl.appendChild(tr);
+      });
+
+      errorEl.hidden = true;
+      resultsEl.hidden = false;
+    }
+
+    calculateBtn.addEventListener('click', () => {
+      const earthWeight = parseFloat(weightInput.value);
+      const result = calculatePlanetaryWeights(earthWeight);
+      if (result.error) {
+        showPwError(result.error);
+        return;
+      }
+      renderPwResults(result);
+    });
   })();
 }

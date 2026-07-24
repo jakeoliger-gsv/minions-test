@@ -16,7 +16,8 @@ const {
   applyAtan,
   applyJakify,
   applyUnary,
-  formatNumber
+  formatNumber,
+  calculateCompoundInterest
 } = CalculatorMath;
 
 // Helper: Assert floating-point equality with tolerance
@@ -4164,6 +4165,7 @@ console.log('  ✓ Selecting Roman theme stores "roman" in localStorage');
 }
 console.log('  ✓ Roman theme is restored from localStorage on page reload');
 
+
 // ============================================================================
 // JMNT-8: Inverse Trig Toggle Button (AC1-AC5)
 // ============================================================================
@@ -4343,7 +4345,7 @@ console.log('\nAC1-AC3: Inverse Trig Toggle Button - DOM Tests');
     }
   };
 
-  global.document = invFakeDOM;
+  global.document = patchFakeDOMForRomanTheme(invFakeDOM);
   global.window = {};
 
   delete require.cache[require.resolve('./script.js')];
@@ -4442,7 +4444,7 @@ console.log('\nAC4: Integration Test - Computing Inverse Trig with Toggle On');
     }
   };
 
-  global.document = ac4invFakeDOM;
+  global.document = patchFakeDOMForRomanTheme(ac4invFakeDOM);
   global.window = {};
 
   delete require.cache[require.resolve('./script.js')];
@@ -4527,7 +4529,7 @@ console.log('\nAC5: Error Handling - Out-of-Range Inverse Trig Input');
     }
   };
 
-  global.document = ac5invFakeDOM;
+  global.document = patchFakeDOMForRomanTheme(ac5invFakeDOM);
   global.window = {};
 
   delete require.cache[require.resolve('./script.js')];
@@ -4569,6 +4571,1429 @@ console.log('\nAC5: Error Handling - Out-of-Range Inverse Trig Input');
     'Result should be an error message for out-of-range input, got: ' + result);
 }
 console.log('  ✓ AC5: sin⁻¹(1.5) shows error message (out of range)');
+
+// ============================================================================
+// AC1: Compound Interest Calculation - Three Scenarios
+// ============================================================================
+
+console.log('\nAC1: Compound Interest Calculation');
+
+// Test scenario (a): Lump sum only (monthlyPayment=0)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 12,
+    monthlyPayment: 0,
+    years: 1
+  });
+
+  // Manual calculation: monthly rate = 12/100/12 = 0.01
+  // Month 1: balance = 1000 * (1 + 0.01) + 0 = 1010
+  // Month 2: balance = 1010 * (1 + 0.01) + 0 = 1020.10
+  // ... continuing for 12 months
+  // Expected: finalBalance ≈ 1126.825...
+  assertClose(result.finalBalance, 1000 * Math.pow(1.01, 12), 1e-6, 'Lump sum only: finalBalance');
+  assert.strictEqual(result.totalContributed, 1000, 'Lump sum only: totalContributed should be principal');
+  assertClose(result.totalInterest, result.finalBalance - 1000, 1e-6, 'Lump sum only: totalInterest');
+}
+console.log('  ✓ Lump sum only (principal=1000, rate=12%, monthly=0, years=1)');
+
+// Test scenario (b): Monthly payments only (principal=0)
+{
+  const result = calculateCompoundInterest({
+    principal: 0,
+    annualRate: 12,
+    monthlyPayment: 100,
+    years: 1
+  });
+
+  // With 0 principal, after 12 months of $100 contributions at 1% monthly rate:
+  // Total contributed = 100 * 12 = 1200
+  // This grows via compound interest
+  // Manual: sum of (100 * (1.01)^(12-month)) for months 1..12
+  let expectedBalance = 0;
+  for (let month = 1; month <= 12; month++) {
+    expectedBalance = expectedBalance * 1.01 + 100;
+  }
+  assertClose(result.finalBalance, expectedBalance, 1e-6, 'Monthly payments only: finalBalance');
+  assert.strictEqual(result.totalContributed, 1200, 'Monthly payments only: totalContributed');
+  assertClose(result.totalInterest, expectedBalance - 1200, 1e-6, 'Monthly payments only: totalInterest');
+}
+console.log('  ✓ Monthly payments only (principal=0, rate=12%, monthly=100, years=1)');
+
+// Test scenario (c): Combined (both principal and monthly payments)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 6,
+    monthlyPayment: 50,
+    years: 2
+  });
+
+  // Manual calculation with monthly rate = 6/100/12 = 0.005
+  let balance = 1000;
+  const monthlyRate = 0.06 / 12;
+  for (let month = 1; month <= 24; month++) {
+    balance = balance * (1 + monthlyRate) + 50;
+  }
+  assertClose(result.finalBalance, balance, 1e-6, 'Combined: finalBalance');
+  assert.strictEqual(result.totalContributed, 1000 + 50 * 24, 'Combined: totalContributed');
+  assertClose(result.totalInterest, balance - (1000 + 50 * 24), 1e-6, 'Combined: totalInterest');
+}
+console.log('  ✓ Combined scenario (principal=1000, rate=6%, monthly=50, years=2)');
+
+// ============================================================================
+// AC2: Zero Annual Rate
+// ============================================================================
+
+console.log('\nAC2: Zero Annual Rate');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 500,
+    annualRate: 0,
+    monthlyPayment: 50,
+    years: 2
+  });
+
+  // With 0 rate, balance grows only by contributions
+  // finalBalance = principal + monthlyPayment * totalMonths = 500 + 50*24 = 1700
+  assert.strictEqual(result.finalBalance, 1700, 'Zero rate: finalBalance should be principal + contributions');
+  assert.strictEqual(result.totalInterest, 0, 'Zero rate: totalInterest should be 0');
+}
+console.log('  ✓ Zero rate: balance grows only via principal and monthly contributions');
+
+// ============================================================================
+// AC3: Invalid Input Validation
+// ============================================================================
+
+console.log('\nAC3: Invalid Input Validation');
+
+// Test: Negative principal
+{
+  const result = calculateCompoundInterest({
+    principal: -1,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative principal should return error');
+}
+console.log('  ✓ Negative principal returns error');
+
+// Test: Negative annual rate
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: -5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative annualRate should return error');
+}
+console.log('  ✓ Negative annual rate returns error');
+
+// Test: Negative monthly payment
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: -10,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative monthlyPayment should return error');
+}
+console.log('  ✓ Negative monthly payment returns error');
+
+// Test: Zero years
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 0
+  });
+  assert(result.error === 'Invalid input', 'Zero years should return error');
+}
+console.log('  ✓ Zero years returns error');
+
+// Test: Non-integer years (10.5)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 10.5
+  });
+  assert(result.error === 'Invalid input', 'Non-integer years should return error');
+}
+console.log('  ✓ Non-integer years (10.5) returns error');
+
+// Test: NaN principal (from blank field)
+{
+  const result = calculateCompoundInterest({
+    principal: NaN,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN principal should return error');
+}
+console.log('  ✓ NaN principal returns error');
+
+// Test: NaN annual rate
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: NaN,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN annualRate should return error');
+}
+console.log('  ✓ NaN annual rate returns error');
+
+// Test: NaN monthly payment
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: NaN,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN monthlyPayment should return error');
+}
+console.log('  ✓ NaN monthly payment returns error');
+
+// ============================================================================
+// AC4: Monthly and Annual Breakdown Lengths
+// ============================================================================
+
+console.log('\nAC4: Monthly and Annual Breakdown Lengths');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 3
+  });
+
+  assert.strictEqual(result.monthlyBreakdown.length, 36, 'monthlyBreakdown should have 36 entries for 3 years');
+  assert.strictEqual(result.annualSummary.length, 3, 'annualSummary should have 3 entries for 3 years');
+}
+console.log('  ✓ 3 years: monthlyBreakdown has 36 entries, annualSummary has 3 entries');
+
+// ============================================================================
+// AC5: useAnnualView Threshold at 10 Years
+// ============================================================================
+
+console.log('\nAC5: useAnnualView Threshold');
+
+{
+  const result10 = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 10
+  });
+  assert.strictEqual(result10.useAnnualView, false, 'useAnnualView should be false for years === 10');
+}
+console.log('  ✓ useAnnualView is false when years === 10');
+
+{
+  const result11 = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 11
+  });
+  assert.strictEqual(result11.useAnnualView, true, 'useAnnualView should be true for years > 10');
+}
+console.log('  ✓ useAnnualView is true when years === 11');
+
+// ============================================================================
+// AC6: Annual Summary Interest Matches Monthly Breakdown
+// ============================================================================
+
+console.log('\nAC6: Annual Summary Interest Validation');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 5000,
+    annualRate: 8,
+    monthlyPayment: 200,
+    years: 2
+  });
+
+  // Sum interest earned in first 12 months
+  const firstYearInterest = result.monthlyBreakdown.slice(0, 12).reduce((sum, m) => sum + m.interestEarned, 0);
+  assertClose(result.annualSummary[0].interestEarnedInYear, firstYearInterest, 1e-6, 'Year 1 interest should match');
+}
+console.log('  ✓ annualSummary[0].interestEarnedInYear matches sum of first 12 months');
+
+// ============================================================================
+// AC7: DOM Test - 10 Years Monthly Breakdown
+// ============================================================================
+
+console.log('\nAC7: DOM - 10 Years Monthly Breakdown');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '10000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '10' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 120 rows (10 years * 12 months)
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 120, 'Table should have 120 rows for 10 years');
+
+  // Check view label text
+  assert(
+    ciElements['ci-view-label'].textContent.includes('month-by-month breakdown'),
+    'View label should mention month-by-month breakdown'
+  );
+
+  // Check currency formatting (should match $X,XXX.XX pattern)
+  const currencyPattern = /^\$[\d,]+\.\d{2}$/;
+  assert(
+    currencyPattern.test(ciElements['ci-final-balance'].textContent),
+    'Final balance should be currency formatted'
+  );
+  assert(
+    currencyPattern.test(ciElements['ci-total-contributed'].textContent),
+    'Total contributed should be currency formatted'
+  );
+  assert(
+    currencyPattern.test(ciElements['ci-total-interest'].textContent),
+    'Total interest should be currency formatted'
+  );
+
+  assert.strictEqual(ciElements['ci-results'].hidden, false, 'Results should be visible');
+}
+console.log('  ✓ 10 years: table has 120 rows, shows month-by-month label, currency-formatted values');
+
+// ============================================================================
+// AC8: DOM Test - Annual Summary (11 and 50 Years)
+// ============================================================================
+
+console.log('\nAC8: DOM - Annual Summary View');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '10000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '11' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI11 = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 11 rows (annual summary for 11 years)
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 11, 'Table should have 11 rows for 11 years (annual summary)');
+
+  // Check view label mentions annual summary
+  assert(
+    ciElements['ci-view-label'].textContent.includes('annual summary'),
+    'View label should mention annual summary'
+  );
+
+  assert.strictEqual(ciElements['ci-results'].hidden, false, 'Results should be visible');
+}
+console.log('  ✓ 11 years: table has 11 rows, shows annual summary label');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '5000' },
+    'ci-rate': { value: '3' },
+    'ci-monthly': { value: '50' },
+    'ci-years': { value: '50' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI50 = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 50 rows
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 50, 'Table should have 50 rows for 50 years');
+}
+console.log('  ✓ 50 years: table has 50 rows');
+
+// ============================================================================
+// AC9: DOM Test - Error Handling
+// ============================================================================
+
+console.log('\nAC9: DOM - Error Handling');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '-1' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '10' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCIError = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check error message is displayed
+  assert(ciElements['ci-error'].textContent !== '', 'Error message should be displayed');
+
+  // Check results remain hidden
+  assert.strictEqual(ciElements['ci-results'].hidden, true, 'Results should remain hidden on error');
+}
+console.log('  ✓ Negative principal shows error and keeps results hidden');
+
+// ============================================================================
+// AC10: DOM Test - Calculator Tab Still Works After CI Usage
+// ============================================================================
+
+console.log('\nAC10: Regression - Calculator Tab Still Works');
+
+{
+  delete global.document;
+  delete global.window;
+
+  // Create fake DOM for both calculator and CI tabs
+  const eventListenersCalc = {};
+
+  const stubElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '1000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '1' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCalc['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCalc = {
+    getElementById: (id) => stubElements[id] || null,
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (stubElements[id]) return stubElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCalc['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCalc['sci-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.calculator') {
+        return { classList: { remove: () => {}, add: () => {} } };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '.btn.digit') return [];
+      if (selector === '[data-tab]') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCalc;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorFinal = require('./script.js');
+
+  // Helper to simulate a button click
+  function simulateButtonClickCalc(containerKey, selector, classList = []) {
+    const handler = eventListenersCalc[containerKey];
+    if (!handler) return;
+
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Basic calculator operation 2 + 2
+  simulateButtonClickCalc('main-buttons', { dataValue: '2' }, ['digit']);
+  simulateButtonClickCalc('main-buttons', { dataValue: '+' }, ['operator']);
+  simulateButtonClickCalc('main-buttons', { dataValue: '2' }, ['digit']);
+  simulateButtonClickCalc('main-buttons', { dataAction: 'equals' }, ['equals']);
+
+  // Verify result
+  assert.strictEqual(stubElements.result.textContent, '4', 'Calculator should still compute 2+2=4 after CI usage');
+}
+console.log('  ✓ Calculator tab computes 2+2=4 correctly after using CI tab');
+
+// ============================================================================
+// JMNT-13: Planetary Weight Calculator
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-13: Planetary Weight Calculator');
+console.log('='.repeat(70));
+
+console.log('\nAC1/AC2: calculatePlanetaryWeights(175) - length, sort order, spot-checked values');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  assert(Array.isArray(results), 'calculatePlanetaryWeights(175) should return an array');
+  assert.strictEqual(results.length, Object.keys(CalculatorMath.PLANETARY_GRAVITY).length, 'result array length should equal the number of bodies in PLANETARY_GRAVITY');
+}
+console.log('  ✓ Returns one entry per body in PLANETARY_GRAVITY');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  for (let i = 1; i < results.length; i++) {
+    assert(results[i].weight >= results[i - 1].weight, `results should be sorted ascending by weight (index ${i - 1}: ${results[i - 1].weight}, index ${i}: ${results[i].weight})`);
+  }
+}
+console.log('  ✓ Results are sorted ascending by weight');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  const moon = results.find((r) => r.body === 'Moon');
+  const mars = results.find((r) => r.body === 'Mars');
+  const jupiter = results.find((r) => r.body === 'Jupiter');
+  assert(moon, 'Moon should be present in results');
+  assert(mars, 'Mars should be present in results');
+  assert(jupiter, 'Jupiter should be present in results');
+  assertClose(moon.weight, 28.96, 1e-9, `Moon weight should be ~28.96, got ${moon.weight}`);
+  assertClose(mars.weight, 66.40, 1e-9, `Mars weight should be ~66.40, got ${mars.weight}`);
+  assertClose(jupiter.weight, 442.40, 1e-9, `Jupiter weight should be ~442.40, got ${jupiter.weight}`);
+}
+console.log('  ✓ Moon ≈ 28.96 lbs, Mars ≈ 66.40 lbs, Jupiter ≈ 442.40 lbs at 175 lbs Earth weight');
+
+console.log('\nAC3: calculatePlanetaryWeights rejects zero, negative, and non-finite input');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(0);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(0) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(0) returns { error: "Weight must be a positive number" }');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(-5);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(-5) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(-5) returns { error: "Weight must be a positive number" }');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(NaN);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(NaN) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(NaN) returns the positive-number error');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(Infinity);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(Infinity) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(Infinity) returns the positive-number error');
+
+console.log('\nAC4/AC5: Planetary Weight tab renders a sorted table with proportional bars');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      if (pwElements[id]) return pwElements[id];
+      if (id === 'pw-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersPw['pw-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  assert(calculateHandler, 'a click handler should be registered on #pw-calculate');
+  calculateHandler();
+
+  const rows = pwElements['pw-table'].children;
+  assert.strictEqual(rows.length, 10, '#pw-table should have exactly one row per body (10 rows)');
+  assert.strictEqual(pwElements['pw-results'].hidden, false, '#pw-results should be unhidden after a successful calculation');
+
+  const parsedRows = rows.map((tr) => {
+    const [bodyCell, weightCell, barCell] = tr.children;
+    const weight = parseFloat(weightCell.textContent);
+    const bar = barCell.children[0];
+    return { bodyText: bodyCell.textContent, weight, barWidth: bar.style.width, barClassName: bar.className };
+  });
+
+  for (let i = 1; i < parsedRows.length; i++) {
+    assert(parsedRows[i].weight >= parsedRows[i - 1].weight, `rows should render lightest to heaviest (row ${i - 1} weight ${parsedRows[i - 1].weight}, row ${i} weight ${parsedRows[i].weight})`);
+  }
+
+  const heaviestRow = parsedRows[parsedRows.length - 1];
+  assert(heaviestRow.bodyText.includes('Jupiter'), 'the heaviest row should be Jupiter (highest surface gravity of the listed bodies)');
+  assert.strictEqual(heaviestRow.barWidth, '100.0%', "Jupiter's own bar should render at 100.0% width");
+  assert.strictEqual(heaviestRow.barClassName, 'pw-bar', 'bar element should carry the pw-bar class');
+
+  const jupiterWeight = heaviestRow.weight;
+  parsedRows.forEach((row) => {
+    const expectedWidth = `${((row.weight / jupiterWeight) * 100).toFixed(1)}%`;
+    assert.strictEqual(row.barWidth, expectedWidth, `${row.bodyText} bar width should be ${expectedWidth}, got ${row.barWidth}`);
+  });
+}
+console.log('  ✓ Entering 175 and clicking Calculate renders 10 sorted rows with bars proportional to Jupiter (100.0% for Jupiter)');
+
+console.log('\nAC6: Zero and negative Earth weight show an error and keep results hidden');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersPwErr = {};
+
+  const pwErrElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    }
+  };
+
+  const fakeDomPwErr = {
+    getElementById: (id) => {
+      if (pwErrElements[id]) return pwErrElements[id];
+      if (id === 'pw-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersPwErr['pw-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPwErr;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPwErr['pw-calculate'];
+
+  pwErrElements['pw-earth-weight'].value = '0';
+  calculateHandler();
+  assert.strictEqual(pwErrElements['pw-error'].hidden, false, '#pw-error should be unhidden for a zero weight');
+  assert.strictEqual(pwErrElements['pw-error'].textContent, 'Weight must be a positive number', '#pw-error should show the positive-number message for zero weight');
+  assert.strictEqual(pwErrElements['pw-results'].hidden, true, '#pw-results should stay hidden for a zero weight');
+
+  pwErrElements['pw-earth-weight'].value = '-5';
+  calculateHandler();
+  assert.strictEqual(pwErrElements['pw-error'].hidden, false, '#pw-error should be unhidden for a negative weight');
+  assert.strictEqual(pwErrElements['pw-error'].textContent, 'Weight must be a positive number', '#pw-error should show the positive-number message for a negative weight');
+  assert.strictEqual(pwErrElements['pw-results'].hidden, true, '#pw-results should stay hidden for a negative weight');
+}
+console.log('  ✓ Zero and negative Earth weight both show the error message and keep #pw-results hidden');
+
+// ============================================================================
+// JMNT-13: Space Theme
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-13: Space Theme');
+console.log('='.repeat(70));
+
+function makeSpaceThemeTestElements() {
+  const elements = {
+    expression: { id: 'expression', textContent: '', classList: createClassListMock() },
+    result: { id: 'result', textContent: '0', classList: createClassListMock() },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' },
+        { value: 'roman', textContent: 'Roman' },
+        { value: 'space', textContent: 'Space' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          elements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: { classList: createClassListMock() },
+    ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
+    coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() }
+  };
+
+  const fakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return elements.expression;
+      if (id === 'result') return elements.result;
+      if (id === 'theme-select') return elements.themeSelect;
+      if (id === 'ghost-emoji') return elements.ghostEmoji;
+      if (id === 'monolith-emoji') return elements.monolithEmoji;
+      if (id === 'coffee-emoji') return elements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return elements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  return { elements, fakeDOM: patchFakeDOMForRomanTheme(fakeDOM) };
+}
+
+console.log('\nAC7: Selecting Space adds theme-space and removes every other theme class');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Start on a different theme first so we can prove Space removes it.
+  elements.themeSelect.value = 'dark-mode';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-dark-mode'), 'dark-mode theme should apply first');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-space'), 'selecting Space should add theme-space');
+  assert(!elements.calculator.classList.contains('theme-dark-mode'), 'selecting Space should remove theme-dark-mode');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.calculator.classList.contains('theme-space'), 'switching away from Space should remove theme-space');
+  assert(elements.calculator.classList.contains('theme-halloween'), 'switching to Halloween should apply theme-halloween');
+}
+console.log('  ✓ Selecting Space adds theme-space and removes prior theme classes; switching away removes theme-space');
+
+console.log('\nAC8: Space theme selection and page-load persistence via localStorage');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert.strictEqual(localStorageMock['calculator-theme'], 'space', 'selecting Space should write "space" to localStorage under the calculator-theme key');
+}
+console.log('  ✓ Selecting Space writes "space" to localStorage[\'calculator-theme\']');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'space' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'space', 'theme-select should be restored to "space" on load');
+  assert(elements.calculator.classList.contains('theme-space'), 'theme-space class should be applied automatically on load');
+}
+console.log('  ✓ A fresh load with calculator-theme="space" in localStorage restores the Space theme automatically');
+
+console.log('\nAC9: Space theme shows no motif; switching away resumes the other themes\' motifs');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert(!elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should never be visible while Space theme is active');
+  assert(!elements.monolithEmoji.classList.contains('visible'), 'monolith emoji should never be visible while Space theme is active');
+  assert(!elements.coffeeEmoji.classList.contains('visible'), 'coffee emoji should never be visible while Space theme is active');
+}
+console.log('  ✓ No motif element (#ghost-emoji, #monolith-emoji, #coffee-emoji) becomes visible while Space theme is active');
+
+{
+  // Switching from Space to Halloween should resume the ghost animation.
+  delete global.document;
+  delete global.window;
+
+  let ghostIntervalStarted = false;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  global.setTimeout = function (fn, delay) {
+    ghostIntervalStarted = true;
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function (id) {
+    return originalClearTimeout(id);
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!ghostIntervalStarted, 'Space theme should not start the ghost animation');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(ghostIntervalStarted, 'switching from Space to Halloween should resume the ghost animation');
+  assert(elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should become visible after switching from Space to Halloween');
+
+  // Clean up: switch back to default to clear the pending timeout before restoring globals.
+  elements.themeSelect.value = '';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Switching from Space to Halloween resumes the ghost animation');
+
+{
+  // Switching from Space to Roman should resume digit and button relabeling.
+  delete global.document;
+  delete global.window;
+
+  const digitButtons = createDefaultDigitButtons();
+  const clearButton = { textContent: 'Clear', dataset: { action: 'clear' }, classList: createClassListMock() };
+  const equalsButton = { textContent: '=', dataset: { action: 'equals' }, classList: createClassListMock() };
+
+  const elements = {
+    expression: { id: 'expression', textContent: '', classList: createClassListMock() },
+    result: { id: 'result', textContent: '0', classList: createClassListMock() },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'roman', textContent: 'Roman' },
+        { value: 'space', textContent: 'Space' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') elements.themeSelect.changeHandler = handler;
+      }
+    },
+    calculator: { classList: createClassListMock() },
+    ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
+    coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() }
+  };
+
+  const fakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return elements.expression;
+      if (id === 'result') return elements.result;
+      if (id === 'theme-select') return elements.themeSelect;
+      if (id === 'ghost-emoji') return elements.ghostEmoji;
+      if (id === 'monolith-emoji') return elements.monolithEmoji;
+      if (id === 'coffee-emoji') return elements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return elements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      if (selector === '[data-action="clear"]') return clearButton;
+      if (selector === '[data-action="equals"]') return equalsButton;
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '.btn.digit') return digitButtons;
+      return [];
+    }
+  };
+
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert.strictEqual(digitButtons[0].textContent, '1', 'digits should remain Arabic while Space theme is active');
+  assert.strictEqual(clearButton.textContent, 'Clear', 'Clear button should remain "Clear" while Space theme is active');
+
+  elements.themeSelect.value = 'roman';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  const expectedRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+  digitButtons.filter((b) => !b.classList.contains('zero')).forEach((btn, idx) => {
+    assert.strictEqual(btn.textContent, expectedRoman[idx], `digit button ${idx + 1} should show Roman numeral ${expectedRoman[idx]} after switching from Space to Roman`);
+  });
+  assert.strictEqual(clearButton.textContent, 'Dele', 'Clear button should read "Dele" after switching from Space to Roman');
+  assert.strictEqual(equalsButton.textContent, 'Solve', 'Equals button should read "Solve" after switching from Space to Roman');
+}
+console.log('  ✓ Switching from Space to Roman resumes digit and button relabeling');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
