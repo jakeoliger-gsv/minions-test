@@ -112,6 +112,12 @@ body {
   background: #2b3050;
 }
 
+.sci-buttons .btn.inv-active {
+  box-shadow:
+    0 0 0 2px #ffd166,
+    0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
 .btn.operator {
   background: #35395a;
   color: #c9cdff;

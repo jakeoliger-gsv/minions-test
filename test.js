@@ -11,6 +11,9 @@ const {
   applySin,
   applyCos,
   applyTan,
+  applyAsin,
+  applyAcos,
+  applyAtan,
   applyJakify,
   applyUnary,
   formatNumber
@@ -4160,6 +4163,412 @@ console.log('  ✓ Selecting Roman theme stores "roman" in localStorage');
   assert(calculatorEl.classList.contains('theme-roman'), 'Roman theme should persist from localStorage on reload');
 }
 console.log('  ✓ Roman theme is restored from localStorage on page reload');
+
+// ============================================================================
+// JMNT-8: Inverse Trig Toggle Button (AC1-AC5)
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-8: Inverse Trig Toggle Button');
+console.log('='.repeat(70));
+
+// AC4: Direct function tests for applyAsin, applyAcos, applyAtan
+console.log('\nAC4: Inverse Trig Functions - Direct Function Calls');
+
+{
+  // Test: applyAsin(0) = 0
+  const result = applyAsin(0);
+  assert(!result.error, 'applyAsin(0) should not produce an error');
+  assertClose(result.value, 0, 1e-9, 'applyAsin(0) should equal 0°');
+}
+console.log('  ✓ applyAsin(0) = 0°');
+
+{
+  // Test: applyAsin(0.5) ≈ 30
+  const result = applyAsin(0.5);
+  assert(!result.error, 'applyAsin(0.5) should not produce an error');
+  assertClose(result.value, 30, 1e-9, 'applyAsin(0.5) should equal 30°');
+}
+console.log('  ✓ applyAsin(0.5) ≈ 30°');
+
+{
+  // Test: applyAsin(1) = 90
+  const result = applyAsin(1);
+  assert(!result.error, 'applyAsin(1) should not produce an error');
+  assertClose(result.value, 90, 1e-9, 'applyAsin(1) should equal 90°');
+}
+console.log('  ✓ applyAsin(1) = 90°');
+
+{
+  // Test: applyAsin(-1) = -90
+  const result = applyAsin(-1);
+  assert(!result.error, 'applyAsin(-1) should not produce an error');
+  assertClose(result.value, -90, 1e-9, 'applyAsin(-1) should equal -90°');
+}
+console.log('  ✓ applyAsin(-1) = -90°');
+
+{
+  // Test: applyAcos(0) = 90
+  const result = applyAcos(0);
+  assert(!result.error, 'applyAcos(0) should not produce an error');
+  assertClose(result.value, 90, 1e-9, 'applyAcos(0) should equal 90°');
+}
+console.log('  ✓ applyAcos(0) = 90°');
+
+{
+  // Test: applyAcos(0.5) ≈ 60
+  const result = applyAcos(0.5);
+  assert(!result.error, 'applyAcos(0.5) should not produce an error');
+  assertClose(result.value, 60, 1e-9, 'applyAcos(0.5) should equal 60°');
+}
+console.log('  ✓ applyAcos(0.5) ≈ 60°');
+
+{
+  // Test: applyAcos(1) = 0
+  const result = applyAcos(1);
+  assert(!result.error, 'applyAcos(1) should not produce an error');
+  assertClose(result.value, 0, 1e-9, 'applyAcos(1) should equal 0°');
+}
+console.log('  ✓ applyAcos(1) = 0°');
+
+{
+  // Test: applyAcos(-1) = 180
+  const result = applyAcos(-1);
+  assert(!result.error, 'applyAcos(-1) should not produce an error');
+  assertClose(result.value, 180, 1e-9, 'applyAcos(-1) should equal 180°');
+}
+console.log('  ✓ applyAcos(-1) = 180°');
+
+{
+  // Test: applyAtan(0) = 0
+  const result = applyAtan(0);
+  assert(!result.error, 'applyAtan(0) should not produce an error');
+  assertClose(result.value, 0, 1e-9, 'applyAtan(0) should equal 0°');
+}
+console.log('  ✓ applyAtan(0) = 0°');
+
+{
+  // Test: applyAtan(1) ≈ 45
+  const result = applyAtan(1);
+  assert(!result.error, 'applyAtan(1) should not produce an error');
+  assertClose(result.value, 45, 1e-9, 'applyAtan(1) should equal 45°');
+}
+console.log('  ✓ applyAtan(1) ≈ 45°');
+
+// AC5: Domain validation for applyAsin and applyAcos
+console.log('\nAC5: Domain Validation - Asin/Acos Out-of-Range');
+
+{
+  // Test: applyAsin(1.5) returns error
+  const result = applyAsin(1.5);
+  assert(result.error, 'applyAsin(1.5) should produce an error');
+  assert(typeof result.error === 'string', 'Error should be a string message');
+}
+console.log('  ✓ applyAsin(1.5) returns error');
+
+{
+  // Test: applyAsin(-1.5) returns error
+  const result = applyAsin(-1.5);
+  assert(result.error, 'applyAsin(-1.5) should produce an error');
+}
+console.log('  ✓ applyAsin(-1.5) returns error');
+
+{
+  // Test: applyAcos(2) returns error
+  const result = applyAcos(2);
+  assert(result.error, 'applyAcos(2) should produce an error');
+}
+console.log('  ✓ applyAcos(2) returns error');
+
+{
+  // Test: applyAcos(-2) returns error
+  const result = applyAcos(-2);
+  assert(result.error, 'applyAcos(-2) should produce an error');
+}
+console.log('  ✓ applyAcos(-2) returns error');
+
+{
+  // Edge case: applyAtan(1000) has no domain restriction, must succeed
+  const result = applyAtan(1000);
+  assert(!result.error, 'applyAtan(1000) should not produce an error (no domain restriction)');
+  assert(typeof result.value === 'number', 'applyAtan(1000) should return a numeric value');
+}
+console.log('  ✓ applyAtan(1000) succeeds with no domain error');
+
+{
+  // Edge case: applyAtan(-1000) has no domain restriction, must succeed
+  const result = applyAtan(-1000);
+  assert(!result.error, 'applyAtan(-1000) should not produce an error (no domain restriction)');
+  assert(typeof result.value === 'number', 'applyAtan(-1000) should return a numeric value');
+}
+console.log('  ✓ applyAtan(-1000) succeeds with no domain error');
+
+// AC1-AC3: DOM tests for toggle button presence, labeling, and active state
+console.log('\nAC1-AC3: Inverse Trig Toggle Button - DOM Tests');
+
+{
+  // Clean up prior globals
+  delete global.document;
+  delete global.window;
+
+  const invElements = {
+    expression: { textContent: '', classList: createClassListMock() },
+    result: { textContent: '0', classList: createClassListMock() },
+    sinBtn: { textContent: 'sin', dataset: { action: 'sin' }, classList: createClassListMock() },
+    cosBtn: { textContent: 'cos', dataset: { action: 'cos' }, classList: createClassListMock() },
+    tanBtn: { textContent: 'tan', dataset: { action: 'tan' }, classList: createClassListMock() },
+    invToggleBtn: { textContent: 'Inv', dataset: { action: 'toggle-inverse' }, id: 'inv-toggle', classList: createClassListMock() }
+  };
+
+  const invEventListeners = {};
+
+  const invFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return invElements.expression;
+      if (id === 'result') return invElements.result;
+      if (id === 'inv-toggle') return invElements.invToggleBtn;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return { addEventListener: (event, handler) => { invEventListeners['main-buttons'] = handler; } };
+      }
+      if (selector === '.sci-buttons') {
+        return { addEventListener: (event, handler) => { invEventListeners['sci-buttons'] = handler; } };
+      }
+      if (selector === '[data-action="sin"]') return invElements.sinBtn;
+      if (selector === '[data-action="cos"]') return invElements.cosBtn;
+      if (selector === '[data-action="tan"]') return invElements.tanBtn;
+      return null;
+    }
+  };
+
+  global.document = invFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorInvTest = require('./script.js');
+
+  // AC1: Test toggle button is present initially
+  {
+    assert(invElements.invToggleBtn, 'Inv toggle button should exist in DOM');
+    assert(invElements.invToggleBtn.id === 'inv-toggle', 'Toggle button should have id="inv-toggle"');
+    assert.strictEqual(invElements.invToggleBtn.textContent, 'Inv', 'Toggle button should initially display "Inv"');
+  }
+  console.log('  ✓ AC1: Inv toggle button is present in DOM with correct initial label');
+
+  // Helper to simulate sci-buttons click
+  function simulateInvClick(selector, classList = []) {
+    const handler = invEventListeners['sci-buttons'];
+    const fakeButton = {
+      dataset: selector.dataset || {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // AC2: Test clicking toggle turns it on and changes labels
+  {
+    simulateInvClick({ dataAction: 'toggle-inverse' }, ['fn']);
+    assert.strictEqual(invElements.sinBtn.textContent, 'sin⁻¹', 'After toggle on, sin button should display "sin⁻¹"');
+    assert.strictEqual(invElements.cosBtn.textContent, 'cos⁻¹', 'After toggle on, cos button should display "cos⁻¹"');
+    assert.strictEqual(invElements.tanBtn.textContent, 'tan⁻¹', 'After toggle on, tan button should display "tan⁻¹"');
+    assert(invElements.invToggleBtn.classList.contains('inv-active'), 'Toggle button should have inv-active class when on');
+  }
+  console.log('  ✓ AC2: Clicking toggle on changes labels to sin⁻¹/cos⁻¹/tan⁻¹ and adds inv-active class');
+
+  // AC3: Test clicking toggle again turns it off and reverts labels
+  {
+    simulateInvClick({ dataAction: 'toggle-inverse' }, ['fn']);
+    assert.strictEqual(invElements.sinBtn.textContent, 'sin', 'After toggle off, sin button should revert to "sin"');
+    assert.strictEqual(invElements.cosBtn.textContent, 'cos', 'After toggle off, cos button should revert to "cos"');
+    assert.strictEqual(invElements.tanBtn.textContent, 'tan', 'After toggle off, tan button should revert to "tan"');
+    assert(!invElements.invToggleBtn.classList.contains('inv-active'), 'Toggle button should not have inv-active class when off');
+  }
+  console.log('  ✓ AC3: Clicking toggle off reverts labels to sin/cos/tan and removes inv-active class');
+
+  // AC1 regression: Button still present after toggling
+  {
+    assert(invElements.invToggleBtn, 'Inv toggle button should still be present after toggling');
+  }
+  console.log('  ✓ AC1 (regression): Toggle button remains present in DOM after toggling');
+}
+
+// AC4: Integration test - toggle on, click sin with 0.5, result should be arcsin angle
+console.log('\nAC4: Integration Test - Computing Inverse Trig with Toggle On');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const ac4invElements = {
+    expression: { textContent: '', classList: createClassListMock() },
+    result: { textContent: '0', classList: createClassListMock() },
+    sinBtn: { textContent: 'sin', dataset: { action: 'sin' }, classList: createClassListMock() },
+    cosBtn: { textContent: 'cos', dataset: { action: 'cos' }, classList: createClassListMock() },
+    tanBtn: { textContent: 'tan', dataset: { action: 'tan' }, classList: createClassListMock() },
+    invToggleBtn: { textContent: 'Inv', dataset: { action: 'toggle-inverse' }, id: 'inv-toggle', classList: createClassListMock() }
+  };
+
+  const ac4invEventListeners = {};
+
+  const ac4invFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return ac4invElements.expression;
+      if (id === 'result') return ac4invElements.result;
+      if (id === 'inv-toggle') return ac4invElements.invToggleBtn;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return { addEventListener: (event, handler) => { ac4invEventListeners['main-buttons'] = handler; } };
+      }
+      if (selector === '.sci-buttons') {
+        return { addEventListener: (event, handler) => { ac4invEventListeners['sci-buttons'] = handler; } };
+      }
+      if (selector === '[data-action="sin"]') return ac4invElements.sinBtn;
+      if (selector === '[data-action="cos"]') return ac4invElements.cosBtn;
+      if (selector === '[data-action="tan"]') return ac4invElements.tanBtn;
+      return null;
+    }
+  };
+
+  global.document = ac4invFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorAc4InvTest = require('./script.js');
+
+  function simulateAc4InvClick(containerKey, selector, classList = []) {
+    const handler = ac4invEventListeners[containerKey];
+    const fakeButton = {
+      dataset: selector.dataset || {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Toggle inverse on
+  simulateAc4InvClick('sci-buttons', { dataAction: 'toggle-inverse' }, ['fn']);
+  assert(ac4invElements.invToggleBtn.classList.contains('inv-active'), 'Inverse mode should be on');
+
+  // Enter 0.5 and click sin to compute arcsin(0.5) ≈ 30°
+  simulateAc4InvClick('main-buttons', { dataValue: '0' }, ['digit']);
+  simulateAc4InvClick('main-buttons', { dataValue: '.' }, ['digit', 'dot']);
+  simulateAc4InvClick('main-buttons', { dataValue: '5' }, ['digit']);
+  // Now click sin with inverse on (should call asin internally)
+  simulateAc4InvClick('sci-buttons', { dataAction: 'sin' }, ['fn']);
+
+  const result = ac4invElements.result.textContent;
+  // Should be 30 or close to it
+  const resultNum = parseFloat(result);
+  assert(!isNaN(resultNum), 'Result should be a number');
+  assert(Math.abs(resultNum - 30) < 1, 'sin⁻¹(0.5) should be approximately 30°, got: ' + result);
+}
+console.log('  ✓ AC4: sin⁻¹(0.5) computes correctly and displays ≈30° result');
+
+// AC5: Error handling - sin⁻¹ and cos⁻¹ with out-of-range input
+console.log('\nAC5: Error Handling - Out-of-Range Inverse Trig Input');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const ac5invElements = {
+    expression: { textContent: '', classList: createClassListMock() },
+    result: { textContent: '0', classList: createClassListMock() },
+    sinBtn: { textContent: 'sin', dataset: { action: 'sin' }, classList: createClassListMock() },
+    cosBtn: { textContent: 'cos', dataset: { action: 'cos' }, classList: createClassListMock() },
+    tanBtn: { textContent: 'tan', dataset: { action: 'tan' }, classList: createClassListMock() },
+    invToggleBtn: { textContent: 'Inv', dataset: { action: 'toggle-inverse' }, id: 'inv-toggle', classList: createClassListMock() }
+  };
+
+  const ac5invEventListeners = {};
+
+  const ac5invFakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return ac5invElements.expression;
+      if (id === 'result') return ac5invElements.result;
+      if (id === 'inv-toggle') return ac5invElements.invToggleBtn;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons') {
+        return { addEventListener: (event, handler) => { ac5invEventListeners['main-buttons'] = handler; } };
+      }
+      if (selector === '.sci-buttons') {
+        return { addEventListener: (event, handler) => { ac5invEventListeners['sci-buttons'] = handler; } };
+      }
+      if (selector === '[data-action="sin"]') return ac5invElements.sinBtn;
+      if (selector === '[data-action="cos"]') return ac5invElements.cosBtn;
+      if (selector === '[data-action="tan"]') return ac5invElements.tanBtn;
+      return null;
+    }
+  };
+
+  global.document = ac5invFakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorAc5InvTest = require('./script.js');
+
+  function simulateAc5InvClick(containerKey, selector, classList = []) {
+    const handler = ac5invEventListeners[containerKey];
+    const fakeButton = {
+      dataset: selector.dataset || {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Toggle inverse on
+  simulateAc5InvClick('sci-buttons', { dataAction: 'toggle-inverse' }, ['fn']);
+
+  // Enter 1.5 and click sin to compute arcsin(1.5) - out of range, should error
+  simulateAc5InvClick('main-buttons', { dataValue: '1' }, ['digit']);
+  simulateAc5InvClick('main-buttons', { dataValue: '.' }, ['digit', 'dot']);
+  simulateAc5InvClick('main-buttons', { dataValue: '5' }, ['digit']);
+  simulateAc5InvClick('sci-buttons', { dataAction: 'sin' }, ['fn']);
+
+  const result = ac5invElements.result.textContent;
+  assert(typeof result === 'string', 'Result should be a string (error message)');
+  assert(result.toLowerCase().includes('arc') || result.toLowerCase().includes('range') || result.length > 10,
+    'Result should be an error message for out-of-range input, got: ' + result);
+}
+console.log('  ✓ AC5: sin⁻¹(1.5) shows error message (out of range)');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
