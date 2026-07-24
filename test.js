@@ -5081,6 +5081,510 @@ console.log('\nAC10: Regression - Calculator Tab Still Works');
 }
 console.log('  ✓ Calculator tab computes 2+2=4 correctly after using CI tab');
 
+// ============================================================================
+// JMNT-13: Planetary Weight Calculator
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-13: Planetary Weight Calculator');
+console.log('='.repeat(70));
+
+console.log('\nAC1/AC2: calculatePlanetaryWeights(175) - length, sort order, spot-checked values');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  assert(Array.isArray(results), 'calculatePlanetaryWeights(175) should return an array');
+  assert.strictEqual(results.length, Object.keys(CalculatorMath.PLANETARY_GRAVITY).length, 'result array length should equal the number of bodies in PLANETARY_GRAVITY');
+}
+console.log('  ✓ Returns one entry per body in PLANETARY_GRAVITY');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  for (let i = 1; i < results.length; i++) {
+    assert(results[i].weight >= results[i - 1].weight, `results should be sorted ascending by weight (index ${i - 1}: ${results[i - 1].weight}, index ${i}: ${results[i].weight})`);
+  }
+}
+console.log('  ✓ Results are sorted ascending by weight');
+
+{
+  const results = CalculatorMath.calculatePlanetaryWeights(175);
+  const moon = results.find((r) => r.body === 'Moon');
+  const mars = results.find((r) => r.body === 'Mars');
+  const jupiter = results.find((r) => r.body === 'Jupiter');
+  assert(moon, 'Moon should be present in results');
+  assert(mars, 'Mars should be present in results');
+  assert(jupiter, 'Jupiter should be present in results');
+  assertClose(moon.weight, 28.96, 1e-9, `Moon weight should be ~28.96, got ${moon.weight}`);
+  assertClose(mars.weight, 66.40, 1e-9, `Mars weight should be ~66.40, got ${mars.weight}`);
+  assertClose(jupiter.weight, 442.40, 1e-9, `Jupiter weight should be ~442.40, got ${jupiter.weight}`);
+}
+console.log('  ✓ Moon ≈ 28.96 lbs, Mars ≈ 66.40 lbs, Jupiter ≈ 442.40 lbs at 175 lbs Earth weight');
+
+console.log('\nAC3: calculatePlanetaryWeights rejects zero, negative, and non-finite input');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(0);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(0) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(0) returns { error: "Weight must be a positive number" }');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(-5);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(-5) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(-5) returns { error: "Weight must be a positive number" }');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(NaN);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(NaN) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(NaN) returns the positive-number error');
+
+{
+  const result = CalculatorMath.calculatePlanetaryWeights(Infinity);
+  assert.deepStrictEqual(result, { error: 'Weight must be a positive number' }, 'calculatePlanetaryWeights(Infinity) should return the positive-number error');
+}
+console.log('  ✓ calculatePlanetaryWeights(Infinity) returns the positive-number error');
+
+console.log('\nAC4/AC5: Planetary Weight tab renders a sorted table with proportional bars');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      if (pwElements[id]) return pwElements[id];
+      if (id === 'pw-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersPw['pw-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  assert(calculateHandler, 'a click handler should be registered on #pw-calculate');
+  calculateHandler();
+
+  const rows = pwElements['pw-table'].children;
+  assert.strictEqual(rows.length, 10, '#pw-table should have exactly one row per body (10 rows)');
+  assert.strictEqual(pwElements['pw-results'].hidden, false, '#pw-results should be unhidden after a successful calculation');
+
+  const parsedRows = rows.map((tr) => {
+    const [bodyCell, weightCell, barCell] = tr.children;
+    const weight = parseFloat(weightCell.textContent);
+    const bar = barCell.children[0];
+    return { bodyText: bodyCell.textContent, weight, barWidth: bar.style.width, barClassName: bar.className };
+  });
+
+  for (let i = 1; i < parsedRows.length; i++) {
+    assert(parsedRows[i].weight >= parsedRows[i - 1].weight, `rows should render lightest to heaviest (row ${i - 1} weight ${parsedRows[i - 1].weight}, row ${i} weight ${parsedRows[i].weight})`);
+  }
+
+  const heaviestRow = parsedRows[parsedRows.length - 1];
+  assert(heaviestRow.bodyText.includes('Jupiter'), 'the heaviest row should be Jupiter (highest surface gravity of the listed bodies)');
+  assert.strictEqual(heaviestRow.barWidth, '100.0%', "Jupiter's own bar should render at 100.0% width");
+  assert.strictEqual(heaviestRow.barClassName, 'pw-bar', 'bar element should carry the pw-bar class');
+
+  const jupiterWeight = heaviestRow.weight;
+  parsedRows.forEach((row) => {
+    const expectedWidth = `${((row.weight / jupiterWeight) * 100).toFixed(1)}%`;
+    assert.strictEqual(row.barWidth, expectedWidth, `${row.bodyText} bar width should be ${expectedWidth}, got ${row.barWidth}`);
+  });
+}
+console.log('  ✓ Entering 175 and clicking Calculate renders 10 sorted rows with bars proportional to Jupiter (100.0% for Jupiter)');
+
+console.log('\nAC6: Zero and negative Earth weight show an error and keep results hidden');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersPwErr = {};
+
+  const pwErrElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    }
+  };
+
+  const fakeDomPwErr = {
+    getElementById: (id) => {
+      if (pwErrElements[id]) return pwErrElements[id];
+      if (id === 'pw-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersPwErr['pw-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: () => [],
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPwErr;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPwErr['pw-calculate'];
+
+  pwErrElements['pw-earth-weight'].value = '0';
+  calculateHandler();
+  assert.strictEqual(pwErrElements['pw-error'].hidden, false, '#pw-error should be unhidden for a zero weight');
+  assert.strictEqual(pwErrElements['pw-error'].textContent, 'Weight must be a positive number', '#pw-error should show the positive-number message for zero weight');
+  assert.strictEqual(pwErrElements['pw-results'].hidden, true, '#pw-results should stay hidden for a zero weight');
+
+  pwErrElements['pw-earth-weight'].value = '-5';
+  calculateHandler();
+  assert.strictEqual(pwErrElements['pw-error'].hidden, false, '#pw-error should be unhidden for a negative weight');
+  assert.strictEqual(pwErrElements['pw-error'].textContent, 'Weight must be a positive number', '#pw-error should show the positive-number message for a negative weight');
+  assert.strictEqual(pwErrElements['pw-results'].hidden, true, '#pw-results should stay hidden for a negative weight');
+}
+console.log('  ✓ Zero and negative Earth weight both show the error message and keep #pw-results hidden');
+
+// ============================================================================
+// JMNT-13: Space Theme
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-13: Space Theme');
+console.log('='.repeat(70));
+
+function makeSpaceThemeTestElements() {
+  const elements = {
+    expression: { id: 'expression', textContent: '', classList: createClassListMock() },
+    result: { id: 'result', textContent: '0', classList: createClassListMock() },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' },
+        { value: 'roman', textContent: 'Roman' },
+        { value: 'space', textContent: 'Space' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          elements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: { classList: createClassListMock() },
+    ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
+    coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() }
+  };
+
+  const fakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return elements.expression;
+      if (id === 'result') return elements.result;
+      if (id === 'theme-select') return elements.themeSelect;
+      if (id === 'ghost-emoji') return elements.ghostEmoji;
+      if (id === 'monolith-emoji') return elements.monolithEmoji;
+      if (id === 'coffee-emoji') return elements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return elements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  return { elements, fakeDOM: patchFakeDOMForRomanTheme(fakeDOM) };
+}
+
+console.log('\nAC7: Selecting Space adds theme-space and removes every other theme class');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Start on a different theme first so we can prove Space removes it.
+  elements.themeSelect.value = 'dark-mode';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-dark-mode'), 'dark-mode theme should apply first');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-space'), 'selecting Space should add theme-space');
+  assert(!elements.calculator.classList.contains('theme-dark-mode'), 'selecting Space should remove theme-dark-mode');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.calculator.classList.contains('theme-space'), 'switching away from Space should remove theme-space');
+  assert(elements.calculator.classList.contains('theme-halloween'), 'switching to Halloween should apply theme-halloween');
+}
+console.log('  ✓ Selecting Space adds theme-space and removes prior theme classes; switching away removes theme-space');
+
+console.log('\nAC8: Space theme selection and page-load persistence via localStorage');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert.strictEqual(localStorageMock['calculator-theme'], 'space', 'selecting Space should write "space" to localStorage under the calculator-theme key');
+}
+console.log('  ✓ Selecting Space writes "space" to localStorage[\'calculator-theme\']');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'space' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'space', 'theme-select should be restored to "space" on load');
+  assert(elements.calculator.classList.contains('theme-space'), 'theme-space class should be applied automatically on load');
+}
+console.log('  ✓ A fresh load with calculator-theme="space" in localStorage restores the Space theme automatically');
+
+console.log('\nAC9: Space theme shows no motif; switching away resumes the other themes\' motifs');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert(!elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should never be visible while Space theme is active');
+  assert(!elements.monolithEmoji.classList.contains('visible'), 'monolith emoji should never be visible while Space theme is active');
+  assert(!elements.coffeeEmoji.classList.contains('visible'), 'coffee emoji should never be visible while Space theme is active');
+}
+console.log('  ✓ No motif element (#ghost-emoji, #monolith-emoji, #coffee-emoji) becomes visible while Space theme is active');
+
+{
+  // Switching from Space to Halloween should resume the ghost animation.
+  delete global.document;
+  delete global.window;
+
+  let ghostIntervalStarted = false;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  global.setTimeout = function (fn, delay) {
+    ghostIntervalStarted = true;
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function (id) {
+    return originalClearTimeout(id);
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!ghostIntervalStarted, 'Space theme should not start the ghost animation');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(ghostIntervalStarted, 'switching from Space to Halloween should resume the ghost animation');
+  assert(elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should become visible after switching from Space to Halloween');
+
+  // Clean up: switch back to default to clear the pending timeout before restoring globals.
+  elements.themeSelect.value = '';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Switching from Space to Halloween resumes the ghost animation');
+
+{
+  // Switching from Space to Roman should resume digit and button relabeling.
+  delete global.document;
+  delete global.window;
+
+  const digitButtons = createDefaultDigitButtons();
+  const clearButton = { textContent: 'Clear', dataset: { action: 'clear' }, classList: createClassListMock() };
+  const equalsButton = { textContent: '=', dataset: { action: 'equals' }, classList: createClassListMock() };
+
+  const elements = {
+    expression: { id: 'expression', textContent: '', classList: createClassListMock() },
+    result: { id: 'result', textContent: '0', classList: createClassListMock() },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'roman', textContent: 'Roman' },
+        { value: 'space', textContent: 'Space' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') elements.themeSelect.changeHandler = handler;
+      }
+    },
+    calculator: { classList: createClassListMock() },
+    ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
+    coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() }
+  };
+
+  const fakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return elements.expression;
+      if (id === 'result') return elements.result;
+      if (id === 'theme-select') return elements.themeSelect;
+      if (id === 'ghost-emoji') return elements.ghostEmoji;
+      if (id === 'monolith-emoji') return elements.monolithEmoji;
+      if (id === 'coffee-emoji') return elements.coffeeEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return elements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      if (selector === '[data-action="clear"]') return clearButton;
+      if (selector === '[data-action="equals"]') return equalsButton;
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '.btn.digit') return digitButtons;
+      return [];
+    }
+  };
+
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'space';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert.strictEqual(digitButtons[0].textContent, '1', 'digits should remain Arabic while Space theme is active');
+  assert.strictEqual(clearButton.textContent, 'Clear', 'Clear button should remain "Clear" while Space theme is active');
+
+  elements.themeSelect.value = 'roman';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  const expectedRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
+  digitButtons.filter((b) => !b.classList.contains('zero')).forEach((btn, idx) => {
+    assert.strictEqual(btn.textContent, expectedRoman[idx], `digit button ${idx + 1} should show Roman numeral ${expectedRoman[idx]} after switching from Space to Roman`);
+  });
+  assert.strictEqual(clearButton.textContent, 'Dele', 'Clear button should read "Dele" after switching from Space to Roman');
+  assert.strictEqual(equalsButton.textContent, 'Solve', 'Equals button should read "Solve" after switching from Space to Roman');
+}
+console.log('  ✓ Switching from Space to Roman resumes digit and button relabeling');
+
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
