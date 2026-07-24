@@ -123,6 +123,58 @@ function applyUnary(name, value) {
   }
 }
 
+// Projects monthly-compounding growth of a lump sum plus recurring monthly
+// contributions. r = annualRate/100/12; each month: balance = balance*(1+r) + monthlyPayment.
+// Returns { finalBalance, totalContributed, totalInterest, monthlyBreakdown, annualSummary,
+// useAnnualView } or { error: 'Invalid input' } for negative/non-finite/non-integer input.
+function calculateCompoundInterest({ principal, annualRate, monthlyPayment, years }) {
+  if (
+    !Number.isFinite(principal) || principal < 0 ||
+    !Number.isFinite(annualRate) || annualRate < 0 ||
+    !Number.isFinite(monthlyPayment) || monthlyPayment < 0 ||
+    !Number.isInteger(years) || years <= 0
+  ) {
+    return { error: 'Invalid input' };
+  }
+
+  const monthlyRate = annualRate / 100 / 12;
+  const totalMonths = years * 12;
+  const monthlyBreakdown = [];
+  let balance = principal;
+
+  for (let month = 1; month <= totalMonths; month++) {
+    const interestEarned = balance * monthlyRate;
+    balance = balance + interestEarned + monthlyPayment;
+    monthlyBreakdown.push({ month, balance, interestEarned, contribution: monthlyPayment });
+  }
+
+  const annualSummary = [];
+  for (let year = 1; year <= years; year++) {
+    const yearMonths = monthlyBreakdown.slice((year - 1) * 12, year * 12);
+    const interestEarnedInYear = yearMonths.reduce((sum, m) => sum + m.interestEarned, 0);
+    const contributedInYear = yearMonths.reduce((sum, m) => sum + m.contribution, 0);
+    annualSummary.push({
+      year,
+      balance: yearMonths[yearMonths.length - 1].balance,
+      interestEarnedInYear,
+      contributedInYear,
+    });
+  }
+
+  const finalBalance = balance;
+  const totalContributed = principal + monthlyPayment * totalMonths;
+  const totalInterest = finalBalance - totalContributed;
+
+  return {
+    finalBalance,
+    totalContributed,
+    totalInterest,
+    monthlyBreakdown,
+    annualSummary,
+    useAnnualView: years > 10,
+  };
+}
+
 // Rounds away floating-point noise and keeps the display readable.
 function formatNumber(value) {
   if (!isFinite(value)) return 'Error';
@@ -148,6 +200,7 @@ const CalculatorMath = {
   applyUnary,
   formatNumber,
   toRomanNumeral,
+  calculateCompoundInterest,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -456,5 +509,90 @@ if (typeof document !== 'undefined') {
     }
 
     render();
+  })();
+
+  (function () {
+    const principalInput = document.getElementById('ci-principal');
+    const rateInput = document.getElementById('ci-rate');
+    const monthlyInput = document.getElementById('ci-monthly');
+    const yearsInput = document.getElementById('ci-years');
+    const calculateBtn = document.getElementById('ci-calculate');
+    const errorEl = document.getElementById('ci-error');
+    const resultsEl = document.getElementById('ci-results');
+    const finalBalanceEl = document.getElementById('ci-final-balance');
+    const totalContributedEl = document.getElementById('ci-total-contributed');
+    const totalInterestEl = document.getElementById('ci-total-interest');
+    const viewLabelEl = document.getElementById('ci-view-label');
+    const tableBodyEl = document.getElementById('ci-table-body');
+
+    if (
+      !principalInput || !rateInput || !monthlyInput || !yearsInput || !calculateBtn ||
+      !errorEl || !resultsEl || !finalBalanceEl || !totalContributedEl || !totalInterestEl ||
+      !viewLabelEl || !tableBodyEl
+    ) {
+      return;
+    }
+
+    function formatCurrency(value) {
+      return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+
+    function showCiError(message) {
+      errorEl.textContent = message;
+      resultsEl.hidden = true;
+    }
+
+    function renderCiResults(result) {
+      finalBalanceEl.textContent = formatCurrency(result.finalBalance);
+      totalContributedEl.textContent = formatCurrency(result.totalContributed);
+      totalInterestEl.textContent = formatCurrency(result.totalInterest);
+
+      const rows = result.useAnnualView
+        ? result.annualSummary.map((row) => ({
+            period: `Year ${row.year}`,
+            balance: row.balance,
+            interest: row.interestEarnedInYear,
+            contribution: row.contributedInYear,
+          }))
+        : result.monthlyBreakdown.map((row) => ({
+            period: `Month ${row.month}`,
+            balance: row.balance,
+            interest: row.interestEarned,
+            contribution: row.contribution,
+          }));
+
+      tableBodyEl.innerHTML = '';
+      rows.forEach((row) => {
+        const tr = document.createElement('tr');
+        [row.period, formatCurrency(row.balance), formatCurrency(row.interest), formatCurrency(row.contribution)].forEach((text) => {
+          const td = document.createElement('td');
+          td.textContent = text;
+          tr.appendChild(td);
+        });
+        tableBodyEl.appendChild(tr);
+      });
+
+      viewLabelEl.textContent = result.useAnnualView
+        ? 'Showing annual summary (period exceeds 10 years)'
+        : 'Showing month-by-month breakdown';
+
+      resultsEl.hidden = false;
+    }
+
+    calculateBtn.addEventListener('click', () => {
+      errorEl.textContent = '';
+
+      const principal = parseFloat(principalInput.value);
+      const annualRate = parseFloat(rateInput.value);
+      const monthlyPayment = parseFloat(monthlyInput.value);
+      const years = parseFloat(yearsInput.value);
+
+      const result = calculateCompoundInterest({ principal, annualRate, monthlyPayment, years });
+      if (result.error) {
+        showCiError(result.error);
+        return;
+      }
+      renderCiResults(result);
+    });
   })();
 }
