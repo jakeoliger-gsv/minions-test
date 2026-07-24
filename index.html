@@ -27,6 +27,7 @@
       <option value="marvel-ironman">Marvel/Iron Man</option>
       <option value="coffee-lovers">Coffee Lovers</option>
       <option value="roman">Roman</option>
+      <option value="space">Space</option>
     </select>
   </div>
   <div class="ghost-emoji" id="ghost-emoji" aria-hidden="true">&#x1F47B;</div>
@@ -131,7 +132,35 @@
   </div>
 </div>
   </section>
-  <section id="panel-planetary-weight" class="tab-panel"></section>
+  <section id="panel-planetary-weight" class="tab-panel">
+<div class="pw-panel">
+  <h2 class="pw-title">Planetary Weight Calculator</h2>
+
+  <div class="pw-field">
+    <label for="pw-earth-weight">Earth Weight (lbs)</label>
+    <input type="number" id="pw-earth-weight" min="0" step="0.01" value="175">
+  </div>
+
+  <button type="button" class="btn pw-calculate" id="pw-calculate">Calculate</button>
+
+  <p class="pw-error" id="pw-error" role="alert" hidden></p>
+
+  <div class="pw-results" id="pw-results" hidden>
+    <div id="pw-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Body</th>
+            <th>Weight</th>
+            <th>Relative to Jupiter</th>
+          </tr>
+        </thead>
+        <tbody id="pw-table"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  </section>
 </div>
 <script src="script.js"></script>
 </body>
