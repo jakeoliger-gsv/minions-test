@@ -155,6 +155,16 @@ body {
   }
 }
 
+/* ---------- Tab shell ---------- */
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
 /* ---------- Theme picker ---------- */
 
 .theme-picker {

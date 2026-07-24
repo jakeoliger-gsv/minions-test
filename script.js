@@ -161,6 +161,52 @@ if (typeof window !== 'undefined') {
 
 if (typeof document !== 'undefined') {
   (function () {
+    const TAB_STORAGE_KEY = 'active-tab';
+    const KNOWN_TABS = ['calculator', 'compound-interest', 'planetary-weight'];
+
+    function activateTab(tabName) {
+      document.querySelectorAll('[data-tab]').forEach((btn) => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('active');
+        }
+      });
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.remove('active');
+      });
+      const targetPanel = document.getElementById(`panel-${tabName}`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    }
+
+    document.querySelectorAll('[data-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        activateTab(tabName);
+        if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem(TAB_STORAGE_KEY, tabName);
+          } catch (e) {
+            /* localStorage unavailable — tab still switches, just isn't persisted */
+          }
+        }
+      });
+    });
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const storedTab = localStorage.getItem(TAB_STORAGE_KEY);
+        if (storedTab && KNOWN_TABS.includes(storedTab)) {
+          activateTab(storedTab);
+        }
+      } catch (e) {
+        /* localStorage unavailable — default markup (calculator active) stands */
+      }
+    }
+  })();
+
+  (function () {
     const expressionEl = document.getElementById('expression');
     const resultEl = document.getElementById('result');
 
