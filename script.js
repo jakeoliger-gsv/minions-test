@@ -175,6 +175,39 @@ function calculateCompoundInterest({ principal, annualRate, monthlyPayment, year
   };
 }
 
+// Surface gravity of each solar-system body relative to Earth (Earth = 1),
+// used to convert an Earth weight into the equivalent weight elsewhere.
+const PLANETARY_GRAVITY = {
+  Mercury: 0.38,
+  Venus: 0.904,
+  Moon: 0.1655,
+  Mars: 0.3794,
+  Jupiter: 2.528,
+  Saturn: 1.065,
+  Uranus: 0.886,
+  Neptune: 1.137,
+  Pluto: 0.063,
+  Titan: 0.138,
+};
+
+// Converts an Earth weight in lbs into the equivalent weight on every body in
+// PLANETARY_GRAVITY. Returns an array of { body, weight } (weight = earthWeightLbs
+// times the body's gravity ratio, rounded to 2 decimals) sorted ascending by
+// weight, or { error: 'Weight must be a positive number' } for zero, negative,
+// or non-finite input.
+function calculatePlanetaryWeights(earthWeightLbs) {
+  if (!Number.isFinite(earthWeightLbs) || earthWeightLbs <= 0) {
+    return { error: 'Weight must be a positive number' };
+  }
+
+  return Object.keys(PLANETARY_GRAVITY)
+    .map((body) => ({
+      body,
+      weight: Math.round(earthWeightLbs * PLANETARY_GRAVITY[body] * 100) / 100,
+    }))
+    .sort((a, b) => a.weight - b.weight);
+}
+
 // Rounds away floating-point noise and keeps the display readable.
 function formatNumber(value) {
   if (!isFinite(value)) return 'Error';
@@ -201,6 +234,8 @@ const CalculatorMath = {
   formatNumber,
   toRomanNumeral,
   calculateCompoundInterest,
+  PLANETARY_GRAVITY,
+  calculatePlanetaryWeights,
 };
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -476,7 +511,7 @@ if (typeof document !== 'undefined') {
       };
 
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman', 'theme-space');
         stopGhost();
         stopMonolith();
         stopCoffee();
@@ -593,6 +628,79 @@ if (typeof document !== 'undefined') {
         return;
       }
       renderCiResults(result);
+    });
+  })();
+
+  (function () {
+    const weightInput = document.getElementById('pw-earth-weight');
+    const calculateBtn = document.getElementById('pw-calculate');
+    const errorEl = document.getElementById('pw-error');
+    const resultsEl = document.getElementById('pw-results');
+    const tableEl = document.getElementById('pw-table');
+
+    if (!weightInput || !calculateBtn || !errorEl || !resultsEl || !tableEl) {
+      return;
+    }
+
+    // Astronomical/astrological symbol shown beside each body's name.
+    const BODY_EMOJI = {
+      Mercury: '☿',
+      Venus: '♀',
+      Moon: '🌙',
+      Mars: '♂',
+      Jupiter: '♃',
+      Saturn: '♄',
+      Uranus: '♅',
+      Neptune: '♆',
+      Pluto: '♇',
+      Titan: '🛰️',
+    };
+
+    function showPwError(message) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+      resultsEl.hidden = true;
+    }
+
+    function renderPwResults(results) {
+      const jupiter = results.find((row) => row.body === 'Jupiter');
+      const jupiterWeight = jupiter ? jupiter.weight : 0;
+
+      tableEl.innerHTML = '';
+      results.forEach((row) => {
+        const tr = document.createElement('tr');
+
+        const bodyCell = document.createElement('td');
+        bodyCell.textContent = `${BODY_EMOJI[row.body] || ''} ${row.body}`.trim();
+        tr.appendChild(bodyCell);
+
+        const weightCell = document.createElement('td');
+        weightCell.className = 'pw-weight';
+        weightCell.textContent = `${row.weight.toFixed(2)} lbs`;
+        tr.appendChild(weightCell);
+
+        const barCell = document.createElement('td');
+        const bar = document.createElement('div');
+        bar.className = 'pw-bar';
+        bar.style.width = `${((row.weight / jupiterWeight) * 100).toFixed(1)}%`;
+        barCell.appendChild(bar);
+        tr.appendChild(barCell);
+
+        tableEl.appendChild(tr);
+      });
+
+      errorEl.hidden = true;
+      resultsEl.hidden = false;
+    }
+
+    calculateBtn.addEventListener('click', () => {
+      const earthWeight = parseFloat(weightInput.value);
+      const result = calculatePlanetaryWeights(earthWeight);
+      if (result.error) {
+        showPwError(result.error);
+        return;
+      }
+      renderPwResults(result);
     });
   })();
 }
