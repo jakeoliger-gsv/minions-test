@@ -165,6 +165,126 @@ body {
   display: block;
 }
 
+/* ---------- Compound interest tab ---------- */
+
+.ci-panel {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  color: #eef0f6;
+}
+
+.ci-title {
+  margin: 0 0 18px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #f5f6fa;
+}
+
+.ci-field {
+  margin-bottom: 14px;
+}
+
+.ci-field label {
+  display: block;
+  font-size: 0.8rem;
+  color: #b7bfe6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.ci-field input {
+  width: 100%;
+  background: #0d0e13;
+  color: #eef0f6;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+.ci-calculate {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.ci-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin-bottom: 10px;
+}
+
+.ci-summary {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ci-summary-item {
+  display: flex;
+  justify-content: space-between;
+  background: #0d0e13;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ci-summary-label {
+  font-size: 0.85rem;
+  color: #b7bfe6;
+}
+
+.ci-summary-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5f6fa;
+}
+
+.ci-view-label {
+  font-size: 0.85rem;
+  color: #7d8296;
+  margin-bottom: 10px;
+}
+
+#ci-table {
+  max-height: 480px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: #0d0e13;
+}
+
+#ci-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#ci-table th,
+#ci-table td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#ci-table th:first-child,
+#ci-table td:first-child {
+  text-align: left;
+}
+
+#ci-table thead th {
+  position: sticky;
+  top: 0;
+  background: #15171f;
+  color: #b7bfe6;
+  font-weight: 500;
+}
+
 /* ---------- Theme picker ---------- */
 
 .theme-picker {

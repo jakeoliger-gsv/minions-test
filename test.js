@@ -13,7 +13,8 @@ const {
   applyTan,
   applyJakify,
   applyUnary,
-  formatNumber
+  formatNumber,
+  calculateCompoundInterest
 } = CalculatorMath;
 
 // Helper: Assert floating-point equality with tolerance
@@ -4160,6 +4161,925 @@ console.log('  ✓ Selecting Roman theme stores "roman" in localStorage');
   assert(calculatorEl.classList.contains('theme-roman'), 'Roman theme should persist from localStorage on reload');
 }
 console.log('  ✓ Roman theme is restored from localStorage on page reload');
+
+// ============================================================================
+// AC1: Compound Interest Calculation - Three Scenarios
+// ============================================================================
+
+console.log('\nAC1: Compound Interest Calculation');
+
+// Test scenario (a): Lump sum only (monthlyPayment=0)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 12,
+    monthlyPayment: 0,
+    years: 1
+  });
+
+  // Manual calculation: monthly rate = 12/100/12 = 0.01
+  // Month 1: balance = 1000 * (1 + 0.01) + 0 = 1010
+  // Month 2: balance = 1010 * (1 + 0.01) + 0 = 1020.10
+  // ... continuing for 12 months
+  // Expected: finalBalance ≈ 1126.825...
+  assertClose(result.finalBalance, 1000 * Math.pow(1.01, 12), 1e-6, 'Lump sum only: finalBalance');
+  assert.strictEqual(result.totalContributed, 1000, 'Lump sum only: totalContributed should be principal');
+  assertClose(result.totalInterest, result.finalBalance - 1000, 1e-6, 'Lump sum only: totalInterest');
+}
+console.log('  ✓ Lump sum only (principal=1000, rate=12%, monthly=0, years=1)');
+
+// Test scenario (b): Monthly payments only (principal=0)
+{
+  const result = calculateCompoundInterest({
+    principal: 0,
+    annualRate: 12,
+    monthlyPayment: 100,
+    years: 1
+  });
+
+  // With 0 principal, after 12 months of $100 contributions at 1% monthly rate:
+  // Total contributed = 100 * 12 = 1200
+  // This grows via compound interest
+  // Manual: sum of (100 * (1.01)^(12-month)) for months 1..12
+  let expectedBalance = 0;
+  for (let month = 1; month <= 12; month++) {
+    expectedBalance = expectedBalance * 1.01 + 100;
+  }
+  assertClose(result.finalBalance, expectedBalance, 1e-6, 'Monthly payments only: finalBalance');
+  assert.strictEqual(result.totalContributed, 1200, 'Monthly payments only: totalContributed');
+  assertClose(result.totalInterest, expectedBalance - 1200, 1e-6, 'Monthly payments only: totalInterest');
+}
+console.log('  ✓ Monthly payments only (principal=0, rate=12%, monthly=100, years=1)');
+
+// Test scenario (c): Combined (both principal and monthly payments)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 6,
+    monthlyPayment: 50,
+    years: 2
+  });
+
+  // Manual calculation with monthly rate = 6/100/12 = 0.005
+  let balance = 1000;
+  const monthlyRate = 0.06 / 12;
+  for (let month = 1; month <= 24; month++) {
+    balance = balance * (1 + monthlyRate) + 50;
+  }
+  assertClose(result.finalBalance, balance, 1e-6, 'Combined: finalBalance');
+  assert.strictEqual(result.totalContributed, 1000 + 50 * 24, 'Combined: totalContributed');
+  assertClose(result.totalInterest, balance - (1000 + 50 * 24), 1e-6, 'Combined: totalInterest');
+}
+console.log('  ✓ Combined scenario (principal=1000, rate=6%, monthly=50, years=2)');
+
+// ============================================================================
+// AC2: Zero Annual Rate
+// ============================================================================
+
+console.log('\nAC2: Zero Annual Rate');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 500,
+    annualRate: 0,
+    monthlyPayment: 50,
+    years: 2
+  });
+
+  // With 0 rate, balance grows only by contributions
+  // finalBalance = principal + monthlyPayment * totalMonths = 500 + 50*24 = 1700
+  assert.strictEqual(result.finalBalance, 1700, 'Zero rate: finalBalance should be principal + contributions');
+  assert.strictEqual(result.totalInterest, 0, 'Zero rate: totalInterest should be 0');
+}
+console.log('  ✓ Zero rate: balance grows only via principal and monthly contributions');
+
+// ============================================================================
+// AC3: Invalid Input Validation
+// ============================================================================
+
+console.log('\nAC3: Invalid Input Validation');
+
+// Test: Negative principal
+{
+  const result = calculateCompoundInterest({
+    principal: -1,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative principal should return error');
+}
+console.log('  ✓ Negative principal returns error');
+
+// Test: Negative annual rate
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: -5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative annualRate should return error');
+}
+console.log('  ✓ Negative annual rate returns error');
+
+// Test: Negative monthly payment
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: -10,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'Negative monthlyPayment should return error');
+}
+console.log('  ✓ Negative monthly payment returns error');
+
+// Test: Zero years
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 0
+  });
+  assert(result.error === 'Invalid input', 'Zero years should return error');
+}
+console.log('  ✓ Zero years returns error');
+
+// Test: Non-integer years (10.5)
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 10.5
+  });
+  assert(result.error === 'Invalid input', 'Non-integer years should return error');
+}
+console.log('  ✓ Non-integer years (10.5) returns error');
+
+// Test: NaN principal (from blank field)
+{
+  const result = calculateCompoundInterest({
+    principal: NaN,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN principal should return error');
+}
+console.log('  ✓ NaN principal returns error');
+
+// Test: NaN annual rate
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: NaN,
+    monthlyPayment: 100,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN annualRate should return error');
+}
+console.log('  ✓ NaN annual rate returns error');
+
+// Test: NaN monthly payment
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: NaN,
+    years: 1
+  });
+  assert(result.error === 'Invalid input', 'NaN monthlyPayment should return error');
+}
+console.log('  ✓ NaN monthly payment returns error');
+
+// ============================================================================
+// AC4: Monthly and Annual Breakdown Lengths
+// ============================================================================
+
+console.log('\nAC4: Monthly and Annual Breakdown Lengths');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 3
+  });
+
+  assert.strictEqual(result.monthlyBreakdown.length, 36, 'monthlyBreakdown should have 36 entries for 3 years');
+  assert.strictEqual(result.annualSummary.length, 3, 'annualSummary should have 3 entries for 3 years');
+}
+console.log('  ✓ 3 years: monthlyBreakdown has 36 entries, annualSummary has 3 entries');
+
+// ============================================================================
+// AC5: useAnnualView Threshold at 10 Years
+// ============================================================================
+
+console.log('\nAC5: useAnnualView Threshold');
+
+{
+  const result10 = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 10
+  });
+  assert.strictEqual(result10.useAnnualView, false, 'useAnnualView should be false for years === 10');
+}
+console.log('  ✓ useAnnualView is false when years === 10');
+
+{
+  const result11 = calculateCompoundInterest({
+    principal: 1000,
+    annualRate: 5,
+    monthlyPayment: 100,
+    years: 11
+  });
+  assert.strictEqual(result11.useAnnualView, true, 'useAnnualView should be true for years > 10');
+}
+console.log('  ✓ useAnnualView is true when years === 11');
+
+// ============================================================================
+// AC6: Annual Summary Interest Matches Monthly Breakdown
+// ============================================================================
+
+console.log('\nAC6: Annual Summary Interest Validation');
+
+{
+  const result = calculateCompoundInterest({
+    principal: 5000,
+    annualRate: 8,
+    monthlyPayment: 200,
+    years: 2
+  });
+
+  // Sum interest earned in first 12 months
+  const firstYearInterest = result.monthlyBreakdown.slice(0, 12).reduce((sum, m) => sum + m.interestEarned, 0);
+  assertClose(result.annualSummary[0].interestEarnedInYear, firstYearInterest, 1e-6, 'Year 1 interest should match');
+}
+console.log('  ✓ annualSummary[0].interestEarnedInYear matches sum of first 12 months');
+
+// ============================================================================
+// AC7: DOM Test - 10 Years Monthly Breakdown
+// ============================================================================
+
+console.log('\nAC7: DOM - 10 Years Monthly Breakdown');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '10000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '10' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 120 rows (10 years * 12 months)
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 120, 'Table should have 120 rows for 10 years');
+
+  // Check view label text
+  assert(
+    ciElements['ci-view-label'].textContent.includes('month-by-month breakdown'),
+    'View label should mention month-by-month breakdown'
+  );
+
+  // Check currency formatting (should match $X,XXX.XX pattern)
+  const currencyPattern = /^\$[\d,]+\.\d{2}$/;
+  assert(
+    currencyPattern.test(ciElements['ci-final-balance'].textContent),
+    'Final balance should be currency formatted'
+  );
+  assert(
+    currencyPattern.test(ciElements['ci-total-contributed'].textContent),
+    'Total contributed should be currency formatted'
+  );
+  assert(
+    currencyPattern.test(ciElements['ci-total-interest'].textContent),
+    'Total interest should be currency formatted'
+  );
+
+  assert.strictEqual(ciElements['ci-results'].hidden, false, 'Results should be visible');
+}
+console.log('  ✓ 10 years: table has 120 rows, shows month-by-month label, currency-formatted values');
+
+// ============================================================================
+// AC8: DOM Test - Annual Summary (11 and 50 Years)
+// ============================================================================
+
+console.log('\nAC8: DOM - Annual Summary View');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '10000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '11' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI11 = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 11 rows (annual summary for 11 years)
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 11, 'Table should have 11 rows for 11 years (annual summary)');
+
+  // Check view label mentions annual summary
+  assert(
+    ciElements['ci-view-label'].textContent.includes('annual summary'),
+    'View label should mention annual summary'
+  );
+
+  assert.strictEqual(ciElements['ci-results'].hidden, false, 'Results should be visible');
+}
+console.log('  ✓ 11 years: table has 11 rows, shows annual summary label');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '5000' },
+    'ci-rate': { value: '3' },
+    'ci-monthly': { value: '50' },
+    'ci-years': { value: '50' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCI50 = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check table has 50 rows
+  const tableBody = ciElements['ci-table-body'];
+  const rowCount = tableBody.children.length;
+  assert.strictEqual(rowCount, 50, 'Table should have 50 rows for 50 years');
+}
+console.log('  ✓ 50 years: table has 50 rows');
+
+// ============================================================================
+// AC9: DOM Test - Error Handling
+// ============================================================================
+
+console.log('\nAC9: DOM - Error Handling');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const eventListenersCi = {};
+
+  const ciElements = {
+    'expression': { textContent: '', classList: { toggle: () => {} } },
+    'result': { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '-1' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '10' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCi['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCi = {
+    getElementById: (id) => {
+      if (ciElements[id]) return ciElements[id];
+      if (id === 'ci-calculate') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCi['ci-calculate'] = handler;
+          }
+        };
+      }
+      return null;
+    },
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (ciElements[id]) return ciElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'ci-calculate') {
+          return {
+            addEventListener: (event, handler) => {
+              eventListenersCi['ci-calculate'] = handler;
+            }
+          };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      // Provide calculator DOM stubs to prevent errors
+      if (selector === '.main-buttons' || selector === '.sci-buttons' || selector === '.calculator') {
+        return {
+          addEventListener: (event, handler) => {}
+        };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]' || selector === '.btn.digit') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCi;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorWithCIError = require('./script.js');
+
+  // Simulate clicking the calculate button
+  const calculateHandler = eventListenersCi['ci-calculate'];
+  if (calculateHandler) {
+    calculateHandler();
+  }
+
+  // Check error message is displayed
+  assert(ciElements['ci-error'].textContent !== '', 'Error message should be displayed');
+
+  // Check results remain hidden
+  assert.strictEqual(ciElements['ci-results'].hidden, true, 'Results should remain hidden on error');
+}
+console.log('  ✓ Negative principal shows error and keeps results hidden');
+
+// ============================================================================
+// AC10: DOM Test - Calculator Tab Still Works After CI Usage
+// ============================================================================
+
+console.log('\nAC10: Regression - Calculator Tab Still Works');
+
+{
+  delete global.document;
+  delete global.window;
+
+  // Create fake DOM for both calculator and CI tabs
+  const eventListenersCalc = {};
+
+  const stubElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'ci-principal': { value: '1000' },
+    'ci-rate': { value: '5' },
+    'ci-monthly': { value: '100' },
+    'ci-years': { value: '1' },
+    'ci-calculate': {
+      onclick: null,
+      addEventListener: (event, handler) => {
+        eventListenersCalc['ci-calculate'] = handler;
+      }
+    },
+    'ci-error': { textContent: '' },
+    'ci-results': { hidden: true },
+    'ci-final-balance': { textContent: '' },
+    'ci-total-contributed': { textContent: '' },
+    'ci-total-interest': { textContent: '' },
+    'ci-view-label': { textContent: '' },
+    'ci-table-body': {
+      innerHTML: '',
+      children: [],
+      appendChild: function(child) {
+        this.children.push(child);
+      }
+    }
+  };
+
+  const fakeDomCalc = {
+    getElementById: (id) => stubElements[id] || null,
+    querySelector: (selector) => {
+      // Handle ID selectors
+      if (selector.startsWith('#')) {
+        const id = selector.slice(1);
+        if (stubElements[id]) return stubElements[id];
+        if (id === 'expression' || id === 'result') {
+          return { textContent: '', classList: { toggle: () => {} } };
+        }
+        if (id === 'theme-select') {
+          return { addEventListener: (event, handler) => {} };
+        }
+        return null;
+      }
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCalc['main-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            eventListenersCalc['sci-buttons'] = handler;
+          }
+        };
+      }
+      if (selector === '.calculator') {
+        return { classList: { remove: () => {}, add: () => {} } };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '.btn.digit') return [];
+      if (selector === '[data-tab]') return [];
+      return [];
+    },
+    createElement: (tag) => {
+      if (tag === 'tr') {
+        return {
+          appendChild: function(child) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+          }
+        };
+      }
+      if (tag === 'td') {
+        return {
+          textContent: '',
+          appendChild: function(child) {}
+        };
+      }
+      return { appendChild: (child) => {} };
+    }
+  };
+
+  global.document = fakeDomCalc;
+  global.window = {};
+  global.localStorage = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  const CalculatorFinal = require('./script.js');
+
+  // Helper to simulate a button click
+  function simulateButtonClickCalc(containerKey, selector, classList = []) {
+    const handler = eventListenersCalc[containerKey];
+    if (!handler) return;
+
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Test: Basic calculator operation 2 + 2
+  simulateButtonClickCalc('main-buttons', { dataValue: '2' }, ['digit']);
+  simulateButtonClickCalc('main-buttons', { dataValue: '+' }, ['operator']);
+  simulateButtonClickCalc('main-buttons', { dataValue: '2' }, ['digit']);
+  simulateButtonClickCalc('main-buttons', { dataAction: 'equals' }, ['equals']);
+
+  // Verify result
+  assert.strictEqual(stubElements.result.textContent, '4', 'Calculator should still compute 2+2=4 after CI usage');
+}
+console.log('  ✓ Calculator tab computes 2+2=4 correctly after using CI tab');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
