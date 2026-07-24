@@ -7,6 +7,13 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="app-shell">
+  <nav id="tab-bar">
+    <button class="active" data-tab="calculator">Calculator</button>
+    <button data-tab="compound-interest">Compound Interest</button>
+    <button data-tab="planetary-weight">Planetary Weight</button>
+  </nav>
+  <section id="panel-calculator" class="tab-panel active">
 <div class="calculator">
   <div class="theme-picker">
     <label for="theme-select" class="theme-picker-label">Theme</label>
@@ -63,6 +70,10 @@
     <button class="btn digit zero" data-value="0">0</button>
     <button class="btn digit dot" data-value=".">.</button>
   </div>
+</div>
+  </section>
+  <section id="panel-compound-interest" class="tab-panel"></section>
+  <section id="panel-planetary-weight" class="tab-panel"></section>
 </div>
 <script src="script.js"></script>
 </body>
