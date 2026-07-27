@@ -439,6 +439,23 @@ body {
   opacity: 1;
 }
 
+/* ---------- Alien emoji (Alien Monster theme only) ---------- */
+
+.alien-emoji {
+  position: fixed;
+  top: 0;
+  left: 0;
+  font-size: 2.5rem;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.25s ease, top 0.4s ease, left 0.4s ease;
+}
+
+.alien-emoji.visible {
+  opacity: 1;
+}
+
 /* ---------- Halloween theme ---------- */
 
 .calculator.theme-halloween {
@@ -1018,5 +1035,84 @@ body {
 .calculator.theme-space .btn.equals {
   background: linear-gradient(160deg, #00ccff 0%, #0066cc 100%);
   color: #041024;
+  font-weight: 700;
+}
+
+/* ---------- Alien Monster theme ---------- */
+
+.calculator.theme-alien-monster {
+  background: linear-gradient(160deg, #0d1a0f 0%, #081108 100%);
+  border: 2px solid #1a3d1a;
+  border-radius: 16px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 255, 65, 0.1) inset;
+}
+
+.calculator.theme-alien-monster .display {
+  background: #050a05;
+  border: 1px solid #1a4d1a;
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(0, 255, 65, 0.15) inset;
+}
+
+.calculator.theme-alien-monster .expression {
+  color: #66ff00;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+}
+
+.calculator.theme-alien-monster .result {
+  color: #00ff41;
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.8);
+}
+
+.calculator.theme-alien-monster .btn {
+  background: linear-gradient(160deg, #1a2a1a 0%, #0f1a0f 100%);
+  color: #88dd66;
+  border: 1px solid #2a5a2a;
+  border-radius: 10px;
+}
+
+.calculator.theme-alien-monster .btn:hover {
+  background: linear-gradient(160deg, #224422 0%, #1a3a1a 100%);
+}
+
+.calculator.theme-alien-monster .btn.digit {
+  background: #4a8844;
+  color: #000000;
+  border: 1px solid #2a5a2a;
+  font-weight: 600;
+}
+
+.calculator.theme-alien-monster .btn.digit:hover {
+  background: #5a9844;
+}
+
+.calculator.theme-alien-monster .sci-buttons .btn {
+  background: linear-gradient(160deg, #1a2a1a 0%, #0f1a0f 100%);
+  color: #66dd00;
+}
+
+.calculator.theme-alien-monster .btn.operator {
+  background: linear-gradient(160deg, #8b1a1a 0%, #5a0f0f 100%);
+  color: #ff6b6b;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.6);
+  border: 1px solid #cc3333;
+}
+
+.calculator.theme-alien-monster .btn.operator:hover {
+  background: linear-gradient(160deg, #aa2a2a 0%, #771717 100%);
+}
+
+.calculator.theme-alien-monster .btn.util {
+  background: linear-gradient(160deg, #2a3a2a 0%, #1a2a1a 100%);
+  color: #88dd66;
+}
+
+.calculator.theme-alien-monster .btn.equals {
+  background: linear-gradient(160deg, #cc0000 0%, #990000 100%);
+  color: #ffcccc;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.8);
+  border: 1px solid #ff3333;
   font-weight: 700;
 }

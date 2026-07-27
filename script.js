@@ -504,6 +504,7 @@ if (typeof document !== 'undefined') {
     const ghostEl = document.getElementById('ghost-emoji');
     const monolithEl = document.getElementById('monolith-emoji');
     const coffeeEl = document.getElementById('coffee-emoji');
+    const alienEl = document.getElementById('alien-emoji');
     const THEME_STORAGE_KEY = 'calculator-theme';
     const clearBtn = document.querySelector('[data-action="clear"]');
     const equalsBtn = document.querySelector('[data-action="equals"]');
@@ -525,8 +526,10 @@ if (typeof document !== 'undefined') {
 
     if (calculatorEl && themeSelect && ghostEl && monolithEl && coffeeEl) {
       let ghostTimeoutId = null;
+      let alienTimeoutId = null;
 
       const stopGhost = () => {
+        if (!ghostEl) return;
         if (ghostTimeoutId !== null) {
           clearTimeout(ghostTimeoutId);
           ghostTimeoutId = null;
@@ -535,6 +538,7 @@ if (typeof document !== 'undefined') {
       };
 
       const moveGhost = () => {
+        if (!ghostEl) return;
         const maxTop = Math.max(window.innerHeight - 60, 0);
         const maxLeft = Math.max(window.innerWidth - 60, 0);
         ghostEl.style.top = `${Math.random() * maxTop}px`;
@@ -544,26 +548,50 @@ if (typeof document !== 'undefined') {
       };
 
       const stopMonolith = () => {
+        if (!monolithEl) return;
         monolithEl.classList.remove('visible');
       };
 
       const showMonolith = () => {
+        if (!monolithEl) return;
         monolithEl.classList.add('visible');
       };
 
       const stopCoffee = () => {
+        if (!coffeeEl) return;
         coffeeEl.classList.remove('visible');
       };
 
       const showCoffee = () => {
+        if (!coffeeEl) return;
         coffeeEl.classList.add('visible');
       };
 
+      const stopAlien = () => {
+        if (!alienEl) return;
+        if (alienTimeoutId !== null) {
+          clearTimeout(alienTimeoutId);
+          alienTimeoutId = null;
+        }
+        alienEl.classList.remove('visible');
+      };
+
+      const moveAlien = () => {
+        if (!alienEl) return;
+        const maxTop = Math.max(window.innerHeight - 60, 0);
+        const maxLeft = Math.max(window.innerWidth - 60, 0);
+        alienEl.style.top = `${Math.random() * maxTop}px`;
+        alienEl.style.left = `${Math.random() * maxLeft}px`;
+        alienEl.classList.add('visible');
+        alienTimeoutId = setTimeout(moveAlien, 700 + Math.random() * 1800);
+      };
+
       const applyTheme = (theme) => {
-        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman', 'theme-space');
+        calculatorEl.classList.remove('theme-halloween', 'theme-dark-mode', 'theme-childrens', 'theme-monolith', 'theme-minions', 'theme-marvel-ironman', 'theme-coffee-lovers', 'theme-roman', 'theme-space', 'theme-alien-monster');
         stopGhost();
         stopMonolith();
         stopCoffee();
+        stopAlien();
         if (theme) {
           calculatorEl.classList.add(`theme-${theme}`);
         }
@@ -573,6 +601,8 @@ if (typeof document !== 'undefined') {
           showMonolith();
         } else if (theme === 'coffee-lovers') {
           showCoffee();
+        } else if (theme === 'alien-monster') {
+          moveAlien();
         }
         isRomanTheme = theme === 'roman';
         updateRomanLabels(isRomanTheme);
