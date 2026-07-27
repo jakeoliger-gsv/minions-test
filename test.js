@@ -6033,7 +6033,9 @@ function makeAlienMonsterThemeTestElements() {
     ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
     monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
     coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() },
-    alienEmoji: { id: 'alien-emoji', style: { top: '', left: '' }, classList: createClassListMock() }
+    alienEmoji: { id: 'alien-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    mainButtonsHandler: null,
+    sciButtonsHandler: null
   };
 
   const fakeDOM = {
@@ -6049,8 +6051,20 @@ function makeAlienMonsterThemeTestElements() {
     },
     querySelector: (selector) => {
       if (selector === '.calculator') return elements.calculator;
-      if (selector === '.main-buttons') return { addEventListener: () => {} };
-      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      if (selector === '.main-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            elements.mainButtonsHandler = handler;
+          }
+        };
+      }
+      if (selector === '.sci-buttons') {
+        return {
+          addEventListener: (event, handler) => {
+            elements.sciButtonsHandler = handler;
+          }
+        };
+      }
       return null;
     }
   };
@@ -6262,17 +6276,44 @@ console.log('\nAC4: Display renders correctly while Alien Monster theme is activ
   delete require.cache[require.resolve('./script.js')];
   require('./script.js');
 
+  // Helper to simulate button clicks
+  function simulateAlienClick(containerKey, selector, classList = []) {
+    const handler = containerKey === 'main' ? elements.mainButtonsHandler : elements.sciButtonsHandler;
+    const fakeButton = {
+      dataset: {},
+      classList: classList.reduce((acc, cls) => ({ ...acc, [cls]: true }), {}),
+      closest: (s) => fakeButton
+    };
+
+    if (selector.dataValue !== undefined) {
+      fakeButton.dataset.value = selector.dataValue;
+    }
+    if (selector.dataAction !== undefined) {
+      fakeButton.dataset.action = selector.dataAction;
+    }
+
+    const classList_contains = (cls) => classList.includes(cls);
+    fakeButton.classList.contains = classList_contains;
+
+    handler({ target: fakeButton });
+  }
+
+  // Select Alien Monster theme first
   elements.themeSelect.value = 'alien-monster';
   elements.themeSelect.changeHandler({ target: elements.themeSelect });
 
-  // The render() function should populate expression and result even while theme is active
-  // This is the substrate test — actual glow colors are E2E-only
+  // Verify theme is applied
   assert(elements.calculator.classList.contains('theme-alien-monster'), 'theme-alien-monster class should be present');
-  // Verify the display elements exist and can render (they're set up in the fake DOM)
-  assert(elements.expression !== undefined, 'expression element should exist and be renderable');
-  assert(elements.result !== undefined, 'result element should exist and be renderable');
+
+  // Test basic arithmetic with alien-monster theme active (5 + 3 = 8)
+  simulateAlienClick('main', { dataValue: '5' }, ['digit']);
+  simulateAlienClick('main', { dataValue: '+' }, ['operator']);
+  simulateAlienClick('main', { dataValue: '3' }, ['digit']);
+  simulateAlienClick('main', { dataAction: 'equals' }, ['equals']);
+
+  assert.strictEqual(elements.result.textContent, '8', 'With alien-monster theme: 5 + 3 should equal 8');
 }
-console.log('  ✓ Display renders while Alien Monster theme is active');
+console.log('  ✓ Display renders correctly while Alien Monster theme is active (arithmetic operations work unchanged)');
 
 console.log('\nAC5: Selecting Alien Monster writes to localStorage and persists across reloads');
 
@@ -6377,3 +6418,5 @@ console.log('  ✓ Rapid theme switching (Halloween ↔ Alien Monster) works cor
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
+
+process.exit(0);
