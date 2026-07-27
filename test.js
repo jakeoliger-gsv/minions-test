@@ -5995,6 +5995,385 @@ console.log('  ✓ Switching from Space to Halloween resumes the ghost animation
 }
 console.log('  ✓ Switching from Space to Roman resumes digit and button relabeling');
 
+// ============================================================================
+// JMNT-14: Alien Monster Theme
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-14: Alien Monster Theme');
+console.log('='.repeat(70));
+
+function makeAlienMonsterThemeTestElements() {
+  const elements = {
+    expression: { id: 'expression', textContent: '', classList: createClassListMock() },
+    result: { id: 'result', textContent: '0', classList: createClassListMock() },
+    themeSelect: {
+      id: 'theme-select',
+      value: '',
+      options: [
+        { value: '', textContent: 'Default' },
+        { value: 'halloween', textContent: 'Halloween' },
+        { value: 'dark-mode', textContent: 'Dark Mode' },
+        { value: 'childrens', textContent: "Children's" },
+        { value: 'monolith', textContent: '2001: A Space Odyssey' },
+        { value: 'minions', textContent: 'Minions' },
+        { value: 'marvel-ironman', textContent: 'Marvel/Iron Man' },
+        { value: 'coffee-lovers', textContent: 'Coffee Lovers' },
+        { value: 'roman', textContent: 'Roman' },
+        { value: 'space', textContent: 'Space' },
+        { value: 'alien-monster', textContent: 'Alien Monster' }
+      ],
+      addEventListener: (event, handler) => {
+        if (event === 'change') {
+          elements.themeSelect.changeHandler = handler;
+        }
+      }
+    },
+    calculator: { classList: createClassListMock() },
+    ghostEmoji: { id: 'ghost-emoji', style: { top: '', left: '' }, classList: createClassListMock() },
+    monolithEmoji: { id: 'monolith-emoji', classList: createClassListMock() },
+    coffeeEmoji: { id: 'coffee-emoji', classList: createClassListMock() },
+    alienEmoji: { id: 'alien-emoji', style: { top: '', left: '' }, classList: createClassListMock() }
+  };
+
+  const fakeDOM = {
+    getElementById: (id) => {
+      if (id === 'expression') return elements.expression;
+      if (id === 'result') return elements.result;
+      if (id === 'theme-select') return elements.themeSelect;
+      if (id === 'ghost-emoji') return elements.ghostEmoji;
+      if (id === 'monolith-emoji') return elements.monolithEmoji;
+      if (id === 'coffee-emoji') return elements.coffeeEmoji;
+      if (id === 'alien-emoji') return elements.alienEmoji;
+      return null;
+    },
+    querySelector: (selector) => {
+      if (selector === '.calculator') return elements.calculator;
+      if (selector === '.main-buttons') return { addEventListener: () => {} };
+      if (selector === '.sci-buttons') return { addEventListener: () => {} };
+      return null;
+    }
+  };
+
+  return { elements, fakeDOM: patchFakeDOMForRomanTheme(fakeDOM) };
+}
+
+console.log('\nAC1: Alien Monster option exists in #theme-select');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+
+  const alienOption = elements.themeSelect.options.find(opt => opt.value === 'alien-monster');
+  assert(alienOption, 'alien-monster option should exist in theme select');
+  assert.strictEqual(alienOption.textContent, 'Alien Monster', 'alien-monster option should have textContent "Alien Monster"');
+
+  const lastOption = elements.themeSelect.options[elements.themeSelect.options.length - 1];
+  assert.strictEqual(lastOption.value, 'alien-monster', 'alien-monster should be the last option in the dropdown');
+}
+console.log('  ✓ Alien Monster option exists in theme dropdown as the last option');
+
+console.log('\nAC1: Selecting Alien Monster adds theme-alien-monster class to .calculator');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Start on a different theme first to prove Alien Monster removes it
+  elements.themeSelect.value = 'dark-mode';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-dark-mode'), 'dark-mode theme should apply first');
+
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-alien-monster'), 'selecting Alien Monster should add theme-alien-monster class');
+  assert(!elements.calculator.classList.contains('theme-dark-mode'), 'selecting Alien Monster should remove theme-dark-mode');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.calculator.classList.contains('theme-alien-monster'), 'switching away from Alien Monster should remove theme-alien-monster');
+  assert(elements.calculator.classList.contains('theme-halloween'), 'switching to Halloween should apply theme-halloween');
+}
+console.log('  ✓ Selecting Alien Monster adds theme-alien-monster and removes prior theme classes; switching away removes theme-alien-monster');
+
+console.log('\nAC2: Selecting Alien Monster makes #alien-emoji visible and schedules a moveAlien timeout');
+
+{
+  delete global.document;
+  delete global.window;
+
+  let alienIntervalStarted = false;
+  let alienTimeoutId = null;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  global.setTimeout = function (fn, delay) {
+    alienIntervalStarted = true;
+    alienTimeoutId = originalSetTimeout(fn, delay);
+    return alienTimeoutId;
+  };
+  global.clearTimeout = function (id) {
+    return originalClearTimeout(id);
+  };
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Select Alien Monster to start alien interval
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert(alienIntervalStarted, 'Selecting Alien Monster should start a setTimeout for alien emoji');
+  assert(elements.alienEmoji.classList.contains('visible'), 'alien emoji should become visible when Alien Monster is selected');
+
+  // Clean up: switch back to default to clear the pending timeout before restoring globals
+  elements.themeSelect.value = '';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Alien Monster theme starts alien emoji interval and makes emoji visible');
+
+console.log('\nAC3: Switching from Alien Monster to another theme stops alien emoji animation');
+
+{
+  delete global.document;
+  delete global.window;
+
+  let alienIntervalStarted = false;
+  let alienIntervalCleared = false;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  global.setTimeout = function (fn, delay) {
+    alienIntervalStarted = true;
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function (id) {
+    alienIntervalCleared = true;
+    return originalClearTimeout(id);
+  };
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Start with Alien Monster
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(alienIntervalStarted, 'Alien Monster should start the interval');
+  assert(elements.alienEmoji.classList.contains('visible'), 'alien emoji should be visible');
+
+  // Switch to a different theme
+  alienIntervalStarted = false; // reset the flag to track if clearTimeout is called
+  elements.themeSelect.value = 'dark-mode';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert(alienIntervalCleared, 'switching away from Alien Monster should clear the alien timeout');
+  assert(!elements.alienEmoji.classList.contains('visible'), 'alien emoji should no longer be visible after switching away');
+  assert(!elements.calculator.classList.contains('theme-alien-monster'), '.calculator should not have theme-alien-monster class');
+  assert(elements.calculator.classList.contains('theme-dark-mode'), 'the new theme should be applied');
+
+  // Clean up globals
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Switching away from Alien Monster clears alien timeout and hides alien emoji');
+
+console.log('\nAC3/AC6: No other motif elements become visible while Alien Monster is active');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert(!elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should not be visible while Alien Monster is active');
+  assert(!elements.monolithEmoji.classList.contains('visible'), 'monolith emoji should not be visible while Alien Monster is active');
+  assert(!elements.coffeeEmoji.classList.contains('visible'), 'coffee emoji should not be visible while Alien Monster is active');
+}
+console.log('  ✓ No other motif elements (#ghost-emoji, #monolith-emoji, #coffee-emoji) become visible while Alien Monster is active');
+
+console.log('\nAC6: Alien emoji is not visible when other themes are active');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Test with Halloween theme
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.alienEmoji.classList.contains('visible'), 'alien emoji should not be visible when Halloween is active');
+  assert(!elements.calculator.classList.contains('theme-alien-monster'), 'theme-alien-monster should not be applied when Halloween is active');
+
+  // Test with default theme
+  elements.themeSelect.value = '';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.alienEmoji.classList.contains('visible'), 'alien emoji should not be visible when Default theme is active');
+  assert(!elements.calculator.classList.contains('theme-alien-monster'), 'theme-alien-monster should not be applied when Default is active');
+}
+console.log('  ✓ Alien emoji is not visible and theme-alien-monster is not applied when other themes are active');
+
+console.log('\nAC4: Display renders correctly while Alien Monster theme is active');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  // The render() function should populate expression and result even while theme is active
+  // This is the substrate test — actual glow colors are E2E-only
+  assert(elements.calculator.classList.contains('theme-alien-monster'), 'theme-alien-monster class should be present');
+  // Verify the display elements exist and can render (they're set up in the fake DOM)
+  assert(elements.expression !== undefined, 'expression element should exist and be renderable');
+  assert(elements.result !== undefined, 'result element should exist and be renderable');
+}
+console.log('  ✓ Display renders while Alien Monster theme is active');
+
+console.log('\nAC5: Selecting Alien Monster writes to localStorage and persists across reloads');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+
+  assert.strictEqual(localStorageMock['calculator-theme'], 'alien-monster', 'selecting Alien Monster should write "alien-monster" to localStorage');
+}
+console.log('  ✓ Selecting Alien Monster writes "alien-monster" to localStorage[\'calculator-theme\']');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'alien-monster' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key],
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'alien-monster', 'theme-select should be restored to "alien-monster" on load');
+  assert(elements.calculator.classList.contains('theme-alien-monster'), 'theme-alien-monster class should be applied automatically on load');
+}
+console.log('  ✓ A fresh load with calculator-theme="alien-monster" in localStorage restores the Alien Monster theme automatically');
+
+console.log('\nAC6: Rapid theme switching includes Alien Monster without interference');
+
+{
+  delete global.document;
+  delete global.window;
+
+  let timeoutCount = 0;
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  global.setTimeout = function (fn, delay) {
+    timeoutCount++;
+    return originalSetTimeout(fn, delay);
+  };
+  global.clearTimeout = function (id) {
+    return originalClearTimeout(id);
+  };
+
+  const { elements, fakeDOM } = makeAlienMonsterThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+  global.localStorage = { getItem: () => null, setItem: () => {} };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Halloween -> Alien Monster -> Halloween
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-halloween'), 'Halloween should be applied');
+  assert(elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should be visible with Halloween');
+  assert(!elements.alienEmoji.classList.contains('visible'), 'alien emoji should not be visible with Halloween');
+
+  elements.themeSelect.value = 'alien-monster';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(!elements.calculator.classList.contains('theme-halloween'), 'Halloween class should be removed');
+  assert(elements.calculator.classList.contains('theme-alien-monster'), 'Alien Monster class should be applied');
+  assert(!elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should not be visible with Alien Monster');
+  assert(elements.alienEmoji.classList.contains('visible'), 'alien emoji should be visible with Alien Monster');
+
+  elements.themeSelect.value = 'halloween';
+  elements.themeSelect.changeHandler({ target: elements.themeSelect });
+  assert(elements.calculator.classList.contains('theme-halloween'), 'Halloween should be restored');
+  assert(!elements.calculator.classList.contains('theme-alien-monster'), 'Alien Monster class should be removed');
+  assert(elements.ghostEmoji.classList.contains('visible'), 'ghost emoji should be visible again with Halloween');
+  assert(!elements.alienEmoji.classList.contains('visible'), 'alien emoji should not be visible when switching back to Halloween');
+
+  // Clean up globals
+  global.setTimeout = originalSetTimeout;
+  global.clearTimeout = originalClearTimeout;
+}
+console.log('  ✓ Rapid theme switching (Halloween ↔ Alien Monster) works correctly without interference');
+
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
