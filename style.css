@@ -16,17 +16,17 @@ body {
 .calculator {
   width: 100%;
   max-width: 360px;
-  background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
-  border-radius: 28px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
   padding: 24px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .display {
-  background: #0d0e13;
-  border-radius: 18px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
   padding: 24px 20px 18px;
   margin-bottom: 20px;
   text-align: right;
@@ -35,13 +35,13 @@ body {
   flex-direction: column;
   justify-content: flex-end;
   gap: 8px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
 .expression {
   font-size: 1.05rem;
-  color: #7d8296;
+  color: #6B7280;
+  font-weight: 400;
   min-height: 1.3em;
   overflow-x: auto;
   white-space: nowrap;
@@ -51,14 +51,14 @@ body {
 .result {
   font-size: 2.6rem;
   font-weight: 600;
-  color: #f5f6fa;
+  color: #111827;
   overflow-x: auto;
   white-space: nowrap;
   line-height: 1.1;
 }
 
 .result.error {
-  color: #ff6b6b;
+  color: #dc2626;
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -78,76 +78,74 @@ body {
 }
 
 .btn {
-  border: none;
-  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
   padding: 18px 0;
   font-size: 1.15rem;
   font-weight: 500;
-  color: #eef0f6;
-  background: #2a2e3d;
+  color: #111827;
+  background: #F9FAFB;
   cursor: pointer;
-  box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-  transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .btn:hover {
-  background: #333849;
+  background: #F3F4F6;
 }
 
 .btn:active {
   transform: translateY(1px) scale(0.97);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
 .sci-buttons .btn {
   font-size: 0.95rem;
   padding: 14px 0;
-  background: #23273a;
-  color: #b7bfe6;
+  background: #F9FAFB;
+  color: #374151;
 }
 
 .sci-buttons .btn:hover {
-  background: #2b3050;
+  background: #F3F4F6;
 }
 
 .sci-buttons .btn.inv-active {
-  box-shadow:
-    0 0 0 2px #ffd166,
-    0 4px 10px rgba(0, 0, 0, 0.35);
+  border-color: #2563EB;
+  background: #EFF6FF;
+  color: #1D4ED8;
 }
 
 .btn.operator {
-  background: #35395a;
-  color: #c9cdff;
+  background: #F9FAFB;
+  color: #374151;
+  border-color: #E5E7EB;
 }
 
 .btn.operator:hover {
-  background: #40456b;
+  background: #F3F4F6;
 }
 
 .btn.util {
-  background: #3a2a2f;
-  color: #ffb4bd;
+  background: #F9FAFB;
+  color: #374151;
+  border-color: #E5E7EB;
 }
 
 .btn.util:hover {
-  background: #47323a;
+  background: #F3F4F6;
 }
 
 .btn.equals {
   grid-row: span 2;
-  background: linear-gradient(160deg, #ff8a5b 0%, #ff5f7e 100%);
-  color: #1a1220;
-  font-weight: 700;
-  box-shadow:
-    0 6px 16px rgba(255, 95, 126, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  background: #2563EB;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-color: #2563EB;
 }
 
 .btn.equals:hover {
-  filter: brightness(1.05);
+  background: #1D4ED8;
+  border-color: #1D4ED8;
 }
 
 .btn.zero,
@@ -407,19 +405,21 @@ body {
 
 .theme-picker-label {
   font-size: 0.8rem;
-  color: #b7bfe6;
+  color: #6B7280;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
 #theme-select {
   flex: 1;
-  background: #23273a;
-  color: #eef0f6;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  background: #FFFFFF;
+  color: #111827;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
   padding: 8px 10px;
   font-size: 0.9rem;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* ---------- Ghost emoji (Halloween theme only) ---------- */
