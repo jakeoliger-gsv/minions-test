@@ -49,7 +49,7 @@ body {
 }
 
 .result {
-  font-size: 2.6rem;
+  font-size: 1.875rem;
   font-weight: 600;
   color: #111827;
   overflow-x: auto;
@@ -155,7 +155,7 @@ body {
 
 @media (max-width: 380px) {
   .result {
-    font-size: 2.1rem;
+    font-size: 1.5rem;
   }
 }
 
