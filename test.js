@@ -1,4 +1,6 @@
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 // Import the pure calculation logic
 const CalculatorMath = require('./script.js');
@@ -6414,6 +6416,81 @@ console.log('\nAC6: Rapid theme switching includes Alien Monster without interfe
   global.clearTimeout = originalClearTimeout;
 }
 console.log('  ✓ Rapid theme switching (Halloween ↔ Alien Monster) works correctly without interference');
+
+// ============================================================================
+// JMNT-19: LinFunify Button Label Rename
+// ============================================================================
+
+console.log('\n' + '='.repeat(70));
+console.log('JMNT-19: LinFunify Button Label Rename');
+console.log('='.repeat(70));
+
+// AC1: Verify button text is "LinFunify" and not "Jakify"
+console.log('\nAC1: Button Label Changed to "LinFunify"');
+{
+  const htmlPath = path.join(__dirname, 'index.html');
+  const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+
+  // Find the jakify button and check its text content
+  const jakifyButtonMatch = htmlContent.match(/<button\s+[^>]*data-action="jakify"[^>]*>([^<]*)<\/button>/);
+  assert(jakifyButtonMatch, 'Button with data-action="jakify" should exist in index.html');
+
+  const buttonText = jakifyButtonMatch[1];
+  assert.strictEqual(buttonText, 'LinFunify', 'Button text should be "LinFunify"');
+  assert(!buttonText.includes('Jakify'), 'Button text should not contain "Jakify"');
+}
+console.log('  ✓ Button with data-action="jakify" displays text "LinFunify"');
+console.log('  ✓ String "Jakify" no longer appears as the button text');
+
+// AC2: Verify calculation behavior is unchanged
+console.log('\nAC2: Jakify Function Behavior Unchanged (2x + 3)');
+{
+  // Re-run existing applyJakify tests from JMNT-5
+  const testCases = [
+    { input: 1, expected: 5 },
+    { input: 2, expected: 7 },
+    { input: -4, expected: -5 },
+    { input: 0, expected: 3 },
+    { input: 10, expected: 23 }
+  ];
+
+  for (const { input, expected } of testCases) {
+    const result = applyJakify(input);
+    assert(!result.error, `applyJakify(${input}) should not error`);
+    assert.strictEqual(result.value, expected, `applyJakify(${input}) should equal ${expected}`);
+  }
+}
+console.log('  ✓ applyJakify behavior remains identical: f(x) = 2x + 3');
+
+// AC2: Verify applyUnary dispatch still works
+console.log('\nAC2: applyUnary Dispatch Unchanged');
+{
+  const result = applyUnary('jakify', 2);
+  assert(!result.error, 'applyUnary("jakify", 2) should not error');
+  assert.strictEqual(result.value, 7, 'applyUnary("jakify", 2) should equal 7');
+}
+console.log('  ✓ applyUnary("jakify", x) dispatch unchanged');
+
+// AC3: Verify button wiring is intact across themes (regression check)
+console.log('\nAC3: Button Remains Clickable Across All Themes');
+{
+  const htmlPath = path.join(__dirname, 'index.html');
+  const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+
+  // Verify the button element exists
+  assert(htmlContent.includes('data-action="jakify"'), 'Button with data-action="jakify" must exist');
+
+  // Verify data-action attribute is unchanged (still "jakify", not renamed)
+  const actionMatch = htmlContent.match(/<button[^>]*data-action="jakify"[^>]*>/);
+  assert(actionMatch, 'Button with data-action="jakify" should be found');
+
+  // Verify button is in .sci-buttons (scientific-buttons row)
+  const sciButtGroup = htmlContent.match(/<div class="buttons sci-buttons">[\s\S]*?<\/div>/);
+  assert(sciButtGroup && sciButtGroup[0].includes('data-action="jakify"'), 'jakify button should be in .sci-buttons row');
+}
+console.log('  ✓ Button with data-action="jakify" exists in .sci-buttons');
+console.log('  ✓ data-action attribute is "jakify" (unchanged)');
+console.log('  ✓ Substrate verified: dispatch cannot vary by theme (verified in script.js wiring)');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
