@@ -294,20 +294,18 @@ body {
 .pw-panel {
   width: 100%;
   max-width: 420px;
-  background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
   border-radius: 28px;
   padding: 24px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  color: #eef0f6;
+  color: #111827;
 }
 
 .pw-title {
   margin: 0 0 18px;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #f5f6fa;
+  color: #111827;
 }
 
 .pw-field {
@@ -317,7 +315,7 @@ body {
 .pw-field label {
   display: block;
   font-size: 0.8rem;
-  color: #b7bfe6;
+  color: #6B7280;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 6px;
@@ -325,9 +323,9 @@ body {
 
 .pw-field input {
   width: 100%;
-  background: #0d0e13;
-  color: #eef0f6;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #F9FAFB;
+  color: #111827;
+  border: 1px solid #E5E7EB;
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 1rem;
@@ -339,7 +337,7 @@ body {
 }
 
 .pw-error {
-  color: #ff6b6b;
+  color: #dc2626;
   font-size: 0.9rem;
   min-height: 1.2em;
   margin: 0 0 10px;
@@ -349,32 +347,34 @@ body {
   max-height: 480px;
   overflow-y: auto;
   border-radius: 10px;
-  background: #0d0e13;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
 }
 
 #pw-table-wrap table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
+  color: #111827;
 }
 
 #pw-table-wrap th,
 #pw-table-wrap td {
   padding: 8px 10px;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid #E5E7EB;
 }
 
 #pw-table-wrap thead th {
   position: sticky;
   top: 0;
-  background: #15171f;
-  color: #b7bfe6;
+  background: #F9FAFB;
+  color: #111827;
   font-weight: 500;
 }
 
 #pw-table-wrap tbody tr:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.02);
+  background: #F3F4F6;
 }
 
 #pw-table-wrap td.pw-weight {
@@ -392,6 +392,58 @@ body {
   height: 12px;
   border-radius: 6px;
   background: linear-gradient(to right, #0066cc, #00ccff);
+}
+
+@media (prefers-color-scheme: dark) {
+  .pw-panel {
+    background: linear-gradient(160deg, #1c1f2b 0%, #15171f 100%);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    color: #eef0f6;
+  }
+
+  .pw-title {
+    color: #f5f6fa;
+  }
+
+  .pw-field label {
+    color: #b7bfe6;
+  }
+
+  .pw-field input {
+    background: #0d0e13;
+    color: #eef0f6;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .pw-error {
+    color: #ff6b6b;
+  }
+
+  #pw-table-wrap {
+    background: #0d0e13;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  #pw-table-wrap table {
+    color: #eef0f6;
+  }
+
+  #pw-table-wrap th,
+  #pw-table-wrap td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  #pw-table-wrap thead th {
+    background: #15171f;
+    color: #b7bfe6;
+  }
+
+  #pw-table-wrap tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.02);
+  }
 }
 
 /* ---------- Theme picker ---------- */
