@@ -6513,7 +6513,6 @@ console.log('\nAC3: t() returns correct locale-specific values');
 // AC4: Missing key in locale falls back to English with warning
 console.log('\nAC4: Missing key fallback and console warning');
 {
-  // Create a mock translations object with missing key in Latin
   const originalWarn = console.warn;
   let warnCalled = false;
   let warnMessage = '';
@@ -6522,54 +6521,21 @@ console.log('\nAC4: Missing key fallback and console warning');
     warnMessage = msg;
   };
 
-  // Temporarily modify module.exports to test fallback
+  // Test the real t() function by temporarily removing a key from translations.la
   const testKey = 'planetaryWeight.title';
   const enValue = translations.en.planetaryWeight.title;
+  const originalLaValue = translations.la.planetaryWeight.title;
 
-  // Create a custom locale without the title key
-  const incompleteLa = {
-    planetaryWeight: {
-      tabLabel: 'Test',
-      // title is intentionally missing
-      earthWeightLabel: 'Test',
-      calculateButton: 'Test',
-      tableHeaderBody: 'Test',
-      tableHeaderWeight: 'Test',
-      tableHeaderRelative: 'Test',
-      errorPositiveNumber: 'Test',
-      unitLbs: 'Test',
-      bodies: {},
-    },
-  };
+  // Temporarily delete the Latin translation to trigger the fallback
+  delete translations.la.planetaryWeight.title;
 
-  // Manually test the fallback logic
-  function testT(key, locale, testTranslations) {
-    const parts = key.split('.');
-    let value = testTranslations[locale];
-    for (const part of parts) {
-      if (value === undefined || value === null) break;
-      value = value[part];
-    }
-
-    if (value === undefined) {
-      let enVal = testTranslations.en;
-      for (const part of parts) {
-        if (enVal === undefined || enVal === null) break;
-        enVal = enVal[part];
-      }
-      if (enVal !== undefined && locale !== 'en') {
-        console.warn(`Missing translation key "${key}" for locale "${locale}"; falling back to English`);
-        return enVal;
-      }
-      console.warn(`Translation key "${key}" not found in any locale`);
-      return undefined;
-    }
-    return value;
-  }
-
+  // Call the real t() function - it should fall back to English
   warnCalled = false;
-  const testTranslations = { en: translations.en, la: incompleteLa };
-  const fallbackValue = testT(testKey, 'la', testTranslations);
+  warnMessage = '';
+  const fallbackValue = t(testKey, 'la');
+
+  // Restore the Latin translation
+  translations.la.planetaryWeight.title = originalLaValue;
 
   assert(warnCalled, 'console.warn should be called for missing key');
   assert.strictEqual(fallbackValue, enValue, 'Should fall back to English value');
