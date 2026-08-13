@@ -6416,6 +6416,217 @@ console.log('\nAC6: Rapid theme switching includes Alien Monster without interfe
 console.log('  ✓ Rapid theme switching (Halloween ↔ Alien Monster) works correctly without interference');
 
 console.log('\n' + '='.repeat(70));
+console.log('JMNT-23: Build translation bundle and locale utility');
+console.log('='.repeat(70));
+
+const { translations, t, getLocale, setLocale } = require('./translations.js');
+
+// Helper: recursively collect all leaf key paths from a nested object
+function collectLeafPaths(obj, prefix = '') {
+  const paths = [];
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+      if (obj[key] === null || obj[key] === undefined || typeof obj[key] !== 'object') {
+        paths.push(fullKey);
+      } else if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+        paths.push(...collectLeafPaths(obj[key], fullKey));
+      }
+    }
+  }
+  return paths.sort();
+}
+
+// AC1: Translation bundle has correct structure with expected keys and values
+console.log('\nAC1: Translation bundle structure and English values');
+{
+  const expected = {
+    'planetaryWeight.tabLabel': 'Planetary Weight',
+    'planetaryWeight.title': 'Planetary Weight Calculator',
+    'planetaryWeight.earthWeightLabel': 'Earth Weight (lbs)',
+    'planetaryWeight.calculateButton': 'Calculate',
+    'planetaryWeight.tableHeaderBody': 'Body',
+    'planetaryWeight.tableHeaderWeight': 'Weight',
+    'planetaryWeight.tableHeaderRelative': 'Relative to Jupiter',
+    'planetaryWeight.errorPositiveNumber': 'Weight must be a positive number',
+    'planetaryWeight.unitLbs': 'lbs',
+  };
+
+  for (const [key, expectedValue] of Object.entries(expected)) {
+    const value = t(key, 'en');
+    assert.strictEqual(value, expectedValue, `t('${key}', 'en') should return "${expectedValue}"`);
+  }
+
+  // Test all 10 body names
+  const bodyNames = ['Mercury', 'Venus', 'Moon', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Titan'];
+  for (const body of bodyNames) {
+    const value = t(`planetaryWeight.bodies.${body}`, 'en');
+    assert.strictEqual(value, body, `t('planetaryWeight.bodies.${body}', 'en') should return "${body}"`);
+  }
+
+  // Verify we have exactly 19 leaf paths (9 flat + 10 bodies)
+  const enPaths = collectLeafPaths(translations.en);
+  assert.strictEqual(enPaths.length, 19, `English translation should have exactly 19 leaf paths, got ${enPaths.length}`);
+  assert(enPaths.includes('planetaryWeight.tabLabel'), 'planetaryWeight.tabLabel should exist');
+  assert(enPaths.includes('planetaryWeight.bodies.Mercury'), 'planetaryWeight.bodies.Mercury should exist');
+  assert(enPaths.includes('planetaryWeight.bodies.Titan'), 'planetaryWeight.bodies.Titan should exist');
+
+  console.log('  ✓ All expected English keys present with correct values');
+}
+
+// AC2: Latin translations have identical key structure with non-empty values
+console.log('\nAC2: Latin translations identical key structure');
+{
+  const enPaths = collectLeafPaths(translations.en);
+  const laPaths = collectLeafPaths(translations.la);
+
+  assert.deepStrictEqual(laPaths, enPaths, 'Latin and English should have identical leaf key paths');
+
+  // Verify all Latin values are non-empty strings
+  for (const key of laPaths) {
+    const value = t(key, 'la');
+    assert(typeof value === 'string', `Latin value for "${key}" should be a string`);
+    assert(value.length > 0, `Latin value for "${key}" should not be empty`);
+  }
+
+  console.log('  ✓ Latin translations have identical structure with non-empty values');
+}
+
+// AC3: t() returns locale-specific values (not just English)
+console.log('\nAC3: t() returns correct locale-specific values');
+{
+  const enTitle = t('planetaryWeight.title', 'en');
+  const laTitle = t('planetaryWeight.title', 'la');
+
+  assert.notStrictEqual(enTitle, laTitle, 'English and Latin titles should differ');
+  assert.strictEqual(enTitle, 'Planetary Weight Calculator', 'English title should be correct');
+  assert.strictEqual(laTitle, 'Calculus Ponderis Planetarii', 'Latin title should be correct');
+
+  const enMercury = t('planetaryWeight.bodies.Mercury', 'en');
+  const laMercury = t('planetaryWeight.bodies.Mercury', 'la');
+  assert.strictEqual(enMercury, 'Mercury', 'English Mercury should be correct');
+  assert.strictEqual(laMercury, 'Mercurius', 'Latin Mercury should be correct');
+
+  console.log('  ✓ t() returns correct locale-specific values');
+}
+
+// AC4: Missing key in locale falls back to English with warning
+console.log('\nAC4: Missing key fallback and console warning');
+{
+  const originalWarn = console.warn;
+  let warnCalled = false;
+  let warnMessage = '';
+  console.warn = function(msg) {
+    warnCalled = true;
+    warnMessage = msg;
+  };
+
+  // Test the real t() function by temporarily removing a key from translations.la
+  const testKey = 'planetaryWeight.title';
+  const enValue = translations.en.planetaryWeight.title;
+  const originalLaValue = translations.la.planetaryWeight.title;
+
+  // Temporarily delete the Latin translation to trigger the fallback
+  delete translations.la.planetaryWeight.title;
+
+  // Call the real t() function - it should fall back to English
+  warnCalled = false;
+  warnMessage = '';
+  const fallbackValue = t(testKey, 'la');
+
+  // Restore the Latin translation
+  translations.la.planetaryWeight.title = originalLaValue;
+
+  assert(warnCalled, 'console.warn should be called for missing key');
+  assert.strictEqual(fallbackValue, enValue, 'Should fall back to English value');
+  assert(warnMessage.includes(testKey), 'Warning should include the missing key');
+  assert(warnMessage.includes('la'), 'Warning should include the locale');
+
+  console.warn = originalWarn;
+  console.log('  ✓ Missing key falls back to English with console warning');
+}
+
+// AC5: getLocale() returns stored locale or default to English
+console.log('\nAC5: getLocale() persistence');
+{
+  // Test 1: No localStorage set, should return 'en'
+  global.localStorage = {
+    getItem: () => null,
+    setItem: () => {},
+  };
+  let locale = getLocale();
+  assert.strictEqual(locale, 'en', 'getLocale() should return "en" when nothing is stored');
+
+  // Test 2: localStorage has 'la'
+  global.localStorage = {
+    getItem: () => 'la',
+    setItem: () => {},
+  };
+  delete require.cache[require.resolve('./translations.js')];
+  const { getLocale: getLocale2 } = require('./translations.js');
+  locale = getLocale2();
+  assert.strictEqual(locale, 'la', 'getLocale() should return "la" when stored');
+
+  // Test 3: localStorage has invalid value, should default to 'en'
+  global.localStorage = {
+    getItem: () => 'fr',
+    setItem: () => {},
+  };
+  delete require.cache[require.resolve('./translations.js')];
+  const { getLocale: getLocale3 } = require('./translations.js');
+  locale = getLocale3();
+  assert.strictEqual(locale, 'en', 'getLocale() should return "en" for invalid stored value');
+
+  // Clean up
+  delete global.localStorage;
+  delete require.cache[require.resolve('./translations.js')];
+  console.log('  ✓ getLocale() returns stored locale or defaults to English');
+}
+
+// AC6: setLocale() validates input and writes to localStorage
+console.log('\nAC6: setLocale() validation and persistence');
+{
+  // Test 1: setLocale('la') should write to localStorage
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+  delete require.cache[require.resolve('./translations.js')];
+  const { setLocale: setLocale1 } = require('./translations.js');
+
+  setLocale1('la');
+  assert.strictEqual(fakeStorage['calculator-locale'], 'la', 'setLocale("la") should write to localStorage');
+
+  // Test 2: setLocale('en') should write to localStorage
+  setLocale1('en');
+  assert.strictEqual(fakeStorage['calculator-locale'], 'en', 'setLocale("en") should write to localStorage');
+
+  // Test 3: setLocale with invalid locale should throw TypeError
+  delete require.cache[require.resolve('./translations.js')];
+  const { setLocale: setLocale2 } = require('./translations.js');
+
+  let errorThrown = false;
+  let errorMessage = '';
+  try {
+    setLocale2('xx');
+  } catch (e) {
+    errorThrown = true;
+    errorMessage = e.message;
+  }
+  assert(errorThrown, 'setLocale("xx") should throw an error');
+  assert(errorMessage.includes('xx') || errorMessage.includes('Invalid'), 'Error message should reference the invalid locale');
+  assert.strictEqual(fakeStorage['calculator-locale'], 'en', 'localStorage should not be modified on error');
+
+  // Clean up
+  delete global.localStorage;
+  delete require.cache[require.resolve('./translations.js')];
+  console.log('  ✓ setLocale() validates input and persists to localStorage');
+}
+
+console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
 
