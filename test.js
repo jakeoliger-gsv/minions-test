@@ -6626,6 +6626,1064 @@ console.log('\nAC6: setLocale() validation and persistence');
   console.log('  ✓ setLocale() validates input and persists to localStorage');
 }
 
+// ============================================================================
+// JMNT-24: Wire translation layer into planet page UI
+// ============================================================================
+
+console.log('\nJMNT-24: Translation Layer Integration');
+
+// AC1: Initial render in English (default locale)
+console.log('\nAC1: Initial render with English strings (default locale)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Verify that all static strings are in English
+  assert.strictEqual(
+    pwElements['pw-title'].textContent,
+    'Planetary Weight Calculator',
+    'AC1: pw-title should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-earth-weight-label'].textContent,
+    'Earth Weight (lbs)',
+    'AC1: pw-earth-weight-label should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-calculate'].textContent,
+    'Calculate',
+    'AC1: pw-calculate should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-body'].textContent,
+    'Body',
+    'AC1: pw-th-body should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-weight'].textContent,
+    'Weight',
+    'AC1: pw-th-weight should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-relative'].textContent,
+    'Relative to Jupiter',
+    'AC1: pw-th-relative should be in English'
+  );
+
+  // Verify language select is set to 'en'
+  assert.strictEqual(
+    pwElements['pw-lang-select'].value,
+    'en',
+    'AC1: pw-lang-select should be set to "en"'
+  );
+
+  console.log('  ✓ All static strings render in English by default');
+}
+
+// AC1 & AC6: Initial render in Latin when localStorage has persisted locale
+console.log('\nAC1 & AC6: Initial render with Latin strings (persisted locale)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = { 'calculator-locale': 'la' };
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPwLa = {};
+
+  const pwElementsLa = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'la',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPwLa = {
+    getElementById: (id) => {
+      return pwElementsLa[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPwLa;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // Verify that all static strings are in Latin
+  assert.strictEqual(
+    pwElementsLa['pw-title'].textContent,
+    'Calculus Ponderis Planetarii',
+    'AC6: pw-title should be in Latin when persisted'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-earth-weight-label'].textContent,
+    'Pondus Terrestris (lb)',
+    'AC6: pw-earth-weight-label should be in Latin when persisted'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-calculate'].textContent,
+    'Computare',
+    'AC6: pw-calculate should be in Latin when persisted'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-th-body'].textContent,
+    'Corpus',
+    'AC6: pw-th-body should be in Latin when persisted'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-th-weight'].textContent,
+    'Pondus',
+    'AC6: pw-th-weight should be in Latin when persisted'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-th-relative'].textContent,
+    'Relatum ad Iovem',
+    'AC6: pw-th-relative should be in Latin when persisted'
+  );
+
+  // Verify language select is set to 'la'
+  assert.strictEqual(
+    pwElementsLa['pw-lang-select'].value,
+    'la',
+    'AC6: pw-lang-select should be set to "la" when persisted'
+  );
+
+  console.log('  ✓ All static strings render in Latin when persisted in localStorage');
+}
+
+// AC2: Results table with localized body names and units (English)
+console.log('\nAC2: Results table with localized body names and units (English)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  calculateHandler();
+
+  const rows = pwElements['pw-table'].children;
+  assert.strictEqual(rows.length, 10, 'AC2: should have 10 rows for 10 bodies');
+
+  // Check that body names are in English and weights have English unit label
+  const parsedRows = rows.map((tr) => {
+    const [bodyCell, weightCell] = tr.children;
+    return { bodyText: bodyCell.textContent, weightText: weightCell.textContent };
+  });
+
+  // Verify some key body names are in English
+  const mercuryRow = parsedRows.find(r => r.bodyText.includes('Mercury'));
+  assert(mercuryRow, 'AC2: Mercury should appear in English');
+  assert(mercuryRow.weightText.includes('lbs'), 'AC2: weight should have "lbs" unit label in English');
+
+  const jupiterRow = parsedRows.find(r => r.bodyText.includes('Jupiter'));
+  assert(jupiterRow, 'AC2: Jupiter should appear in English');
+  assert(jupiterRow.weightText.includes('lbs'), 'AC2: Jupiter weight should have "lbs" unit label');
+
+  console.log('  ✓ Results table renders with English body names and unit labels');
+}
+
+// AC2: Results table with localized body names and units (Latin)
+console.log('\nAC2: Results table with localized body names and units (Latin)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPwLa = {};
+
+  const pwElementsLa = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'la',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPwLa = {
+    getElementById: (id) => {
+      return pwElementsLa[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPwLa;
+  global.window = { Translations: require('./translations.js') };
+  global.window.Translations.setLocale('la');
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPwLa['pw-calculate'];
+  calculateHandler();
+
+  const rows = pwElementsLa['pw-table'].children;
+  assert.strictEqual(rows.length, 10, 'AC2 (Latin): should have 10 rows for 10 bodies');
+
+  // Check that body names are in Latin and weights have Latin unit label
+  const parsedRows = rows.map((tr) => {
+    const [bodyCell, weightCell] = tr.children;
+    return { bodyText: bodyCell.textContent, weightText: weightCell.textContent };
+  });
+
+  // Verify some key body names are in Latin
+  const mercuryRow = parsedRows.find(r => r.bodyText.includes('Mercurius'));
+  assert(mercuryRow, 'AC2 (Latin): Mercurius should appear in Latin');
+  assert(mercuryRow.weightText.includes('lb'), 'AC2 (Latin): weight should have "lb" unit label');
+  assert(!mercuryRow.weightText.includes('lbs'), 'AC2 (Latin): weight should not have English "lbs"');
+
+  const jupiterRow = parsedRows.find(r => r.bodyText.includes('Iuppiter'));
+  assert(jupiterRow, 'AC2 (Latin): Iuppiter should appear in Latin');
+  assert(jupiterRow.weightText.includes('lb'), 'AC2 (Latin): Jupiter weight should have "lb" unit label');
+
+  console.log('  ✓ Results table renders with Latin body names and unit labels');
+}
+
+// AC3: Error message localization (English)
+console.log('\nAC3: Error message localization (English)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '0' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  calculateHandler();
+
+  assert.strictEqual(
+    pwElements['pw-error'].textContent,
+    'Weight must be a positive number',
+    'AC3: error message should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-error'].hidden,
+    false,
+    'AC3: error should be visible'
+  );
+
+  console.log('  ✓ Error message renders in English');
+}
+
+// AC3: Error message localization (Latin)
+console.log('\nAC3: Error message localization (Latin)');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPwLa = {};
+
+  const pwElementsLa = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '-5' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'la',
+      children: [],
+      addEventListener: (event, handler) => {
+        eventListenersPwLa['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPwLa = {
+    getElementById: (id) => {
+      return pwElementsLa[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPwLa;
+  global.window = { Translations: require('./translations.js') };
+  global.window.Translations.setLocale('la');
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const calculateHandler = eventListenersPwLa['pw-calculate'];
+  calculateHandler();
+
+  assert.strictEqual(
+    pwElementsLa['pw-error'].textContent,
+    'Pondus numerum positivum esse debet',
+    'AC3 (Latin): error message should be in Latin'
+  );
+  assert.strictEqual(
+    pwElementsLa['pw-error'].hidden,
+    false,
+    'AC3 (Latin): error should be visible'
+  );
+
+  console.log('  ✓ Error message renders in Latin');
+}
+
+// AC4: Language select element exists with correct options
+console.log('\nAC4: Language select element with correct options');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [
+        { value: 'en', textContent: 'English' },
+        { value: 'la', textContent: 'Latin' }
+      ],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const langSelect = pwElements['pw-lang-select'];
+  assert(langSelect, 'AC4: pw-lang-select should exist');
+  assert.strictEqual(langSelect.children.length, 2, 'AC4: should have exactly 2 options');
+  assert.strictEqual(langSelect.children[0].value, 'en', 'AC4: first option should be "en"');
+  assert.strictEqual(langSelect.children[0].textContent, 'English', 'AC4: first option label should be "English"');
+  assert.strictEqual(langSelect.children[1].value, 'la', 'AC4: second option should be "la"');
+  assert.strictEqual(langSelect.children[1].textContent, 'Latin', 'AC4: second option label should be "Latin"');
+
+  console.log('  ✓ Language select element exists with correct options');
+}
+
+// AC5: Changing language select re-renders all strings and results
+console.log('\nAC5: Language toggle re-renders all strings and visible results');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '175' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [
+        { value: 'en', textContent: 'English' },
+        { value: 'la', textContent: 'Latin' }
+      ],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // First, trigger Calculate to render results in English
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  calculateHandler();
+
+  // Verify initial state is in English
+  assert.strictEqual(
+    pwElements['pw-title'].textContent,
+    'Planetary Weight Calculator',
+    'AC5: initial title should be in English'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-body'].textContent,
+    'Body',
+    'AC5: initial header should be in English'
+  );
+
+  // Verify results are visible
+  assert.strictEqual(
+    pwElements['pw-results'].hidden,
+    false,
+    'AC5: results should be visible before language switch'
+  );
+
+  const initialRows = pwElements['pw-table'].children;
+  assert(initialRows.length > 0, 'AC5: should have rendered results');
+  const initialMercuryCell = initialRows.find(tr => tr.children[0].textContent.includes('Mercury'));
+  assert(initialMercuryCell, 'AC5: Mercury should be in English before switch');
+
+  // Now switch to Latin
+  const langSelectHandler = eventListenersPw['pw-lang-select'];
+  const mockChangeEvent = { target: { value: 'la' } };
+  pwElements['pw-lang-select'].value = 'la';
+  langSelectHandler(mockChangeEvent);
+
+  // Verify all strings updated to Latin
+  assert.strictEqual(
+    pwElements['pw-title'].textContent,
+    'Calculus Ponderis Planetarii',
+    'AC5: title should update to Latin after language switch'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-body'].textContent,
+    'Corpus',
+    'AC5: header should update to Latin after language switch'
+  );
+  assert.strictEqual(
+    pwElements['pw-th-weight'].textContent,
+    'Pondus',
+    'AC5: weight header should update to Latin'
+  );
+
+  // Verify results re-rendered in Latin
+  const latinRows = pwElements['pw-table'].children;
+  const latinMercuryCell = latinRows.find(tr => tr.children[0].textContent.includes('Mercurius'));
+  assert(latinMercuryCell, 'AC5: Mercury should be translated to Mercurius after switch');
+
+  const latinWeightCell = latinMercuryCell.children[1];
+  assert(latinWeightCell.textContent.includes('lb'), 'AC5: weight unit should be "lb" in Latin');
+  assert(!latinWeightCell.textContent.includes('lbs'), 'AC5: weight unit should not have "lbs" after switch to Latin');
+
+  console.log('  ✓ Language toggle updates all strings and re-renders visible results');
+}
+
+// AC5: Changing language select re-renders error message
+console.log('\nAC5: Language toggle re-renders error message when visible');
+{
+  delete global.document;
+  delete global.window;
+  delete require.cache[require.resolve('./translations.js')];
+
+  const fakeStorage = {};
+  global.localStorage = {
+    setItem: (key, value) => {
+      fakeStorage[key] = value;
+    },
+    getItem: (key) => fakeStorage[key] || null,
+  };
+
+  const eventListenersPw = {};
+
+  const pwElements = {
+    expression: { textContent: '', classList: { toggle: () => {} } },
+    result: { textContent: '0', classList: { toggle: () => {} } },
+    'pw-earth-weight': { value: '-10' },
+    'pw-error': { textContent: '', hidden: true },
+    'pw-results': { hidden: true },
+    'pw-table': {
+      innerHTML: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    },
+    'pw-title': { textContent: '' },
+    'pw-earth-weight-label': { textContent: '' },
+    'pw-calculate': {
+      textContent: '',
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-calculate'] = handler;
+      }
+    },
+    'pw-th-body': { textContent: '' },
+    'pw-th-weight': { textContent: '' },
+    'pw-th-relative': { textContent: '' },
+    'pw-lang-select': {
+      value: 'en',
+      children: [
+        { value: 'en', textContent: 'English' },
+        { value: 'la', textContent: 'Latin' }
+      ],
+      addEventListener: (event, handler) => {
+        eventListenersPw['pw-lang-select'] = handler;
+      }
+    }
+  };
+
+  const fakeDomPw = {
+    getElementById: (id) => {
+      return pwElements[id] || null;
+    },
+    querySelector: (selector) => {
+      if (selector === '[data-tab="planetary-weight"]') {
+        return { textContent: '' };
+      }
+      if (selector === '.main-buttons' || selector === '.sci-buttons') {
+        return { addEventListener: () => {} };
+      }
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[data-tab]') {
+        return [
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'calculator' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'compound-interest' }, addEventListener: () => {} },
+          { classList: { remove: () => {}, add: () => {} }, dataset: { tab: 'planetary-weight' }, textContent: '', addEventListener: () => {} }
+        ];
+      }
+      return [];
+    },
+    createElement: () => ({
+      style: {},
+      className: '',
+      textContent: '',
+      children: [],
+      appendChild: function (child) { this.children.push(child); }
+    })
+  };
+
+  global.document = fakeDomPw;
+  global.window = { Translations: require('./translations.js') };
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  // First, trigger Calculate to show error in English
+  const calculateHandler = eventListenersPw['pw-calculate'];
+  calculateHandler();
+
+  assert.strictEqual(
+    pwElements['pw-error'].textContent,
+    'Weight must be a positive number',
+    'AC5 (error): initial error should be in English'
+  );
+
+  // Now switch to Latin
+  const langSelectHandler = eventListenersPw['pw-lang-select'];
+  const mockChangeEvent = { target: { value: 'la' } };
+  pwElements['pw-lang-select'].value = 'la';
+  langSelectHandler(mockChangeEvent);
+
+  // Verify error message updated to Latin
+  assert.strictEqual(
+    pwElements['pw-error'].textContent,
+    'Pondus numerum positivum esse debet',
+    'AC5 (error): error should update to Latin after language switch'
+  );
+
+  console.log('  ✓ Language toggle re-renders error message when visible');
+}
+
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');
 console.log('='.repeat(70));
