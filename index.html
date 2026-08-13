@@ -140,10 +140,18 @@
   </section>
   <section id="panel-planetary-weight" class="tab-panel">
 <div class="pw-panel">
-  <h2 class="pw-title">Planetary Weight Calculator</h2>
+  <div class="pw-lang-toggle">
+    <label for="pw-lang-select" class="pw-lang-label">Language</label>
+    <select id="pw-lang-select">
+      <option value="en">English</option>
+      <option value="la">Latin</option>
+    </select>
+  </div>
+
+  <h2 class="pw-title" id="pw-title">Planetary Weight Calculator</h2>
 
   <div class="pw-field">
-    <label for="pw-earth-weight">Earth Weight (lbs)</label>
+    <label for="pw-earth-weight" id="pw-earth-weight-label">Earth Weight (lbs)</label>
     <input type="number" id="pw-earth-weight" min="0" step="0.01" value="175">
   </div>
 
@@ -156,9 +164,9 @@
       <table>
         <thead>
           <tr>
-            <th>Body</th>
-            <th>Weight</th>
-            <th>Relative to Jupiter</th>
+            <th id="pw-th-body">Body</th>
+            <th id="pw-th-weight">Weight</th>
+            <th id="pw-th-relative">Relative to Jupiter</th>
           </tr>
         </thead>
         <tbody id="pw-table"></tbody>
@@ -168,6 +176,7 @@
 </div>
   </section>
 </div>
+<script src="translations.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

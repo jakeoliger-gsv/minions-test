@@ -722,6 +722,18 @@ if (typeof document !== 'undefined') {
       return;
     }
 
+    const tabLabelEl = document.querySelector('[data-tab="planetary-weight"]');
+    const titleEl = document.getElementById('pw-title');
+    const earthWeightLabelEl = document.getElementById('pw-earth-weight-label');
+    const thBodyEl = document.getElementById('pw-th-body');
+    const thWeightEl = document.getElementById('pw-th-weight');
+    const thRelativeEl = document.getElementById('pw-th-relative');
+    const langSelect = document.getElementById('pw-lang-select');
+
+    let currentLocale = window.Translations ? window.Translations.getLocale() : 'en';
+    let lastResults = null;
+    let lastShowedError = false;
+
     // Astronomical/astrological symbol shown beside each body's name.
     const BODY_EMOJI = {
       Mercury: '☿',
@@ -736,6 +748,20 @@ if (typeof document !== 'undefined') {
       Titan: '🛰️',
     };
 
+    function renderStaticStrings() {
+      if (!window.Translations) {
+        return;
+      }
+      const t = window.Translations.t;
+      if (tabLabelEl) tabLabelEl.textContent = t('planetaryWeight.tabLabel', currentLocale);
+      if (titleEl) titleEl.textContent = t('planetaryWeight.title', currentLocale);
+      if (earthWeightLabelEl) earthWeightLabelEl.textContent = t('planetaryWeight.earthWeightLabel', currentLocale);
+      calculateBtn.textContent = t('planetaryWeight.calculateButton', currentLocale);
+      if (thBodyEl) thBodyEl.textContent = t('planetaryWeight.tableHeaderBody', currentLocale);
+      if (thWeightEl) thWeightEl.textContent = t('planetaryWeight.tableHeaderWeight', currentLocale);
+      if (thRelativeEl) thRelativeEl.textContent = t('planetaryWeight.tableHeaderRelative', currentLocale);
+    }
+
     function showPwError(message) {
       errorEl.textContent = message;
       errorEl.hidden = false;
@@ -745,18 +771,22 @@ if (typeof document !== 'undefined') {
     function renderPwResults(results) {
       const jupiter = results.find((row) => row.body === 'Jupiter');
       const jupiterWeight = jupiter ? jupiter.weight : 0;
+      const unitLabel = window.Translations ? window.Translations.t('planetaryWeight.unitLbs', currentLocale) : 'lbs';
 
       tableEl.innerHTML = '';
       results.forEach((row) => {
         const tr = document.createElement('tr');
+        const bodyName = window.Translations
+          ? window.Translations.t('planetaryWeight.bodies.' + row.body, currentLocale)
+          : row.body;
 
         const bodyCell = document.createElement('td');
-        bodyCell.textContent = `${BODY_EMOJI[row.body] || ''} ${row.body}`.trim();
+        bodyCell.textContent = `${BODY_EMOJI[row.body] || ''} ${bodyName}`.trim();
         tr.appendChild(bodyCell);
 
         const weightCell = document.createElement('td');
         weightCell.className = 'pw-weight';
-        weightCell.textContent = `${row.weight.toFixed(2)} lbs`;
+        weightCell.textContent = `${row.weight.toFixed(2)} ${unitLabel}`;
         tr.appendChild(weightCell);
 
         const barCell = document.createElement('td');
@@ -777,10 +807,38 @@ if (typeof document !== 'undefined') {
       const earthWeight = parseFloat(weightInput.value);
       const result = calculatePlanetaryWeights(earthWeight);
       if (result.error) {
-        showPwError(result.error);
+        lastResults = null;
+        lastShowedError = true;
+        const message = window.Translations
+          ? window.Translations.t('planetaryWeight.errorPositiveNumber', currentLocale)
+          : result.error;
+        showPwError(message);
         return;
       }
+      lastShowedError = false;
+      lastResults = result;
       renderPwResults(result);
     });
+
+    if (langSelect) {
+      langSelect.value = currentLocale;
+      langSelect.addEventListener('change', (e) => {
+        currentLocale = e.target.value;
+        if (window.Translations) {
+          window.Translations.setLocale(currentLocale);
+        }
+        renderStaticStrings();
+        if (lastShowedError) {
+          const message = window.Translations
+            ? window.Translations.t('planetaryWeight.errorPositiveNumber', currentLocale)
+            : '';
+          showPwError(message);
+        } else if (lastResults) {
+          renderPwResults(lastResults);
+        }
+      });
+    }
+
+    renderStaticStrings();
   })();
 }
