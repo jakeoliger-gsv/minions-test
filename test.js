@@ -2202,12 +2202,13 @@ console.log('  ✓ Page load defaults to Roman theme when nothing is stored (JMN
   delete require.cache[require.resolve('./script.js')];
   const CalculatorPersistence4Test = require('./script.js');
 
-  // Invalid theme should not be applied
-  assert.strictEqual(persistenceElements4.themeSelect.value, '', 'themeSelect.value should remain empty with invalid stored theme');
+  // Invalid theme should fall back to Roman default
+  assert.strictEqual(persistenceElements4.themeSelect.value, 'roman', 'themeSelect.value should default to "roman" with invalid stored theme (JMNT-21 AC5)');
+  assert(persistenceElements4.calculator.classList.contains('theme-roman'), 'theme-roman class should be applied with invalid stored theme');
   assert(!persistenceElements4.calculator.classList.contains('theme-coffee-lovers'), 'invalid theme should not be applied');
   assert(!persistenceElements4.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with invalid stored theme');
 }
-console.log('  ✓ Invalid stored theme falls back to no theme');
+console.log('  ✓ Invalid stored theme falls back to Roman default (JMNT-21 AC5)');
 
 {
   // Test 5: Other valid themes persist correctly
