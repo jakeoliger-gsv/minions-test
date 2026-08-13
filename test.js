@@ -985,9 +985,9 @@ console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.value, '', 'Default option should be selected on initial load');
+  assert.strictEqual(selectEl.value, 'roman', 'Roman theme should be selected on initial load (JMNT-21)');
 }
-console.log('  ✓ Default option is selected on initial load');
+console.log('  ✓ Roman theme is selected on initial load (JMNT-21)');
 
 // ============================================================================
 // AC2: Choosing a theme applies classes; choosing default removes them
@@ -2110,12 +2110,12 @@ console.log('  ✓ Page load restores and applies stored theme');
   delete require.cache[require.resolve('./script.js')];
   const CalculatorPersistence3Test = require('./script.js');
 
-  // With no stored theme, calculator should have no theme class
-  assert.strictEqual(persistenceElements3.themeSelect.value, '', 'themeSelect.value should remain empty with no stored theme');
-  assert(!persistenceElements3.calculator.classList.contains('theme-coffee-lovers'), 'no coffee-lovers class should be applied with no stored theme');
-  assert(!persistenceElements3.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with no stored theme');
+  // With no stored theme, calculator should default to Roman theme (JMNT-21)
+  assert.strictEqual(persistenceElements3.themeSelect.value, 'roman', 'themeSelect.value should be "roman" with no stored theme (JMNT-21)');
+  assert(persistenceElements3.calculator.classList.contains('theme-roman'), 'Roman theme class should be applied with no stored theme (JMNT-21)');
+  assert(!persistenceElements3.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with Roman theme');
 }
-console.log('  ✓ Page load defaults to no theme when nothing is stored');
+console.log('  ✓ Page load defaults to Roman theme when nothing is stored (JMNT-21)');
 
 {
   // Test 4: Page load with invalid stored theme falls back to no theme
