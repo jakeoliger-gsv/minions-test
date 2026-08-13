@@ -985,9 +985,9 @@ console.log('  ✓ Options are: Default, Halloween, Dark Mode, Children\'s, 2001
 
 {
   const selectEl = themeTestFakeDOM.getElementById('theme-select');
-  assert.strictEqual(selectEl.value, '', 'Default option should be selected on initial load');
+  assert.strictEqual(selectEl.value, 'roman', 'Roman theme should be selected on initial load (JMNT-21)');
 }
-console.log('  ✓ Default option is selected on initial load');
+console.log('  ✓ Roman theme is selected on initial load (JMNT-21)');
 
 // ============================================================================
 // AC2: Choosing a theme applies classes; choosing default removes them
@@ -2110,12 +2110,12 @@ console.log('  ✓ Page load restores and applies stored theme');
   delete require.cache[require.resolve('./script.js')];
   const CalculatorPersistence3Test = require('./script.js');
 
-  // With no stored theme, calculator should have no theme class
-  assert.strictEqual(persistenceElements3.themeSelect.value, '', 'themeSelect.value should remain empty with no stored theme');
-  assert(!persistenceElements3.calculator.classList.contains('theme-coffee-lovers'), 'no coffee-lovers class should be applied with no stored theme');
-  assert(!persistenceElements3.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with no stored theme');
+  // With no stored theme, calculator should default to Roman theme (JMNT-21)
+  assert.strictEqual(persistenceElements3.themeSelect.value, 'roman', 'themeSelect.value should be "roman" with no stored theme (JMNT-21)');
+  assert(persistenceElements3.calculator.classList.contains('theme-roman'), 'Roman theme class should be applied with no stored theme (JMNT-21)');
+  assert(!persistenceElements3.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with Roman theme');
 }
-console.log('  ✓ Page load defaults to no theme when nothing is stored');
+console.log('  ✓ Page load defaults to Roman theme when nothing is stored (JMNT-21)');
 
 {
   // Test 4: Page load with invalid stored theme falls back to no theme
@@ -2202,12 +2202,13 @@ console.log('  ✓ Page load defaults to no theme when nothing is stored');
   delete require.cache[require.resolve('./script.js')];
   const CalculatorPersistence4Test = require('./script.js');
 
-  // Invalid theme should not be applied
-  assert.strictEqual(persistenceElements4.themeSelect.value, '', 'themeSelect.value should remain empty with invalid stored theme');
+  // Invalid theme should fall back to Roman default
+  assert.strictEqual(persistenceElements4.themeSelect.value, 'roman', 'themeSelect.value should default to "roman" with invalid stored theme (JMNT-21 AC5)');
+  assert(persistenceElements4.calculator.classList.contains('theme-roman'), 'theme-roman class should be applied with invalid stored theme');
   assert(!persistenceElements4.calculator.classList.contains('theme-coffee-lovers'), 'invalid theme should not be applied');
   assert(!persistenceElements4.coffeeEmoji.classList.contains('visible'), 'coffee icon should not be visible with invalid stored theme');
 }
-console.log('  ✓ Invalid stored theme falls back to no theme');
+console.log('  ✓ Invalid stored theme falls back to Roman default (JMNT-21 AC5)');
 
 {
   // Test 5: Other valid themes persist correctly
@@ -6414,6 +6415,206 @@ console.log('\nAC6: Rapid theme switching includes Alien Monster without interfe
   global.clearTimeout = originalClearTimeout;
 }
 console.log('  ✓ Rapid theme switching (Halloween ↔ Alien Monster) works correctly without interference');
+
+// ============================================================================
+// JMNT-21: Roman theme as default on first load
+// ============================================================================
+
+console.log('\nJMNT-21: AC1 - Roman theme active on first load with no saved theme');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'roman', 'on first load with no saved theme, theme-select should be set to "roman"');
+  assert(elements.calculator.classList.contains('theme-roman'), 'on first load with no saved theme, theme-roman class should be applied');
+}
+console.log('  ✓ Roman theme is applied by default on first load when no theme is saved');
+
+console.log('\nJMNT-21: AC2 - Previously saved theme is restored, not overridden by Roman default');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'halloween' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'halloween', 'when halloween is saved in localStorage, theme-select should restore to "halloween"');
+  assert(elements.calculator.classList.contains('theme-halloween'), 'when halloween is saved, theme-halloween class should be applied');
+  assert(!elements.calculator.classList.contains('theme-roman'), 'when halloween is saved, theme-roman class should not be applied');
+}
+console.log('  ✓ Previously saved Halloween theme is restored, not overridden by Roman default');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'dark-mode' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'dark-mode', 'when dark-mode is saved, theme-select should restore to "dark-mode"');
+  assert(elements.calculator.classList.contains('theme-dark-mode'), 'when dark-mode is saved, theme-dark-mode class should be applied');
+  assert(!elements.calculator.classList.contains('theme-roman'), 'when dark-mode is saved, theme-roman class should not be applied');
+}
+console.log('  ✓ Previously saved Dark Mode theme is restored, not overridden by Roman default');
+
+console.log('\nJMNT-21: AC3 - Previously saved Roman theme loads correctly');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'roman' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'roman', 'when roman theme is explicitly saved, theme-select should restore to "roman"');
+  assert(elements.calculator.classList.contains('theme-roman'), 'when roman theme is saved, theme-roman class should be applied');
+}
+console.log('  ✓ Previously saved Roman theme loads correctly');
+
+console.log('\nJMNT-21: AC4 - Theme picker dropdown shows "Roman" as selected on first load');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  const selectedOption = elements.themeSelect.options.find(opt => opt.value === elements.themeSelect.value);
+  assert(selectedOption, 'theme-select should have a selected option');
+  assert.strictEqual(selectedOption.textContent, 'Roman', 'the selected option should be "Roman" on first load');
+}
+console.log('  ✓ Theme picker dropdown shows "Roman" as the selected option on first load');
+
+console.log('\nJMNT-21: AC5 - After clearing saved preference, calculator returns to Roman as default');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': 'halloween' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; },
+    removeItem: (key) => delete localStorageMock[key]
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, 'halloween', 'initially halloween should be loaded from storage');
+  assert(elements.calculator.classList.contains('theme-halloween'), 'initially halloween theme should be applied');
+
+  // Clear the saved theme
+  global.localStorage.removeItem('calculator-theme');
+
+  // Simulate a reload with no saved theme
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock2 = {};
+  global.localStorage = {
+    getItem: (key) => localStorageMock2[key] !== undefined ? localStorageMock2[key] : null,
+    setItem: (key, value) => { localStorageMock2[key] = value; }
+  };
+
+  const { elements: elements2, fakeDOM: fakeDOM2 } = makeSpaceThemeTestElements();
+  global.document = fakeDOM2;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements2.themeSelect.value, 'roman', 'after clearing saved theme, theme-select should default to "roman"');
+  assert(elements2.calculator.classList.contains('theme-roman'), 'after clearing saved theme, theme-roman class should be applied');
+  assert(!elements2.calculator.classList.contains('theme-halloween'), 'after clearing saved theme, theme-halloween should be removed');
+}
+console.log('  ✓ After clearing saved preference, calculator returns to Roman as the default theme');
+
+console.log('\nJMNT-21: Verify Roman theme does not override explicitly selected "Default" theme');
+
+{
+  delete global.document;
+  delete global.window;
+
+  const localStorageMock = { 'calculator-theme': '' };
+  global.localStorage = {
+    getItem: (key) => localStorageMock[key] !== undefined ? localStorageMock[key] : null,
+    setItem: (key, value) => { localStorageMock[key] = value; }
+  };
+
+  const { elements, fakeDOM } = makeSpaceThemeTestElements();
+  global.document = fakeDOM;
+  global.window = {};
+
+  delete require.cache[require.resolve('./script.js')];
+  require('./script.js');
+
+  assert.strictEqual(elements.themeSelect.value, '', 'when explicitly saving empty string (Default), theme-select should be ""');
+  assert(!elements.calculator.classList.contains('theme-roman'), 'when Default theme is explicitly selected, theme-roman class should not be applied');
+  assert(!elements.calculator.classList.contains('theme-halloween'), 'when Default is selected, no theme classes should be present');
+  assert(!elements.calculator.classList.contains('theme-dark-mode'), 'when Default is selected, no theme classes should be present');
+}
+console.log('  ✓ Roman default does not override explicitly selected "Default" theme');
 
 console.log('\n' + '='.repeat(70));
 console.log('✅ All tests passed!');

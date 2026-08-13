@@ -614,12 +614,13 @@ if (typeof document !== 'undefined') {
         localStorage.setItem(THEME_STORAGE_KEY, e.target.value);
       });
 
+      const DEFAULT_THEME = 'roman';
       const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
       const knownThemeValues = Array.from(themeSelect.options).map((opt) => opt.value);
-      if (storedTheme && knownThemeValues.includes(storedTheme)) {
-        themeSelect.value = storedTheme;
-        applyTheme(storedTheme);
-      }
+      const themeToApply =
+        storedTheme !== null && knownThemeValues.includes(storedTheme) ? storedTheme : DEFAULT_THEME;
+      themeSelect.value = themeToApply;
+      applyTheme(themeToApply);
     }
 
     render();
