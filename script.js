@@ -617,13 +617,10 @@ if (typeof document !== 'undefined') {
       const DEFAULT_THEME = 'roman';
       const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
       const knownThemeValues = Array.from(themeSelect.options).map((opt) => opt.value);
-      if (storedTheme == null) {
-        themeSelect.value = DEFAULT_THEME;
-        applyTheme(DEFAULT_THEME);
-      } else if (storedTheme && knownThemeValues.includes(storedTheme)) {
-        themeSelect.value = storedTheme;
-        applyTheme(storedTheme);
-      }
+      const themeToApply =
+        storedTheme !== null && knownThemeValues.includes(storedTheme) ? storedTheme : DEFAULT_THEME;
+      themeSelect.value = themeToApply;
+      applyTheme(themeToApply);
     }
 
     render();
